@@ -1,4 +1,4 @@
-var bp = chrome.extension.getBackgroundPage();
+var bkgdPg = chrome.extension.getBackgroundPage();
 var sla = document.getElementById("sla");
 var tradInt = document.getElementById("tradingIntervalMinutes");
 var tc_buy = document.getElementById("tickCountBuy");
@@ -114,8 +114,8 @@ function save() {
 		return;
 	}
 
-	if (es>bp.MaxSamplesToKeep || el>bp.MaxSamplesToKeep) {
-		alert("EMA parameter too big - max is "+bp.MaxSamplesToKeep);
+	if (es>bkgdPg.MaxSamplesToKeep || el>bkgdPg.MaxSamplesToKeep) {
+		alert("EMA parameter too big - max is "+bkgdPg.MaxSamplesToKeep);
 		return;
 	}
 
@@ -149,158 +149,158 @@ function save() {
 	}
 */
 	
-	if (bp.EmaShortPar!=es || bp.EmaLongPar!=el || bp.MinBuyThreshold!=buy_tr || bp.MinSellThreshold!=sell_tr || bp.tradingIntervalMinutes != parseInt(tradInt.value) ) {
+	if (bkgdPg.EmaShortPar!=es || bkgdPg.EmaLongPar!=el || bkgdPg.MinBuyThreshold!=buy_tr || bkgdPg.MinSellThreshold!=sell_tr || bkgdPg.tradingIntervalMinutes != parseInt(tradInt.value) ) {
 		if (!confirm("Applying different Trading interval/EMA/Threshold values may case an instant trigger to execute a trade."))  return;
 	}
 
-	localStorage.ApiKey=bp.ApiKey=document.getElementById("apikey").value;
-	localStorage.ApiSec=bp.ApiSec=document.getElementById("apisec").value;
-	bp.schedUpdateInfo(10);
+	localStorage.ApiKey=bkgdPg.ApiKey=document.getElementById("apikey").value;
+	localStorage.ApiSec=bkgdPg.ApiSec=document.getElementById("apisec").value;
+	bkgdPg.schedUpdateInfo(10);
 
-	localStorage.tradingEnabled=bp.tradingEnabled=(document.getElementById("tradingEnabled").checked?1:0);
-	if (bp.tradingEnabled==1) {
-		bp.chrome.browserAction.setIcon({path: 'robot_trading_on.png'});
+	localStorage.tradingEnabled=bkgdPg.tradingEnabled=(document.getElementById("tradingEnabled").checked?1:0);
+	if (bkgdPg.tradingEnabled==1) {
+		bkgdPg.chrome.browserAction.setIcon({path: 'robot_trading_on.png'});
 	} else {
-		bp.chrome.browserAction.setIcon({path: 'robot_trading_off.png'});
+		bkgdPg.chrome.browserAction.setIcon({path: 'robot_trading_off.png'});
 	}
-	localStorage.tradingDisabledOnStart=bp.tradingDisabledOnStart=(document.getElementById("tradingDisabledOnStart").checked?1:0);
+	localStorage.tradingDisabledOnStart=bkgdPg.tradingDisabledOnStart=(document.getElementById("tradingDisabledOnStart").checked?1:0);
 		
 //	console.log("localStorage.tradingEnabled="+localStorage.tradingEnabled);
 
 	var resetH1=false;
 	
 	var currency=currencySelector.value;
-	if (currency!=bp.currency) {
-		bp.emptySampleCache();
+	if (currency!=bkgdPg.currency) {
+		bkgdPg.emptySampleCache();
 		resetH1=true;
 	}
-	localStorage.currency=bp.currency=currency;
-	localStorage.keepBTC=bp.keepBTC=keepBTC;
-//	localStorage.keepFiat=bp.keepFiat=keepFiat;
+	localStorage.currency=bkgdPg.currency=currency;
+	localStorage.keepBTC=bkgdPg.keepBTC=keepBTC;
+//	localStorage.keepFiat=bkgdPg.keepFiat=keepFiat;
 /*
 	// Does not work at the moment, so don't uncomment
 	if (keepBTCStr.trim().endsWith("%")) {
-		localStorage.keepBTCUnitIsPercentage=bp.keepBTCUnitIsPercentage=1;
+		localStorage.keepBTCUnitIsPercentage=bkgdPg.keepBTCUnitIsPercentage=1;
 	} else {
-		localStorage.keepBTCUnitIsPercentage=bp.keepBTCUnitIsPercentage=0;
+		localStorage.keepBTCUnitIsPercentage=bkgdPg.keepBTCUnitIsPercentage=0;
 	}
 */
-	if (bp.tradingIntervalMinutes != parseInt(tradInt.value)) {
+	if (bkgdPg.tradingIntervalMinutes != parseInt(tradInt.value)) {
 		resetH1=true;
 	}
 
 	try {
-		localStorage.tradingIntervalMinutes=bp.tradingIntervalMinutes=parseInt(tradInt.value);
-		//localStorage.MaxMinutesBack=bp.MaxMinutesBack=parseInt(bp.MaxSamplesToKeep*bp.tradingIntervalMinutes);
+		localStorage.tradingIntervalMinutes=bkgdPg.tradingIntervalMinutes=parseInt(tradInt.value);
+		//localStorage.MaxMinutesBack=bkgdPg.MaxMinutesBack=parseInt(bkgdPg.MaxSamplesToKeep*bkgdPg.tradingIntervalMinutes);
 	
-		//localStorage.LogLines=bp.LogLines=parseInt(sla.value)
-		localStorage.LogLines=bp.LogLines=parseInt(sla.value*60/localStorage.tradingIntervalMinutes);
+		//localStorage.LogLines=bkgdPg.LogLines=parseInt(sla.value)
+		localStorage.LogLines=bkgdPg.LogLines=parseInt(sla.value*60/localStorage.tradingIntervalMinutes);
 	
-		localStorage.tickCountBuy=bp.tickCountBuy=parseInt(tc_buy.value);
-		localStorage.tickCountSell=bp.tickCountSell=parseInt(tc_sell.value);
+		localStorage.tickCountBuy=bkgdPg.tickCountBuy=parseInt(tc_buy.value);
+		localStorage.tickCountSell=bkgdPg.tickCountSell=parseInt(tc_sell.value);
 	
-		localStorage.EmaShortPar=bp.EmaShortPar=es;
-		localStorage.EmaLongPar=bp.EmaLongPar=el;
-		//localStorage.MinThreshold=bp.MinThreshold=tr;
-		localStorage.MinBuyThreshold=bp.MinBuyThreshold=buy_tr;
-		localStorage.MinSellThreshold=bp.MinSellThreshold=sell_tr;
+		localStorage.EmaShortPar=bkgdPg.EmaShortPar=es;
+		localStorage.EmaLongPar=bkgdPg.EmaLongPar=el;
+		//localStorage.MinThreshold=bkgdPg.MinThreshold=tr;
+		localStorage.MinBuyThreshold=bkgdPg.MinBuyThreshold=buy_tr;
+		localStorage.MinSellThreshold=bkgdPg.MinSellThreshold=sell_tr;
 		
-		localStorage.tradeOnlyAfterSwitch=bp.tradeOnlyAfterSwitch=(document.getElementById("tradeOnlyAfterSwitch").checked?1:0);
-		localStorage.inverseEMA=bp.inverseEMA=(document.getElementById("inverseEMA").checked?1:0);
+		localStorage.tradeOnlyAfterSwitch=bkgdPg.tradeOnlyAfterSwitch=(document.getElementById("tradeOnlyAfterSwitch").checked?1:0);
+		localStorage.inverseEMA=bkgdPg.inverseEMA=(document.getElementById("inverseEMA").checked?1:0);
 /*
-		localStorage.simpleRulesMode=bp.simpleRulesMode=simpleRulesModeSelector.value;
-		localStorage.simple_buy_below=bp.simple_buy_below=simple_buy_below;
-		localStorage.simple_sell_above=bp.simple_sell_above=simple_sell_above;
+		localStorage.simpleRulesMode=bkgdPg.simpleRulesMode=simpleRulesModeSelector.value;
+		localStorage.simple_buy_below=bkgdPg.simple_buy_below=simple_buy_below;
+		localStorage.simple_sell_above=bkgdPg.simple_sell_above=simple_sell_above;
 */
 		
-		//bp.refreshEMA(true);
+		//bkgdPg.refreshEMA(true);
 		if (resetH1) {
-			bp.updateH1(true); // call updateH1() with reset==true instead to also reset the H1-array if trading interval or currency has changed (current data in H1 is no good)
+			bkgdPg.updateH1(true); // call updateH1() with reset==true instead to also reset the H1-array if trading interval or currency has changed (current data in H1 is no good)
 		} else {
-			bp.refreshEMA(true);
+			bkgdPg.refreshEMA(true);
 		}
 		
 	} catch(e) {
-		bp.log("Exception in save(): "+e.stack);
+		bkgdPg.log("Exception in save(): "+e.stack);
 	}
-	bp.refreshPopup(true);
+	bkgdPg.refreshPopup(true);
 }
 
 function setfields() {
-	document.getElementById("apikey").value=bp.ApiKey;
-	document.getElementById("apisec").value=bp.ApiSec;
-	document.getElementById("emas").value=bp.EmaShortPar.toString();
-	document.getElementById("emal").value=bp.EmaLongPar.toString();
-	//document.getElementById("tras").value=bp.MinThreshold.toFixed(2);
-	document.getElementById("buy_tras").value=bp.MinBuyThreshold.toFixed(2);
-	document.getElementById("sell_tras").value=bp.MinSellThreshold.toFixed(2);
+	document.getElementById("apikey").value=bkgdPg.ApiKey;
+	document.getElementById("apisec").value=bkgdPg.ApiSec;
+	document.getElementById("emas").value=bkgdPg.EmaShortPar.toString();
+	document.getElementById("emal").value=bkgdPg.EmaLongPar.toString();
+	//document.getElementById("tras").value=bkgdPg.MinThreshold.toFixed(2);
+	document.getElementById("buy_tras").value=bkgdPg.MinBuyThreshold.toFixed(2);
+	document.getElementById("sell_tras").value=bkgdPg.MinSellThreshold.toFixed(2);
 	
-	document.getElementById("currencySelector").value=bp.currency;
-	document.getElementById("keepBTC").value=bp.keepBTC.toString()+(bp.keepBTCUnitIsPercentage==1?" %":"");
+	document.getElementById("currencySelector").value=bkgdPg.currency;
+	document.getElementById("keepBTC").value=bkgdPg.keepBTC.toString()+(bkgdPg.keepBTCUnitIsPercentage==1?" %":"");
 	
 	
-	document.getElementById("tradingEnabled").checked=(bp.tradingEnabled==1);
-	document.getElementById("tradingDisabledOnStart").checked=(bp.tradingDisabledOnStart==1);
+	document.getElementById("tradingEnabled").checked=(bkgdPg.tradingEnabled==1);
+	document.getElementById("tradingDisabledOnStart").checked=(bkgdPg.tradingDisabledOnStart==1);
 	
-//	console.log("bp.tradingEnabled="+bp.tradingEnabled);
+//	console.log("bkgdPg.tradingEnabled="+bkgdPg.tradingEnabled);
 	
-//	document.getElementById("keepFiat").value=bp.keepFiat.toString();
+//	document.getElementById("keepFiat").value=bkgdPg.keepFiat.toString();
 	
 	
 	for (var i=0; i<sla.options.length; i++) {
-		if (parseInt(sla.options[i].value)==(bp.LogLines*bp.tradingIntervalMinutes/60)) {
+		if (parseInt(sla.options[i].value)==(bkgdPg.LogLines*bkgdPg.tradingIntervalMinutes/60)) {
 			sla.selectedIndex=i;
 			break;
 		}
 	}
 
 	for (var i=0; i<tradInt.options.length; i++) {
-		if (parseInt(tradInt.options[i].value)==bp.tradingIntervalMinutes) {
+		if (parseInt(tradInt.options[i].value)==bkgdPg.tradingIntervalMinutes) {
 			tradInt.selectedIndex=i;
 			break;
 		}
 	}
 
 	for (var i=0; i<tc_buy.length; i++) {
-    if (tc_buy[i].value==bp.tickCountBuy) {
+    if (tc_buy[i].value==bkgdPg.tickCountBuy) {
     	tc_buy.selectedIndex=i;
     	break;
     }
   }
 	for (var i=0; i<tc_sell.length; i++) {
-    if (tc_sell[i].value==bp.tickCountSell) {
+    if (tc_sell[i].value==bkgdPg.tickCountSell) {
     	tc_sell.selectedIndex=i;
     	break;
     }
   }
   
 	for (var i=0; i<currencySelector.length; i++) {
-    if (currencySelector[i].value==bp.currencySelector) {
+    if (currencySelector[i].value==bkgdPg.currencySelector) {
     	currencySelector.selectedIndex=i;
     	break;
     }
   }
 	
 	// Parameters for "Experimental settings"
-	document.getElementById("tradeOnlyAfterSwitch").checked = (bp.tradeOnlyAfterSwitch==1);
-	document.getElementById("inverseEMA").checked = (bp.inverseEMA==1);
+	document.getElementById("tradeOnlyAfterSwitch").checked = (bkgdPg.tradeOnlyAfterSwitch==1);
+	document.getElementById("inverseEMA").checked = (bkgdPg.inverseEMA==1);
 /*
 	for (var i=0; i<simpleRulesModeSelector.length; i++) {
-    if (simpleRulesModeSelector[i].value == bp.simpleRulesMode) {
+    if (simpleRulesModeSelector[i].value == bkgdPg.simpleRulesMode) {
     	simpleRulesModeSelector.selectedIndex=i;
     	break;
     }
   }
-  document.getElementById("simple_buy_below").value=(bp.simple_buy_below>0?bp.simple_buy_below:"");
-  document.getElementById("simple_sell_above").value=(bp.simple_sell_above>0?bp.simple_sell_above:"");
+  document.getElementById("simple_buy_below").value=(bkgdPg.simple_buy_below>0?bkgdPg.simple_buy_below:"");
+  document.getElementById("simple_sell_above").value=(bkgdPg.simple_sell_above>0?bkgdPg.simple_sell_above:"");
 */  
-  document.getElementById("maxVisibleSamples").innerHTML=(bp.MaxSamplesToKeep-bp.preSamples);  
+  document.getElementById("maxVisibleSamples").innerHTML=(bkgdPg.MaxSamplesToKeep-bkgdPg.preSamples);  
   intervalChanged();
   updateFiatCurencyUnit();
 }
 
 function intervalChanged() {
-	var maxVisibleSamples=bp.MaxSamplesToKeep-bp.preSamples;
+	var maxVisibleSamples=bkgdPg.MaxSamplesToKeep-bkgdPg.preSamples;
 	var maxHours=parseInt(maxVisibleSamples*parseInt(tradInt.value)/60);
 	//parseInt(sla.value*60/localStorage.tradingIntervalMinutes);
 	var currentSlaValue=parseInt(sla.value);

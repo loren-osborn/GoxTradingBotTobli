@@ -2,7 +2,7 @@ const MaxSamplesToKeep = 200; // Should be "visible sample" + preSamples below
 const preSamples=56; // Use this number of samples from the MaxSamplesToKeep only for initial EMA-calculation (these samples will not show in the graph, but provides better buy/sell-indicator arrows early in the graph)
 const validSampleIntervalMinutes=[1,5,10,15,30,45,60,120,180,240,300];
 const showLastHours=[1,2,3,6,12,24,48,72,96,120,240,0];
-const	MtGoxAPI2BaseURL = 'https://data.mtgox.com/api/2/';
+const MtGoxAPI2BaseURL = 'https://data.mtgox.com/api/2/';
 const useAPIv2=true;
 
 var ApiKey = localStorage.ApiKey || '';
@@ -40,6 +40,24 @@ var simpleRulesMode=(localStorage.simpleRulesMode || 0);
 var simple_buy_below=(localStorage.simple_sell_above || 0);
 var simple_sell_above=(localStorage.simple_sell_above || 0);
 */
+
+var tobliGoxBot = (function () {
+	function zeroPadTwoDigits(d) {
+		return (d<10) ? '0'+d.toString() : d.toString();
+	}
+	var tobliGoxBot = {
+			formatDate: (function formatDate(d) {
+				return d.getFullYear()+"-"+zeroPadTwoDigits(d.getMonth()+1)+"-"+zeroPadTwoDigits(d.getDate());
+			}),
+			formatTime: (function formatTime(t) {
+				return zeroPadTwoDigits(t.getHours()) + ":"+zeroPadTwoDigits(t.getMinutes());
+			})
+	};
+	tobliGoxBot.formatTimeWithSeconds = (function formatTimeWithSeconds(t) {
+		return tobliGoxBot.formatTime(t) + ":" + zeroPadTwoDigits(t.getSeconds());
+	});
+	return tobliGoxBot;
+})();
 
 var BTC = Number.NaN;
 var fiat = Number.NaN;
