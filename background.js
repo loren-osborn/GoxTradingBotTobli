@@ -41,23 +41,50 @@ var simple_buy_below=(localStorage.simple_sell_above || 0);
 var simple_sell_above=(localStorage.simple_sell_above || 0);
 */
 
-var tobliGoxBot = (function () {
+var tobliGoxBot = {};
+
+tobliGoxBot = (function addDateFormatFuncs(tobliGoxBot) {
 	function zeroPadTwoDigits(d) {
 		return (d<10) ? '0'+d.toString() : d.toString();
 	}
-	var tobliGoxBot = {
-			formatDate: (function formatDate(d) {
-				return d.getFullYear()+"-"+zeroPadTwoDigits(d.getMonth()+1)+"-"+zeroPadTwoDigits(d.getDate());
-			}),
-			formatTime: (function formatTime(t) {
-				return zeroPadTwoDigits(t.getHours()) + ":"+zeroPadTwoDigits(t.getMinutes());
-			})
-	};
+	tobliGoxBot.formatDate = (function formatDate(d) {
+		return d.getFullYear()+"-"+zeroPadTwoDigits(d.getMonth()+1)+"-"+zeroPadTwoDigits(d.getDate());
+	});
+	tobliGoxBot.formatTime = (function formatTime(t) {
+		return zeroPadTwoDigits(t.getHours()) + ":"+zeroPadTwoDigits(t.getMinutes());
+	});
 	tobliGoxBot.formatTimeWithSeconds = (function formatTimeWithSeconds(t) {
 		return tobliGoxBot.formatTime(t) + ":" + zeroPadTwoDigits(t.getSeconds());
 	});
+	/*
+	tobliGoxBot.formatTimeAndDate = (function formatTimeAndDate(d) {
+		return tobliGoxBot.formatDate(d) + " " + tobliGoxBot.formatTime(d);
+	});
+	*/
+	var dateTimeFormatGenerator = (function dateTimeFormatGenerator(todayLabel, dateFormater) {
+		return (function formatWithConditionalDate(d) {
+			var todayDateStr = tobliGoxBot.formatDate(new Date());
+			var dateStr = tobliGoxBot.formatDate(d);
+			var timePrefix = todayLabel;
+			if (dateStr != todayDateStr) {
+				timePrefix = dateFormater(d) + ' ';
+			}
+			return timePrefix + tobliGoxBot.formatTime(d);
+		});
+	});
+	tobliGoxBot.formatDateAndTimeWithImplicitTodayDate = dateTimeFormatGenerator('', tobliGoxBot.formatDate);
+	tobliGoxBot.formatDateAndTimeWithLabeledTodayDate = dateTimeFormatGenerator('Today ', tobliGoxBot.formatDate);
+	tobliGoxBot.FIXME_formatDayMonthAndTimeWithImplicitTodayDate = dateTimeFormatGenerator('', (function formatDate(d) {
+		return d.getDate() + '/' + (d.getMonth()+1);
+	}));
+	tobliGoxBot.FIXME_formatUtcDateWithLocalTime = (function FIXME_formatUtcDateWithLocalTime(d) {
+		return (
+			d.getUTCFullYear()+"-"+zeroPadTwoDigits(d.getUTCMonth()+1)+"-"+zeroPadTwoDigits(d.getUTCDate()) + 
+		    " " + tobliGoxBot.formatTime(d)
+		);
+	});
 	return tobliGoxBot;
-})();
+})(tobliGoxBot);
 
 var BTC = Number.NaN;
 var fiat = Number.NaN;
@@ -175,16 +202,6 @@ function one(e) {
 function onl(d) {
 	console.log("ajax post ok", d);
 	schedUpdateInfo(2500);
-}
-
-function dat2day(ms) {
-	var t = new Date(ms);
-	var y = t.getUTCFullYear().toString();
-	var m = (t.getUTCMonth()+1).toString();
-	var d = t.getUTCDate().toString();
-	if (m.length<2)  m='0'+m;
-	if (d.length<2)  d='0'+d;
-	return y+"-"+m+"-"+d;
 }
 
 function get_url(req, url) {
@@ -443,7 +460,7 @@ var log = console.log = function() {
     	line = stack.split("\n")[2].split("/")[3].split(":")[1];
     } catch (e) {}
     var args = [];
-    args.push(dat2day(t.getTime())+" "+padit(t.getHours())+":"+padit(t.getMinutes())+":"+padit(t.getSeconds()));
+    args.push(tobliGoxBot.FIXME_formatUtcDateWithLocalTime(t));
     args.push("["+file + ":" + line+"]");
     // now add all the other arguments that were passed in:
     for (var _i = 0, _len = arguments.length; _i < _len; _i++) {
