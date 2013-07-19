@@ -70,7 +70,7 @@ function refreshtable() {
 			//var ti=new Date(bkgdPg.tim[i]*3600*1000)
 			var d=new Date(bkgdPg.tim[i]*60*1000);
 			r.title=weekdays[d.getDay()];
-			var date=tobliGoxBot.formatDate(d);
+			var date=bkgdPg.tobliGoxBot.formatDate(d);
 			//r.style.backgroundColor=backgroundColors[((bkgdPg.tim[i]+1)/24)&1]
 			if (lastDate!=date) {
 				lastBackgroundColorIndex=1-lastBackgroundColorIndex;
@@ -80,9 +80,9 @@ function refreshtable() {
 			r.style.backgroundColor=backgroundColors[lastBackgroundColorIndex];
 
 			//r.insertCell(-1).innerHTML=(new Date(bkgdPg.tim[i]*3600*1000)).getHours() + ":00"
-			//r.insertCell(-1).innerHTML=tobliGoxBot.formatTimeAndDate(d);
+			//r.insertCell(-1).innerHTML=bkgdPg.tobliGoxBot.formatTimeAndDate(d);
 			
-			r.insertCell(-1).innerHTML=tobliGoxBot.FIXME_formatDayMonthAndTimeWithImplicitTodayDate(d);
+			r.insertCell(-1).innerHTML=bkgdPg.tobliGoxBot.FIXME_formatDayMonthAndTimeWithImplicitTodayDate(d);
 			r.insertCell(-1).innerHTML=bkgdPg.H1[i].toFixed(3);
 			r.insertCell(-1).innerHTML=es.toFixed(3);
 			r.insertCell(-1).innerHTML=el.toFixed(3);
@@ -355,7 +355,7 @@ function formatPriceTooltip(sp, options, fields){
 
 function assembleTooltip(tim) {
 	var d=new Date(tim*60*1000);
-	var t=tobliGoxBot.formatDateAndTimeWithLabeledTodayDate(d);
+	var t=bkgdPg.tobliGoxBot.formatDateAndTimeWithLabeledTodayDate(d);
 	var tooltip='<div align="center">'+t+
   						'<table width="100%" border="0"><tr><td align="center" class="tooltipTableCell">'+
   						lastPriceTooltipLine+'<br>'+
