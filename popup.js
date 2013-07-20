@@ -1,9 +1,7 @@
 var bkgdPg = chrome.extension.getBackgroundPage();
 var visibleChartSamples=bkgdPg.LogLines;
 
-function padit(d) {return d<10 ? '0'+d.toString() : d.toString()};
 function refreshtable() {
-	const weekdays = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
 	const backgroundColors = ["#f2f2ff", "#fffff0"];
 	var lastBackgroundColorIndex=0;
 	var lastDate="";
@@ -69,12 +67,11 @@ function refreshtable() {
 			var r=tab.insertRow(4);
 			//var ti=new Date(bkgdPg.tim[i]*3600*1000)
 			var d=new Date(bkgdPg.tim[i]*60*1000);
-			r.title=weekdays[d.getDay()];
-			var date=bkgdPg.tobliGoxBot.formatDate(d);
+			r.title=bkgdPg.tobliGoxBot.getWeekdayName;
 			//r.style.backgroundColor=backgroundColors[((bkgdPg.tim[i]+1)/24)&1]
-			if (lastDate!=date) {
+			if (!(bkgdPg.tobliGoxBot.areSameLocalDate(d, lastDate))) {
 				lastBackgroundColorIndex=1-lastBackgroundColorIndex;
-				lastDate=date;
+				lastDate=d;
 			}
 			
 			r.style.backgroundColor=backgroundColors[lastBackgroundColorIndex];

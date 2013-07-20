@@ -44,10 +44,11 @@ var simple_sell_above=(localStorage.simple_sell_above || 0);
 var tobliGoxBot = {};
 
 tobliGoxBot = (function addDateFormatFuncs(tobliGoxBot) {
+	var weekdays = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
 	function zeroPadTwoDigits(d) {
 		return (d<10) ? '0'+d.toString() : d.toString();
 	}
-	tobliGoxBot.formatDate = (function formatDate(d) {
+	var formatDate = (function formatDate(d) {
 		return d.getFullYear()+"-"+zeroPadTwoDigits(d.getMonth()+1)+"-"+zeroPadTwoDigits(d.getDate());
 	});
 	tobliGoxBot.formatTime = (function formatTime(t) {
@@ -58,13 +59,13 @@ tobliGoxBot = (function addDateFormatFuncs(tobliGoxBot) {
 	});
 	/*
 	tobliGoxBot.formatTimeAndDate = (function formatTimeAndDate(d) {
-		return tobliGoxBot.formatDate(d) + " " + tobliGoxBot.formatTime(d);
+		return formatDate(d) + " " + tobliGoxBot.formatTime(d);
 	});
 	*/
 	var dateTimeFormatGenerator = (function dateTimeFormatGenerator(todayLabel, dateFormater) {
 		return (function formatWithConditionalDate(d) {
-			var todayDateStr = tobliGoxBot.formatDate(new Date());
-			var dateStr = tobliGoxBot.formatDate(d);
+			var todayDateStr = formatDate(new Date());
+			var dateStr = formatDate(d);
 			var timePrefix = todayLabel;
 			if (dateStr != todayDateStr) {
 				timePrefix = dateFormater(d) + ' ';
@@ -72,9 +73,9 @@ tobliGoxBot = (function addDateFormatFuncs(tobliGoxBot) {
 			return timePrefix + tobliGoxBot.formatTime(d);
 		});
 	});
-	tobliGoxBot.formatDateAndTimeWithImplicitTodayDate = dateTimeFormatGenerator('', tobliGoxBot.formatDate);
-	tobliGoxBot.formatDateAndTimeWithLabeledTodayDate = dateTimeFormatGenerator('Today ', tobliGoxBot.formatDate);
-	tobliGoxBot.FIXME_formatDayMonthAndTimeWithImplicitTodayDate = dateTimeFormatGenerator('', (function formatDate(d) {
+	tobliGoxBot.formatDateAndTimeWithImplicitTodayDate = dateTimeFormatGenerator('', formatDate);
+	tobliGoxBot.formatDateAndTimeWithLabeledTodayDate = dateTimeFormatGenerator('Today ', formatDate);
+	tobliGoxBot.FIXME_formatDayMonthAndTimeWithImplicitTodayDate = dateTimeFormatGenerator('', (function formatEuDate(d) {
 		return d.getDate() + '/' + (d.getMonth()+1);
 	}));
 	tobliGoxBot.FIXME_formatUtcDateWithLocalTime = (function FIXME_formatUtcDateWithLocalTime(d) {
@@ -82,6 +83,12 @@ tobliGoxBot = (function addDateFormatFuncs(tobliGoxBot) {
 			d.getUTCFullYear()+"-"+zeroPadTwoDigits(d.getUTCMonth()+1)+"-"+zeroPadTwoDigits(d.getUTCDate()) + 
 		    " " + tobliGoxBot.formatTime(d)
 		);
+	});
+	tobliGoxBot.areSameLocalDate = (function areSameLocalDate(d1, d2) {
+		return ((formatDate(d1)) == (formatDate(d2)));
+	});
+	tobliGoxBot.getWeekdayName = (function getWeekdayName(d) {
+		return weekdays[d.getDay()];
 	});
 	return tobliGoxBot;
 })(tobliGoxBot);
@@ -103,8 +110,6 @@ var popupUpdateCounter=null;
 var updateInProgress=false;
 var lastUpdateStartTime=0;
 var abortUpdateAndRedo=false;
-
-function padit(d) {return d<10 ? '0'+d.toString() : d.toString()}
 
 function updateEMA(ema, N) {
 	var pr, k = 2 / (N+1);
