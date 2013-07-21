@@ -67,7 +67,7 @@ function refreshtable() {
 			var r=tab.insertRow(4);
 			//var ti=new Date(bkgdPg.tim[i]*3600*1000)
 			var d=new Date(bkgdPg.tim[i]*60*1000);
-			r.title=bkgdPg.tobliGoxBot.getWeekdayName;
+			r.title=bkgdPg.tobliGoxBot.getWeekdayName(d);
 			//r.style.backgroundColor=backgroundColors[((bkgdPg.tim[i]+1)/24)&1]
 			if (!(bkgdPg.tobliGoxBot.areSameLocalDate(d, lastDate))) {
 				lastBackgroundColorIndex=1-lastBackgroundColorIndex;
