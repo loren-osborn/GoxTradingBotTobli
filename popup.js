@@ -65,11 +65,11 @@ function refreshtable() {
 			var es = bkgdPg.emaShort[i];
 			var perc = 100 * (es-el) / ((es+el)/2);
 			var r=tab.insertRow(4);
-			//var ti=new Date(bkgdPg.tim[i]*3600*1000)
-			var d=new Date(bkgdPg.tim[i]*60*1000);
-			r.title=bkgdPg.tobliGoxBot.getWeekdayName(d);
+			//var ti=new Date(bkgdPg.tim[i]*3600*1000);
+			var d=new (bkgdPg.tobliGoxBot.TobliDate)(bkgdPg.tim[i]*60*1000);
+			r.title=d.getWeekdayName();
 			//r.style.backgroundColor=backgroundColors[((bkgdPg.tim[i]+1)/24)&1]
-			if ((lastDate === false) || !(bkgdPg.tobliGoxBot.areSameLocalDate(d, lastDate))) {
+			if ((lastDate === false) || !(d.isSameDate(lastDate))) {
 				lastBackgroundColorIndex=1-lastBackgroundColorIndex;
 				lastDate=d;
 			}
@@ -77,9 +77,9 @@ function refreshtable() {
 			r.style.backgroundColor=backgroundColors[lastBackgroundColorIndex];
 
 			//r.insertCell(-1).innerHTML=(new Date(bkgdPg.tim[i]*3600*1000)).getHours() + ":00"
-			//r.insertCell(-1).innerHTML=bkgdPg.tobliGoxBot.formatTimeAndDate(d);
+			//r.insertCell(-1).innerHTML=d.formatTimeAndDate();
 			
-			r.insertCell(-1).innerHTML=bkgdPg.tobliGoxBot.FIXME_formatDayMonthAndTimeWithImplicitTodayDate(d);
+			r.insertCell(-1).innerHTML=d.FIXME_formatDayMonthAndTimeWithImplicitTodayDate();
 			r.insertCell(-1).innerHTML=bkgdPg.H1[i].toFixed(3);
 			r.insertCell(-1).innerHTML=es.toFixed(3);
 			r.insertCell(-1).innerHTML=el.toFixed(3);
@@ -351,8 +351,8 @@ function formatPriceTooltip(sp, options, fields){
 }
 
 function assembleTooltip(tim) {
-	var d=new Date(tim*60*1000);
-	var t=bkgdPg.tobliGoxBot.formatDateAndTimeWithLabeledTodayDate(d);
+	var d=new (bkgdPg.tobliGoxBot.TobliDate)(tim*60*1000);
+	var t=d.formatDateAndTimeWithLabeledTodayDate();
 	var tooltip='<div align="center">'+t+
   						'<table width="100%" border="0"><tr><td align="center" class="tooltipTableCell">'+
   						lastPriceTooltipLine+'<br>'+

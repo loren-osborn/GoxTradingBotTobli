@@ -45,9 +45,50 @@ var tobliGoxBot = {};
 
 tobliGoxBot = (function addDateFormatFuncs(tobliGoxBot) {
 	var weekdays = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
-	function zeroPadTwoDigits(d) {
+	var zeroPadTwoDigits = function zeroPadTwoDigits(d) {
 		return (d<10) ? '0'+d.toString() : d.toString();
 	}
+	var createWithVariadicArgs = (function () {
+		var cache = [
+		    /*
+                eval requires sandboxing inside chrome plugins.
+                This preloads cache with the 4 most common cases,
+                but can still fail if args contains more than
+                three arguments. That shouldn't happen as
+                this function is currently used, but if this needs
+                to be added in the future, this function must be
+                moved to a sandboxed page.
+            */
+			(function createWithNoArgs(constructor, args) {
+			    return new constructor();
+			}),
+			(function createWithOneArg(constructor, args) {
+			    return new constructor(args[0]);
+			}),
+			(function createWithTwoArgs(constructor, args) {
+			    return new constructor(args[0],args[1]);
+			}),
+			(function createWithThreeArgs(constructor, args) {
+			    return new constructor(args[0],args[1],args[2]);
+			})
+        ];
+		return (function createWithVariadicArgs(constructor, args) {
+			var funcSource = '';
+			var argList = [];
+			var i = 0;
+			if ((args.length >= cache.length) || !(cache[args.length])) {
+				for (i = 0; i < args.length; i++) {
+					argList[i] = 'args[' + i + ']';
+				}
+				funcSource =
+                    'return (function (constructor, args) {' +
+                        'return new constructor(' + argList + ');' +
+				    '});'; 
+				cache[args.length] = eval(funcSource);
+			}
+			return cache[args.length](constructor, args);
+		});
+	})();
 	var formatDate = (function formatDate(d) {
 		return d.getFullYear()+"-"+zeroPadTwoDigits(d.getMonth()+1)+"-"+zeroPadTwoDigits(d.getDate());
 	});
@@ -57,41 +98,50 @@ tobliGoxBot = (function addDateFormatFuncs(tobliGoxBot) {
 	var formatTimeWithSeconds = (function formatTimeWithSeconds(t) {
 		return formatTime(t) + ":" + zeroPadTwoDigits(t.getSeconds());
 	});
+	var tobliDateMethods = {};
 	/*
-	tobliGoxBot.formatTimeAndDate = (function formatTimeAndDate(d) {
-		return formatDate(d) + " " + formatTime(d);
+	tobliDateMethods.formatTimeAndDate = (function formatTimeAndDate() {
+		return formatDate(this) + " " + formatTime(this);
 	});
 	*/
 	var dateTimeFormatGenerator = (function dateTimeFormatGenerator(todayLabel, dateFormater) {
-		return (function formatWithConditionalDate(d) {
+		return (function formatWithConditionalDate() {
 			var timePrefix = '';
-			if (!(tobliGoxBot.areSameLocalDate(d, new Date()))) {
-				timePrefix = dateFormater(d) + ' ';
+			if (!(this.isSameDate(new (tobliGoxBot.TobliDate)()))) {
+				timePrefix = dateFormater(this) + ' ';
 			} else {
 				timePrefix = todayLabel;
 			}
-			return (timePrefix + formatTime(d));
+			return (timePrefix + formatTime(this));
 		});
 	});
-	tobliGoxBot.formatDateAndTimeWithLabeledTodayDate = dateTimeFormatGenerator('Today ', formatDate);
-	tobliGoxBot.FIXME_formatDayMonthAndTimeWithImplicitTodayDate = dateTimeFormatGenerator('', (function formatEuDate(d) {
+	tobliDateMethods.formatDateAndTimeWithLabeledTodayDate = dateTimeFormatGenerator('Today ', formatDate);
+	tobliDateMethods.FIXME_formatDayMonthAndTimeWithImplicitTodayDate = dateTimeFormatGenerator('', (function formatEuDate(d) {
 		return d.getDate() + '/' + (d.getMonth()+1);
 	}));
-	tobliGoxBot.FIXME_formatUtcDateWithLocalTimeWithSeconds = (function FIXME_formatUtcDateWithLocalTime(d) {
+	tobliDateMethods.FIXME_formatUtcDateWithLocalTimeWithSeconds = (function FIXME_formatUtcDateWithLocalTimeWithSeconds() {
 		return (
-			d.getUTCFullYear()+"-"+zeroPadTwoDigits(d.getUTCMonth()+1)+"-"+zeroPadTwoDigits(d.getUTCDate()) + 
-		    " " + formatTimeWithSeconds(d)
+			this.getUTCFullYear()+"-"+zeroPadTwoDigits(this.getUTCMonth()+1)+"-"+zeroPadTwoDigits(this.getUTCDate()) + 
+		    " " + formatTimeWithSeconds(this)
 		);
 	});
-	tobliGoxBot.areSameLocalDate = (function areSameLocalDate(d1, d2) {
+	tobliDateMethods.isSameDate = (function isSameDate(other) {
 		return (
-				(d1.getFullYear() == d2.getFullYear()) &&
-				(d1.getMonth() == d2.getMonth()) &&
-				(d1.getDate() == d2.getDate())
+				(this.getFullYear() == other.getFullYear()) &&
+				(this.getMonth() == other.getMonth()) &&
+				(this.getDate() == other.getDate())
 		);
 	});
-	tobliGoxBot.getWeekdayName = (function getWeekdayName(d) {
-		return weekdays[d.getDay()];
+	tobliDateMethods.getWeekdayName = (function getWeekdayName() {
+		return weekdays[this.getDay()];
+	});
+	tobliGoxBot.TobliDate = (function TobliDate() {
+		var result = createWithVariadicArgs(Date, arguments);
+		var methodName;
+		for (methodName in tobliDateMethods) {
+			result[methodName] = tobliDateMethods[methodName];
+		}
+		return result;
 	});
 	return tobliGoxBot;
 })(tobliGoxBot);
@@ -459,7 +509,7 @@ function refreshEMA(reset) {
 
 var origLog = console.log;
 var log = console.log = function() {
-		var t=new Date();
+		var t=new (tobliGoxBot.TobliDate)();
 		var file="";
 		var line="";
 		try {
@@ -468,7 +518,7 @@ var log = console.log = function() {
     	line = stack.split("\n")[2].split("/")[3].split(":")[1];
     } catch (e) {}
     var args = [];
-    args.push(tobliGoxBot.FIXME_formatUtcDateWithLocalTimeWithSeconds(t));
+    args.push(t.FIXME_formatUtcDateWithLocalTimeWithSeconds());
     args.push("["+file + ":" + line+"]");
     // now add all the other arguments that were passed in:
     for (var _i = 0, _len = arguments.length; _i < _len; _i++) {
