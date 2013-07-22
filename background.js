@@ -54,7 +54,7 @@ tobliGoxBot = (function addDateFormatFuncs(tobliGoxBot) {
 	var formatTime = (function formatTime(t) {
 		return zeroPadTwoDigits(t.getHours()) + ":"+zeroPadTwoDigits(t.getMinutes());
 	});
-	tobliGoxBot.formatTimeWithSeconds = (function formatTimeWithSeconds(t) {
+	var formatTimeWithSeconds = (function formatTimeWithSeconds(t) {
 		return formatTime(t) + ":" + zeroPadTwoDigits(t.getSeconds());
 	});
 	/*
@@ -73,19 +73,22 @@ tobliGoxBot = (function addDateFormatFuncs(tobliGoxBot) {
 			return timePrefix + formatTime(d);
 		});
 	});
-	tobliGoxBot.formatDateAndTimeWithImplicitTodayDate = dateTimeFormatGenerator('', formatDate);
 	tobliGoxBot.formatDateAndTimeWithLabeledTodayDate = dateTimeFormatGenerator('Today ', formatDate);
 	tobliGoxBot.FIXME_formatDayMonthAndTimeWithImplicitTodayDate = dateTimeFormatGenerator('', (function formatEuDate(d) {
 		return d.getDate() + '/' + (d.getMonth()+1);
 	}));
-	tobliGoxBot.FIXME_formatUtcDateWithLocalTime = (function FIXME_formatUtcDateWithLocalTime(d) {
+	tobliGoxBot.FIXME_formatUtcDateWithLocalTimeWithSeconds = (function FIXME_formatUtcDateWithLocalTime(d) {
 		return (
 			d.getUTCFullYear()+"-"+zeroPadTwoDigits(d.getUTCMonth()+1)+"-"+zeroPadTwoDigits(d.getUTCDate()) + 
-		    " " + formatTime(d)
+		    " " + formatTimeWithSeconds(d)
 		);
 	});
 	tobliGoxBot.areSameLocalDate = (function areSameLocalDate(d1, d2) {
-		return ((formatDate(d1)) == (formatDate(d2)));
+		return (
+				(d1.getFullYear() == d2.getFullYear()) &&
+				(d1.getMonth() == d2.getMonth()) &&
+				(d1.getDate() == d2.getDate())
+		);
 	});
 	tobliGoxBot.getWeekdayName = (function getWeekdayName(d) {
 		return weekdays[d.getDay()];
@@ -465,7 +468,7 @@ var log = console.log = function() {
     	line = stack.split("\n")[2].split("/")[3].split(":")[1];
     } catch (e) {}
     var args = [];
-    args.push(tobliGoxBot.FIXME_formatUtcDateWithLocalTime(t));
+    args.push(tobliGoxBot.FIXME_formatUtcDateWithLocalTimeWithSeconds(t));
     args.push("["+file + ":" + line+"]");
     // now add all the other arguments that were passed in:
     for (var _i = 0, _len = arguments.length; _i < _len; _i++) {
