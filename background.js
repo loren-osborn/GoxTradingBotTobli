@@ -64,13 +64,13 @@ tobliGoxBot = (function addDateFormatFuncs(tobliGoxBot) {
 	*/
 	var dateTimeFormatGenerator = (function dateTimeFormatGenerator(todayLabel, dateFormater) {
 		return (function formatWithConditionalDate(d) {
-			var todayDateStr = formatDate(new Date());
-			var dateStr = formatDate(d);
-			var timePrefix = todayLabel;
-			if (dateStr != todayDateStr) {
+			var timePrefix = '';
+			if (!(tobliGoxBot.areSameLocalDate(d, new Date()))) {
 				timePrefix = dateFormater(d) + ' ';
+			} else {
+				timePrefix = todayLabel;
 			}
-			return timePrefix + formatTime(d);
+			return (timePrefix + formatTime(d));
 		});
 	});
 	tobliGoxBot.formatDateAndTimeWithLabeledTodayDate = dateTimeFormatGenerator('Today ', formatDate);

@@ -4,7 +4,7 @@ var visibleChartSamples=bkgdPg.LogLines;
 function refreshtable() {
 	const backgroundColors = ["#f2f2ff", "#fffff0"];
 	var lastBackgroundColorIndex=0;
-	var lastDate="";
+	var lastDate=false;
 	var tab = document.getElementById("tab");
 	document.getElementById("emal").innerHTML=bkgdPg.EmaLongPar;
 	document.getElementById("emas").innerHTML=bkgdPg.EmaShortPar;
@@ -69,7 +69,7 @@ function refreshtable() {
 			var d=new Date(bkgdPg.tim[i]*60*1000);
 			r.title=bkgdPg.tobliGoxBot.getWeekdayName(d);
 			//r.style.backgroundColor=backgroundColors[((bkgdPg.tim[i]+1)/24)&1]
-			if (!(bkgdPg.tobliGoxBot.areSameLocalDate(d, lastDate))) {
+			if ((lastDate === false) || !(bkgdPg.tobliGoxBot.areSameLocalDate(d, lastDate))) {
 				lastBackgroundColorIndex=1-lastBackgroundColorIndex;
 				lastDate=d;
 			}
