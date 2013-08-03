@@ -46,7 +46,7 @@ var tobliGoxBot = {};
 tobliGoxBot = (function addDateFormatFuncs(tobliGoxBot) {
 	var weekdays = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
 	var zeroPadTwoDigits = function zeroPadTwoDigits(d) {
-		return (d<10) ? '0'+d.toString() : d.toString();
+		return ((d < 10) ? '0' : '') + d.toString();
 	}
 	var createWithVariadicArgs = (function () {
 		var cache = [
@@ -100,6 +100,7 @@ tobliGoxBot = (function addDateFormatFuncs(tobliGoxBot) {
 	});
 	var tobliDateMethods = {};
 	/*
+	// Only used by commented out code elsewhere.
 	tobliDateMethods.formatTimeAndDate = (function formatTimeAndDate() {
 		return formatDate(this) + " " + formatTime(this);
 	});
@@ -537,20 +538,20 @@ Object.size = function(obj) {
 	return size;
 }
 
-function tidBinarySearch(trs,tid) {
-	if ((trs.length<=1) || (tid<trs[1].tid) || (tid>trs[trs.length-1].tid))
+function tidBinarySearch(tradeHistoryResponse,tid) {
+	if ((tradeHistoryResponse.length<=1) || (tid<tradeHistoryResponse[1].tid) || (tid>tradeHistoryResponse[tradeHistoryResponse.length-1].tid))
 		return -1;
-	var l=1,u=trs.length,m;
+	var l=1,u=tradeHistoryResponse.length,m;
 	while (l<=u) {
-		if (tid > parseInt(trs[(m=Math.floor((l+u)/2))].tid))
+		if (tid > parseInt(tradeHistoryResponse[(m=Math.floor((l+u)/2))].tid))
 			l=m+1;
 		else
-			u=(tid==parseInt(trs[m].tid)) ? -2 : m-1;
+			u=(tid==parseInt(tradeHistoryResponse[m].tid)) ? -2 : m-1;
 	}
 	return (u==-2) ? m : l;
 }
 
-function cacheOtherUsefulSamples(trs) {
+function cacheOtherUsefulSamples(tradeHistoryResponse) {
 	//log("generating usefulSamplePoints");
 	// May not really be needed to generate this on every call, but to get the very latest sample points for long date durations, do it anyway (not very intensive)...
 	var time_now=(new Date()).getTime();
@@ -570,11 +571,11 @@ function cacheOtherUsefulSamples(trs) {
 		for (var key in usefulSamplePoints) {
 			var sample=localStorage.getItem("sample."+key);
 			if ((!sample)||(sample=="null")) {
-				var i=tidBinarySearch(trs,parseInt(key)*60*1000000);
+				var i=tidBinarySearch(tradeHistoryResponse,parseInt(key)*60*1000000);
 				if (i!=-1) {
 //					found++;
-//					log("Sample should be cached. key="+key+" tid="+parseInt(trs[i].tid/60/1000000)+" lastTid="+parseInt(trs[i-1].tid/60/1000000)+" price="+trs[i].price);
-					localStorage.setItem("sample."+key,trs[i].price);
+//					log("Sample should be cached. key="+key+" tid="+parseInt(tradeHistoryResponse[i].tid/60/1000000)+" lastTid="+parseInt(tradeHistoryResponse[i-1].tid/60/1000000)+" price="+tradeHistoryResponse[i].price);
+					localStorage.setItem("sample."+key,tradeHistoryResponse[i].price);
 				}
 			}
 		}
@@ -762,26 +763,26 @@ function updateH1(reset) { // Added "reset" parameter to clear the H1 data - sho
 			var done = true;
 			try {
 				//log(req.responseText)
-				var trs = JSON.parse(req.responseText);
+				var tradeHistoryResponse = JSON.parse(req.responseText);
 				if (useAPIv2)
-					trs=trs.data;
+					tradeHistoryResponse=tradeHistoryResponse.data;
 
-				if (trs.length > 0) {
-					//log("Adding sample from MtGox: sample."+minute_fetch+" = "+trs[0].price);
-					addSample(minute_fetch,trs[0].price);
+				if (tradeHistoryResponse.length > 0) {
+					//log("Adding sample from MtGox: sample."+minute_fetch+" = "+tradeHistoryResponse[0].price);
+					addSample(minute_fetch,tradeHistoryResponse[0].price);
 
 					// Check if the chunk contains more any useful data
 					minute_fetch=getNextMinuteFetch();
 					var i=1;
-					while ((i<trs.length)&&(minute_fetch <= minute_now)) {
-						if (parseInt(trs[i].tid) > minute_fetch*60*1000000) {
-							//log("Adding bonus sample from MtGox :) sample."+minute_fetch+" = "+trs[i].price);
-							addSample(minute_fetch,trs[i].price);
+					while ((i<tradeHistoryResponse.length)&&(minute_fetch <= minute_now)) {
+						if (parseInt(tradeHistoryResponse[i].tid) > minute_fetch*60*1000000) {
+							//log("Adding bonus sample from MtGox :) sample."+minute_fetch+" = "+tradeHistoryResponse[i].price);
+							addSample(minute_fetch,tradeHistoryResponse[i].price);
 							minute_fetch=getNextMinuteFetch();
 						}
 						i++;
 					}
-					cacheOtherUsefulSamples(trs);
+					cacheOtherUsefulSamples(tradeHistoryResponse);
 				} else {
 					log("Empty sample chunk from MtGox - no trades since minute_fetch="+minute_fetch);
 					if (parseInt((new Date()).getTime()/(60*1000)) - minute_fetch < 5) {
