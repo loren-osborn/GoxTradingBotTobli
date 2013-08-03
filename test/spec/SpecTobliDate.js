@@ -1,4 +1,5 @@
 describe("TobliDate", function() {
+	var nowDateString = '2013-09-10 08:11:07';
   /*
   var player;
   var song;
