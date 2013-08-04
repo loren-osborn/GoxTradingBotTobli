@@ -1,5 +1,29 @@
-describe("TobliDate", function() {
-	var nowDateString = '2013-09-10 08:11:07';
+describe("getTobliDateConstructor", function() {
+	var OneArgDateWithFakeCurrentTime = (function OneArgDateWithFakeCurrentTime(initalDateSpec) {
+		initalDateSpec = (initalDateSpec || (OneArgDateWithFakeCurrentTime.fakeCurrentTimeString));
+		return new Date(initalDateSpec);
+	});
+	OneArgDateWithFakeCurrentTime.fakeCurrentTimeString = '2013-09-10 08:11:07';
+	
+	it("should be a function that returns a well behaved constructor", function() {
+		expect(getTobliDateConstructor).isAFunction({withName:'getTobliDateConstructor'});
+		expect(getTobliDateConstructor()).toBeAWellBehavedConstructor({withName:'TobliDate', returningObjectOfClass: Date});
+	});
+	
+	it("returns a constructor with expected methods", function() {
+		var expectedMethods = [
+		    'formatDateAndTimeWithLabeledTodayDate',
+		    'FIXME_formatDayMonthAndTimeWithImplicitTodayDate',
+		    'FIXME_formatUtcDateWithLocalTimeWithSeconds',
+		    'isSameDate',
+		    'getWeekdayName'
+		];
+		var i;
+		var newObj = new (getTobliDateConstructor())();
+		for (i = 0; i < expectedMethods.length; i++) {
+			expect(newObj[expectedMethods[i]]).isAFunction({withName:expectedMethods[i]});
+		}
+	});
   /*
   var player;
   var song;
