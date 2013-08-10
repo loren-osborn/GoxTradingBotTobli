@@ -24,6 +24,15 @@ describe("getTobliDateConstructor", function() {
 			expect(newObj[expectedMethods[i]]).isAFunction();
 		}
 	});
+	
+	it("returns a constructor for a Date with expected default value", function() {
+		var newObj = new (getTobliDateConstructor())();
+		var stockDate = new Date();
+		expect(typeof newObj).toEqual(typeof stockDate);
+		expect(newObj instanceof Date).toBeTruthy();
+		expect(newObj.constructor).toEqual(Date);
+		expect(newObj.getTime()).toBeCloseTo(stockDate.getTime(), -1);
+	});
   /*
   var player;
   var song;
