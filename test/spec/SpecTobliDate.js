@@ -21,7 +21,7 @@ describe("getTobliDateConstructor", function() {
 		var i;
 		var newObj = new (getTobliDateConstructor())();
 		for (i = 0; i < expectedMethods.length; i++) {
-			expect(newObj[expectedMethods[i]]).isAFunction({withName:expectedMethods[i]});
+			expect(newObj[expectedMethods[i]]).isAFunction();
 		}
 	});
   /*
