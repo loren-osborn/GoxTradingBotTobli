@@ -33,6 +33,28 @@ describe("getTobliDateConstructor", function() {
 		expect(newObj.constructor).toEqual(Date);
 		expect(newObj.getTime()).toBeCloseTo(stockDate.getTime(), -1);
 	});
+	
+	it("returns a constructor for a constructor passing correct number of args through", function() {
+		var SingleArgDate = jasmine.createSpy("SingleArgDate spy");
+		var singleArgDateObj = new (getTobliDateConstructor(SingleArgDate))(1);
+        expect(SingleArgDate).toHaveBeenCalledWith(1);
+        
+
+		var DoubleArgDate = jasmine.createSpy("DoubleArgDate spy");
+		var doubleArgDateObj = new (getTobliDateConstructor(DoubleArgDate))('foo', 'bar');
+        expect(DoubleArgDate).toHaveBeenCalledWith('foo', 'bar');
+        
+
+		var TrippleArgDate = jasmine.createSpy("TrippleArgDate spy");
+		var trippleArgDate = new (getTobliDateConstructor(TrippleArgDate))(3,'.14',159);
+        expect(TrippleArgDate).toHaveBeenCalledWith(3,'.14',159);
+	});
+	
+	it("returns a constructor that throws an exception when given too many arguments", function() {
+	    expect(function () {
+	    	new (getTobliDateConstructor())(1,2,3,4,5,6,7,8);
+	    }).toThrow('Too many variadic constructor without eval support (disabled in Chrome plugins)');
+	});
   /*
   var player;
   var song;

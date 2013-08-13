@@ -31,9 +31,13 @@ function getTobliDateConstructor(dateConstructor) {
         ];
 		return (function createWithVariadicArgs(constructor, args) {
 			var funcSource = '';
+			/*
 			var argList = [];
 			var i = 0;
+			*/
 			if ((args.length >= cache.length) || !(cache[args.length])) {
+				throw 'Too many variadic constructor without eval support (disabled in Chrome plugins)';
+				/*
 				for (i = 0; i < args.length; i++) {
 					argList[i] = 'args[' + i + ']';
 				}
@@ -42,6 +46,7 @@ function getTobliDateConstructor(dateConstructor) {
                         'return new constructor(' + argList + ');' +
 				    '});'; 
 				cache[args.length] = eval(funcSource);
+				*/
 			}
 			return cache[args.length](constructor, args);
 		});
