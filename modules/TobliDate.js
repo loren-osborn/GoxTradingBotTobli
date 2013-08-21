@@ -36,7 +36,7 @@ function getTobliDateConstructor(dateConstructor) {
 			var i = 0;
 			*/
 			if ((args.length >= cache.length) || !(cache[args.length])) {
-				throw 'Too many variadic constructor without eval support (disabled in Chrome plugins)';
+				throw 'Too many variadic constructor arguments without eval support (disabled in Chrome plugins)';
 				/*
 				for (i = 0; i < args.length; i++) {
 					argList[i] = 'args[' + i + ']';

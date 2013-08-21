@@ -34,7 +34,7 @@ describe("getTobliDateConstructor", function() {
 		expect(newObj.getTime()).toBeCloseTo(stockDate.getTime(), -1);
 	});
 	
-	it("returns a constructor for a constructor passing correct number of args through", function() {
+	it("returns a constructor for a custom constructor passing correct number of args through", function() {
 		var SingleArgDate = jasmine.createSpy("SingleArgDate spy");
 		var singleArgDateObj = new (getTobliDateConstructor(SingleArgDate))(1);
         expect(SingleArgDate).toHaveBeenCalledWith(1);
@@ -53,63 +53,57 @@ describe("getTobliDateConstructor", function() {
 	it("returns a constructor that throws an exception when given too many arguments", function() {
 	    expect(function () {
 	    	new (getTobliDateConstructor())(1,2,3,4,5,6,7,8);
-	    }).toThrow('Too many variadic constructor without eval support (disabled in Chrome plugins)');
+	    }).toThrow('Too many variadic constructor arguments without eval support (disabled in Chrome plugins)');
 	});
-  /*
-  var player;
-  var song;
-
-  beforeEach(function() {
-    player = new Player();
-    song = new Song();
-  });
-
-  it("should be able to play a Song", function() {
-    player.play(song);
-    expect(player.currentlyPlayingSong).toEqual(song);
-
-    //demonstrates use of custom matcher
-    expect(player).toBePlaying(song);
-  });
-
-  describe("when song has been paused", function() {
-    beforeEach(function() {
-      player.play(song);
-      player.pause();
-    });
-
-    it("should indicate that the song is currently paused", function() {
-      expect(player.isPlaying).toBeFalsy();
-
-      // demonstrates use of 'not' with a custom matcher
-      expect(player).not.toBePlaying(song);
-    });
-
-    it("should be possible to resume", function() {
-      player.resume();
-      expect(player.isPlaying).toBeTruthy();
-      expect(player.currentlyPlayingSong).toEqual(song);
-    });
-  });
-
-  // demonstrates use of spies to intercept and test method calls
-  it("tells the current song if the user has made it a favorite", function() {
-    spyOn(song, 'persistFavoriteStatus');
-
-    player.play(song);
-    player.makeFavorite();
-
-    expect(song.persistFavoriteStatus).toHaveBeenCalledWith(true);
-  });
-
-  //demonstrates use of expected exceptions
-  describe("#resume", function() {
-    it("should throw an exception if song is already playing", function() {
-      player.play(song);
-
-      expect(function() {
-        player.resume();
-      }).toThrow("song is already playing");
-    });
-  }); */
+	
+	it("returns a constructor with working isSameDate() method", function() {
+		var sampleYears = [2000,2001,2002];
+		var sampleMonths = ['Jan','Feb','Mar'];
+		var i,j,k;
+		var FIRST_VALID_DAY_OF_MONTH = 1;
+		var earlyComparisonDate,lateComparisonDate;
+		var TobliDate = getTobliDateConstructor();
+		var controlDateString = 'Feb 2, 2001';
+		var comparisonDateString;
+		var earlyControlDate = new TobliDate(controlDateString + ' 00:00:00');
+		var lateControlDate = new TobliDate(controlDateString + ' 23:59:59');
+		var expectedMatch;
+		var matchCount = 0;
+		for (i = 0; i < sampleMonths.length; i++) {
+			for (j = 0; j < 3; j++) {
+				for (k = 0; k < sampleYears.length; k++) {
+					expectedMatch = (i == 1) && (j == 1) && (k == 1);
+					if (expectedMatch) {
+						matchCount++;
+						expect(expectedMatch).toEqual(true);
+					} else {
+						expect(expectedMatch).toEqual(false);
+					}
+					comparisonDateString = sampleMonths[i] + ' ' + (j + FIRST_VALID_DAY_OF_MONTH) + ', ' + sampleYears[k];
+					earlyComparisonDate = new TobliDate(comparisonDateString + ' 00:00:00');
+					lateComparisonDate = new TobliDate(comparisonDateString + ' 23:59:59');
+					expect(earlyControlDate.isSameDate(earlyComparisonDate)).toEqual(expectedMatch);
+					expect(earlyControlDate.isSameDate(lateComparisonDate)).toEqual(expectedMatch);
+					expect(lateControlDate.isSameDate(earlyComparisonDate)).toEqual(expectedMatch);
+					expect(lateControlDate.isSameDate(lateComparisonDate)).toEqual(expectedMatch);
+				}
+			}
+		}
+		expect(matchCount).toEqual(1);
+	});
+	
+	it("returns a constructor with working getWeekdayName() method", function() {
+		// Jan 1, 2000 is a Saturday:
+		var expectedDayNames = [null,"Saturday","Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+		var i;
+		var FIRST_VALID_DAY_OF_MONTH = 1;
+		var testDate;
+		var TobliDate = getTobliDateConstructor();
+		for (i = FIRST_VALID_DAY_OF_MONTH; i < expectedDayNames.length; i++) {
+			testDate = new TobliDate('Jan ' + i + ', 2000 00:00:00');
+			expect(testDate.getWeekdayName()).toEqual(expectedDayNames[i]);
+			testDate = new TobliDate('Jan ' + i + ', 2000 23:59:59');
+			expect(testDate.getWeekdayName()).toEqual(expectedDayNames[i]);
+		}
+	});
 });
