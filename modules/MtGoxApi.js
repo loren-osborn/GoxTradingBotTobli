@@ -1,0 +1,2 @@
+function getMtGoxApi(useAPIv2) {
+}

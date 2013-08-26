@@ -44,6 +44,7 @@ var simple_sell_above=(localStorage.simple_sell_above || 0);
 var tobliGoxBot = {};
 
 tobliGoxBot.TobliDate = getTobliDateConstructor();
+tobliGoxBot.mtGoxApi = getMtGoxApi(useAPIv2);
 
 var BTC = Number.NaN;
 var fiat = Number.NaN;
