@@ -44,7 +44,7 @@ var simple_sell_above=(localStorage.simple_sell_above || 0);
 var tobliGoxBot = {};
 
 tobliGoxBot.TobliDate = getTobliDateConstructor();
-tobliGoxBot.mtGoxApi = getMtGoxApi(useAPIv2);
+tobliGoxBot.mtGoxApi = getMtGoxApi({version: (useAPIv2?2:1)});
 
 var BTC = Number.NaN;
 var fiat = Number.NaN;
@@ -92,11 +92,7 @@ function updateInfo() {
 		return;
 	}
 
-	var path;
-	if (useAPIv2)
-		path="BTC"+currency+"/money/info";
-	else
-		path="info.php";
+	var path = tobliGoxBot.mtGoxApi.getAccountBalancePath({currency:currency});
 
 	mtgoxpost(path, [],
 		function(e) {
