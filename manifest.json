@@ -1,7 +1,7 @@
 {
 	"manifest_version": 2,
 	"background": {
-		"scripts": ["sha512.js", "modules/TobliDate.js", "modules/MtGoxApi.js", "background.js"]
+		"scripts": ["sha512.js", "modules/DependancyInjectionContainer.js", "modules/TobliDate.js", "modules/MtGoxApi.js", "background.js"]
 	},
 	"browser_action": {
 		"default_icon": "robot_trading_off.png",
