@@ -1,5 +1,7 @@
 describe("DependancyInjectionContainer", function() {
 
+    var greetingFunc = (function (Greeter, Guest ,Location) { return ('Hello ' + Guest + '. I am ' + Greeter + '. Welcome to ' + Location + '.'); });
+    
     it("should be a well behaved constructor for objects implementing the get() method", function() {
         expect(DependancyInjectionContainer).toBeAWellBehavedConstructor({withName:'DependancyInjectionContainer', whenCalledWith: [{foo:'bar'}]});
         expect((new DependancyInjectionContainer({foo:'bar'})).get).isAFunction({withName:'get'});
@@ -30,18 +32,39 @@ describe("DependancyInjectionContainer", function() {
     });
     
     it("should create objects whose get() method that fills in function parameters when requesting result for keys defined as function", function() {
-        var greetingFunc = (function (Greeter, Guest ,Location) { return ('Hello ' + Guest + '. I am ' + Greeter + '. Welcome to ' + Location); });
         var testContainer = new DependancyInjectionContainer({
-        	Greeting: greetingFunc
+            Greeting: greetingFunc
         });
         expect((function () {testContainer.get('Greeting');})).toThrow('Key "Greeter" undefined!');
-        /*
-         * Need more tests here
-        var returnNewObject = (function () {return {customTestProperty:'all mine'};});
-        expect(returnNewObject() === returnNewObject()).toBeFalsy();
-        var testContainer = new DependancyInjectionContainer({special:returnNewObject});
-        expect(testContainer.get('special').customTestProperty).toEqual('all mine');
-        expect(testContainer.get('special') === testContainer.get('special')).toBeTruthy();
-        */
+        testContainer = new DependancyInjectionContainer({
+            Greeting: greetingFunc,
+            Greeter: 'Fred',
+            Guest: 'Wilma' ,
+            Location: 'my cave'
+        });
+        expect(testContainer.get('Greeting')).toEqual('Hello Wilma. I am Fred. Welcome to my cave.');
+    });
+    
+    it("should create objects whose get() method that fails gracefully resolving cyclic dependancies", function() {
+        var testContainer = new DependancyInjectionContainer({
+            Greeting: greetingFunc,
+            Greeter: (function (Greeting) {return {
+                toString: function () {return 'Fred';},
+                getGreeting: function () {return Greeting;}
+            };}),
+            Guest: 'Wilma' ,
+            Location: 'my cave'
+        });
+        expect((function () {testContainer.get('Greeting');})).toThrow('cyclical dependancy detected resolving key: Greeter');
+        testContainer = new DependancyInjectionContainer({
+            Greeting: greetingFunc,
+            Greeter: (function () {return {
+                toString: function () {return 'Fred';},
+                getGreeting: function () {return this.get('Greeting');}
+            };}),
+            Guest: 'Wilma' ,
+            Location: 'my cave'
+        });
+        expect(testContainer.get('Greeting')).toEqual('Hello Wilma. I am Fred. Welcome to my cave.');
     });
 });

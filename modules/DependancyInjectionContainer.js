@@ -3,6 +3,7 @@ var DependancyInjectionContainer = (function () {
 		var key;
 		var keyCount;
 		var valueCache = {};
+		var resolvingList = [];
 		if (arguments.length < 1) {
 			throw 'Missing required argument';
 		} else if (arguments.length > 1) {
@@ -33,7 +34,12 @@ var DependancyInjectionContainer = (function () {
 					funcArgValueList = [];
 					for (i = 0; i < funcArgKeyList.length; i++) {
 						if (funcArgKeyList[i] != '') {
-							funcArgValueList.append(get(funcArgKeyList[i]));
+							if (resolvingList.indexOf(funcArgKeyList[i]) >= 0) {
+								throw ('cyclical dependancy detected resolving key: ' + funcArgKeyList[i]);
+							}
+							resolvingList.push(funcArgKeyList[i]);
+							funcArgValueList.push(get(funcArgKeyList[i]));
+							resolvingList.pop();
 						}
 					}
 					valueCache[key] = specObject[key].apply(specObject[key], funcArgValueList);
