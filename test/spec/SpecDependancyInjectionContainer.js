@@ -57,4 +57,22 @@ describe("DependancyInjectionContainer", function() {
         }); 
         expect(testContainer.get('Greeter').getGreeting()).toEqual('Hello Wilma. I am Fred. Welcome to my cave.');
     });
+    
+    it("should create objects whose set() method replaces values set at creation time", function() {
+        var testContainer = new DependancyInjectionContainer({
+            Greeting: greetingFunc,
+            Greeter: (function (Greeting) {return {
+                toString: function () {return 'Fred';},
+                getGreeting: function () {return Greeting();}
+            };}),
+            Guest: 'Wilma' ,
+            Location: 'my cave'
+        });
+        var greeterBefore = testContainer.get('Greeter');
+        expect(greeterBefore.getGreeting()).toEqual('Hello Wilma. I am Fred. Welcome to my cave.');
+        testContainer.set('Guest', 'Betty');
+        expect(testContainer.get('Guest')).toEqual('Betty');
+        expect(greeterBefore === testContainer.get('Greeter')).toBeTruthy();
+        expect(testContainer.get('Greeter').getGreeting()).toEqual('Hello Betty. I am Fred. Welcome to my cave.');
+    });
 });

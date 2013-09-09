@@ -4,6 +4,7 @@ var DependancyInjectionContainer = (function () {
 		var keyCount;
 		var valueCache = {};
 		var resolvingList = [];
+		var expirationMap = {};
 		if (arguments.length < 1) {
 			throw 'Missing required argument';
 		} else if (arguments.length > 1) {
@@ -24,6 +25,7 @@ var DependancyInjectionContainer = (function () {
 			var funcArgKeyList;
 			var funcArgValueList;
 			var i;
+			var j;
 			if (specObject[key] === undefined) {
 				throw ('Key "' + key + '" undefined!');
 			}
@@ -38,16 +40,32 @@ var DependancyInjectionContainer = (function () {
 								throw ('cyclical dependancy detected resolving key: ' + funcArgKeyList[i]);
 							}
 							resolvingList.push(funcArgKeyList[i]);
+							for (j = 0; j < resolvingList.length; j++) {
+								if (expirationMap[resolvingList[j]] === undefined) {
+									expirationMap[resolvingList[j]] = [];
+								}
+								if (expirationMap[resolvingList[j]].indexOf(key) === -1) {
+									expirationMap[resolvingList[j]].push(key);
+								}
+							}
 							funcArgValueList.push((function (c, k) { return (function () { return c.get(k); });})(this, funcArgKeyList[i]));
 							resolvingList.pop();
 						}
 					}
-					valueCache[key] = specObject[key].apply(specObject[key], funcArgValueList);
+					valueCache[key] = specObject[key].apply(this, funcArgValueList);
 				} else {
 					valueCache[key] = specObject[key];
 				}
 			}
 			return valueCache[key];
+		});
+		this.set = (function set(key, value) {
+			var i;
+			specObject[key] = value;
+			valueCache[key] = undefined;
+			for (i = 0; i < expirationMap[key].length; i++) {
+				valueCache[expirationMap[key][i]] = undefined;
+			}
 		});
 	});
 })();
