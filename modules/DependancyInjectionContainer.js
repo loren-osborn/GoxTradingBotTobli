@@ -38,7 +38,7 @@ var DependancyInjectionContainer = (function () {
 								throw ('cyclical dependancy detected resolving key: ' + funcArgKeyList[i]);
 							}
 							resolvingList.push(funcArgKeyList[i]);
-							funcArgValueList.push(get(funcArgKeyList[i]));
+							funcArgValueList.push((function (c, k) { return (function () { return c.get(k); });})(this, funcArgKeyList[i]));
 							resolvingList.pop();
 						}
 					}

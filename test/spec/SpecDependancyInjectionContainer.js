@@ -1,6 +1,6 @@
 describe("DependancyInjectionContainer", function() {
 
-    var greetingFunc = (function (Greeter, Guest ,Location) { return ('Hello ' + Guest + '. I am ' + Greeter + '. Welcome to ' + Location + '.'); });
+    var greetingFunc = (function (Greeter, Guest ,Location) { return ('Hello ' + Guest() + '. I am ' + Greeter() + '. Welcome to ' + Location() + '.'); });
     
     it("should be a well behaved constructor for objects implementing the get() method", function() {
         expect(DependancyInjectionContainer).toBeAWellBehavedConstructor({withName:'DependancyInjectionContainer', whenCalledWith: [{foo:'bar'}]});
@@ -35,7 +35,7 @@ describe("DependancyInjectionContainer", function() {
         var testContainer = new DependancyInjectionContainer({
             Greeting: greetingFunc
         });
-        expect((function () {testContainer.get('Greeting');})).toThrow('Key "Greeter" undefined!');
+        expect((function () {testContainer.get('Greeting');})).toThrow('Key "Guest" undefined!');
         testContainer = new DependancyInjectionContainer({
             Greeting: greetingFunc,
             Greeter: 'Fred',
@@ -45,26 +45,16 @@ describe("DependancyInjectionContainer", function() {
         expect(testContainer.get('Greeting')).toEqual('Hello Wilma. I am Fred. Welcome to my cave.');
     });
     
-    it("should create objects whose get() method that fails gracefully resolving cyclic dependancies", function() {
+    it("should create objects whose get() method that supports cyclic dependancies", function() {
         var testContainer = new DependancyInjectionContainer({
             Greeting: greetingFunc,
             Greeter: (function (Greeting) {return {
                 toString: function () {return 'Fred';},
-                getGreeting: function () {return Greeting;}
+                getGreeting: function () {return Greeting();}
             };}),
             Guest: 'Wilma' ,
             Location: 'my cave'
-        });
-        expect((function () {testContainer.get('Greeting');})).toThrow('cyclical dependancy detected resolving key: Greeter');
-        testContainer = new DependancyInjectionContainer({
-            Greeting: greetingFunc,
-            Greeter: (function () {return {
-                toString: function () {return 'Fred';},
-                getGreeting: function () {return this.get('Greeting');}
-            };}),
-            Guest: 'Wilma' ,
-            Location: 'my cave'
-        });
-        expect(testContainer.get('Greeting')).toEqual('Hello Wilma. I am Fred. Welcome to my cave.');
+        }); 
+        expect(testContainer.get('Greeter').getGreeting()).toEqual('Hello Wilma. I am Fred. Welcome to my cave.');
     });
 });
