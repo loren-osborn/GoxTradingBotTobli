@@ -1,5 +1,5 @@
 var DependancyInjectionContainer = (function () {
-	return (function DependancyInjectionContainer(specObject) {
+	var dic = (function DependancyInjectionContainer(specObject) {
 		var key;
 		var keyCount;
 		var valueCache = {};
@@ -36,6 +36,10 @@ var DependancyInjectionContainer = (function () {
 					funcArgValueList = [];
 					for (i = 0; i < funcArgKeyList.length; i++) {
 						if (funcArgKeyList[i] != '') {
+							if (!(/^get([A-Z])/.test(funcArgKeyList[i]))) {
+								throw ('function argument ' + funcArgKeyList[i] + ' name must start with "get"!');
+							}
+							funcArgKeyList[i] = funcArgKeyList[i].replace(/^get/,'');
 							if (resolvingList.indexOf(funcArgKeyList[i]) >= 0) {
 								throw ('cyclical dependancy detected resolving key: ' + funcArgKeyList[i]);
 							}
@@ -68,4 +72,8 @@ var DependancyInjectionContainer = (function () {
 			}
 		});
 	});
+	dic.wrap = (function wrap(input) {
+		return (function () {return input;});
+	});
+	return dic;
 })();

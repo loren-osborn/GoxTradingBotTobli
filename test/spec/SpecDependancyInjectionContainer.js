@@ -1,10 +1,11 @@
 describe("DependancyInjectionContainer", function() {
 
-    var greetingFunc = (function (Greeter, Guest ,Location) { return ('Hello ' + Guest() + '. I am ' + Greeter() + '. Welcome to ' + Location() + '.'); });
+    var greetingFunc = (function (getGreeter, getGuest ,getLocation) { return ('Hello ' + getGuest() + '. I am ' + getGreeter() + '. Welcome to ' + getLocation() + '.'); });
     
-    it("should be a well behaved constructor for objects implementing the get() method", function() {
+    it("should be a well behaved constructor for objects implementing the get() and set() methods", function() {
         expect(DependancyInjectionContainer).toBeAWellBehavedConstructor({withName:'DependancyInjectionContainer', whenCalledWith: [{foo:'bar'}]});
         expect((new DependancyInjectionContainer({foo:'bar'})).get).isAFunction({withName:'get'});
+        expect((new DependancyInjectionContainer({foo:'bar'})).set).isAFunction({withName:'set'});
     });
     
     it("should require constructor to take one non-empty simple Object argument", function() {
@@ -48,9 +49,9 @@ describe("DependancyInjectionContainer", function() {
     it("should create objects whose get() method that supports cyclic dependancies", function() {
         var testContainer = new DependancyInjectionContainer({
             Greeting: greetingFunc,
-            Greeter: (function (Greeting) {return {
+            Greeter: (function (getGreeting) {return {
                 toString: function () {return 'Fred';},
-                getGreeting: function () {return Greeting();}
+                getGreeting: function () {return getGreeting();}
             };}),
             Guest: 'Wilma' ,
             Location: 'my cave'
@@ -61,18 +62,25 @@ describe("DependancyInjectionContainer", function() {
     it("should create objects whose set() method replaces values set at creation time", function() {
         var testContainer = new DependancyInjectionContainer({
             Greeting: greetingFunc,
-            Greeter: (function (Greeting) {return {
+            Greeter: (function (getGreeting) {return {
                 toString: function () {return 'Fred';},
-                getGreeting: function () {return Greeting();}
+                getGreeting: function () {return getGreeting();}
             };}),
             Guest: 'Wilma' ,
             Location: 'my cave'
         });
         var greeterBefore = testContainer.get('Greeter');
         expect(greeterBefore.getGreeting()).toEqual('Hello Wilma. I am Fred. Welcome to my cave.');
-        testContainer.set('Guest', 'Betty');
+        expect(testContainer.set('Guest', 'Betty')).toBeUndefined();
         expect(testContainer.get('Guest')).toEqual('Betty');
         expect(greeterBefore === testContainer.get('Greeter')).toBeTruthy();
         expect(testContainer.get('Greeter').getGreeting()).toEqual('Hello Betty. I am Fred. Welcome to my cave.');
+    });
+    
+    it("should create have a class method wrap() that returns a function returning it's argument", function() {
+        var testObj = {desc:'mine'};
+        expect(DependancyInjectionContainer.wrap).isAFunction({withName:'wrap'});
+        expect(DependancyInjectionContainer.wrap(testObj)).isAFunction();
+        expect((DependancyInjectionContainer.wrap(testObj))()).toEqual(testObj);
     });
 });
