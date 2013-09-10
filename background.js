@@ -41,10 +41,12 @@ var simple_buy_below=(localStorage.simple_sell_above || 0);
 var simple_sell_above=(localStorage.simple_sell_above || 0);
 */
 
-var tobliGoxBot = {};
-
-tobliGoxBot.TobliDate = getTobliDateConstructor();
-tobliGoxBot.mtGoxApi = getMtGoxApi({version: (useAPIv2?2:1)});
+var tobliGoxBot = new DependancyInjectionContainer({
+	TobliDate: getTobliDateConstructor,
+	NativeDate: DependancyInjectionContainer.wrap(Date),
+	MtGoxApi: getMtGoxApi,
+	MtGoxApiVersion: (useAPIv2?2:1)
+});
 
 var BTC = Number.NaN;
 var fiat = Number.NaN;
@@ -92,7 +94,7 @@ function updateInfo() {
 		return;
 	}
 
-	var path = tobliGoxBot.mtGoxApi.getAccountBalancePath({currency:currency});
+	var path = tobliGoxBot.get('MtGoxApi').getAccountBalancePath({currency:currency});
 
 	mtgoxpost(path, [],
 		function(e) {
@@ -405,7 +407,7 @@ function refreshEMA(reset) {
 
 var origLog = console.log;
 var log = console.log = function() {
-		var t=new (tobliGoxBot.TobliDate)();
+		var t=new (tobliGoxBot.get('TobliDate'))();
 		var file="";
 		var line="";
 		try {

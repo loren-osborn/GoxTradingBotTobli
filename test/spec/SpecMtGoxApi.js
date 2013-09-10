@@ -3,8 +3,8 @@ describe("getMtGoxApi", function() {
     it("should be a function", function() {
         expect(getMtGoxApi).isAFunction({withName:'getMtGoxApi'});
     });
-    var mgApiV1 = getMtGoxApi({version: 1});
-    var mgApiV2 = getMtGoxApi({version: 2});
+    var mgApiV1 = getMtGoxApi(DependancyInjectionContainer.wrap(1));
+    var mgApiV2 = getMtGoxApi(DependancyInjectionContainer.wrap(2));
     it("should return v1 API object", function() {
         expect(mgApiV1).toBeDefined();
         expect(mgApiV1).not.toBeNull();
@@ -16,8 +16,8 @@ describe("getMtGoxApi", function() {
         expect(mgApiV2.constructor).toBeAWellBehavedConstructor({withName:'MtGoxApiV2', returningObjectOfClass: mgApiV2.constructor});
     });
     it("should require valid params", function() {
-        expect(getMtGoxApi).toThrow("parameter required");
-        expect((function () {getMtGoxApi({version: 0.5});})).toThrow("Unrecognized API version: 0.5");
+        expect(getMtGoxApi).toThrow("Unrecognized API version: [undefined]");
+        expect((function () {getMtGoxApi(DependancyInjectionContainer.wrap(0.5));})).toThrow("Unrecognized API version: 0.5");
     });
     it("should return API object supporting getAccountBalancePath() method", function() {
         expect(mgApiV1.getAccountBalancePath).isAFunction({withName:'getAccountBalancePath'});

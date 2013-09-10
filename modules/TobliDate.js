@@ -1,5 +1,4 @@
-function getTobliDateConstructor(dateConstructor) {
-    dateConstructor = dateConstructor || Date;
+function getTobliDateConstructor(getNativeDate) {
     var weekdays = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
     var TobliDate;
     var zeroPadTwoDigits = function zeroPadTwoDigits(d) {
@@ -99,7 +98,7 @@ function getTobliDateConstructor(dateConstructor) {
         return weekdays[this.getDay()];
     });
     TobliDate = (function TobliDate() {
-        var result = createWithVariadicArgs(dateConstructor, arguments);
+        var result = createWithVariadicArgs(getNativeDate(), arguments);
         var methodName;
         for (methodName in tobliDateMethods) {
             result[methodName] = tobliDateMethods[methodName];

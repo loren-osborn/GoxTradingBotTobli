@@ -3,11 +3,9 @@ getMtGoxApi = (function () {
 	MtGoxApiV1.prototype.getAccountBalancePath = function getAccountBalancePath() { return 'info.php'; };
 	var MtGoxApiV2 = (function MtGoxApiV2() {});
 	MtGoxApiV2.prototype.getAccountBalancePath = function getAccountBalancePath(params) { return ('BTC' + (params.currency) + '/money/info'); };
-	return (function getMtGoxApi(params) {
-		if (!params) {
-			throw("parameter required");
-		}
-		switch (params.version) {
+	return (function getMtGoxApi(getMtGoxApiVersion) {
+		getMtGoxApiVersion = getMtGoxApiVersion || DependancyInjectionContainer.wrap('[undefined]');
+		switch (getMtGoxApiVersion()) {
 			case 1:
 				return new MtGoxApiV1();
 				break;
@@ -15,7 +13,7 @@ getMtGoxApi = (function () {
 				return new MtGoxApiV2();
 				break;
 			default:
-				throw ("Unrecognized API version: " + params.version);
+				throw ("Unrecognized API version: " + getMtGoxApiVersion());
 				break;
 		}
 	});
