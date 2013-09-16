@@ -27,4 +27,10 @@ describe("getMtGoxApi", function() {
         expect(mgApiV2.getAccountBalancePath({currency:'USD'})).toEqual("BTCUSD/money/info");
         expect(mgApiV2.getAccountBalancePath({currency:'Simolions'})).toEqual("BTCSimolions/money/info");
     });
+    it("should return API object supporting getAccountBalanceResponseData() method", function() {
+        expect(mgApiV1.getAccountBalanceResponseData).isAFunction({withName:'getAccountBalanceResponseData'});
+        expect(mgApiV1.getAccountBalanceResponseData('"My Dog Has Fleas"')).toEqual("My Dog Has Fleas");
+        expect(mgApiV2.getAccountBalanceResponseData).isAFunction({withName:'getAccountBalanceResponseData'});
+        expect(mgApiV2.getAccountBalanceResponseData('{"data":"My Dog Has Fleas"}')).toEqual("My Dog Has Fleas");
+    });
 });

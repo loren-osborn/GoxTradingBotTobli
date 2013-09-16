@@ -105,10 +105,7 @@ function updateInfo() {
 		function(d) {
 			//console.log("info.php", d.currentTarget.responseText)
 			try {
-				var rr = JSON.parse(d.currentTarget.responseText);
-				if (useAPIv2)
-					rr=rr.data;
-
+				var rr = tobliGoxBot.get('MtGoxApi').getAccountBalancePath(d.currentTarget.responseText);
 				if (typeof(rr.Wallets)=="undefined") {
 					log("Error fetching user info:"+ rr.error);
 					chrome.browserAction.setTitle({title: "Error getting balance. MtGox problem?"});
