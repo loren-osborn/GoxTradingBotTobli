@@ -134,7 +134,7 @@ function hmac_512(message, secret) {
 function mtgoxpost(path, params, ef, df) {
 	var req = new XMLHttpRequest();
 	var t=(new Date()).getTime();
-	req.open("POST", (useAPIv2 ? MtGoxAPI2BaseURL : "https://mtgox.com/api/0/")+path+"?t="+t, true); // Extra cache-busting...
+	req.open("POST", tobliGoxBot.get('MtGoxApi').getUncachablePostUrl(path), true);
 	req.onerror = ef;
 	req.onload = df;
 	var data = "nonce="+(t*1000);

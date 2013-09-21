@@ -67,8 +67,10 @@ var DependancyInjectionContainer = (function () {
 			var i;
 			specObject[key] = value;
 			valueCache[key] = undefined;
-			for (i = 0; i < expirationMap[key].length; i++) {
-				valueCache[expirationMap[key][i]] = undefined;
+			if (expirationMap[key] !== undefined) {
+				for (i = 0; i < expirationMap[key].length; i++) {
+					valueCache[expirationMap[key][i]] = undefined;
+				}
 			}
 		});
 	});
