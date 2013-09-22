@@ -126,12 +126,6 @@ function updateInfo() {
 	)
 }
 
-function hmac_512(message, secret) {
-    var shaObj = new jsSHA(message, "TEXT");
-    var hmac = shaObj.getHMAC(secret, "B64", "SHA-512", "B64");
-    return hmac;
-}
-
 function mtgoxpost(path, params, ef, df) {
 	var req = new XMLHttpRequest();
 	var t=(new Date()).getTime();
@@ -142,7 +136,7 @@ function mtgoxpost(path, params, ef, df) {
 	for (var i in params)
 		data+="&"+params[i];
 	data = encodeURI(data);
-	var	hmac=hmac_512((useAPIv2?path+'\0'+data:data),ApiSec);
+	var hmac = tobliGoxBot.get('MtGoxApi').getMessageHmac(path, data, ApiSec);
 	req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 	req.setRequestHeader("Rest-Key", ApiKey);
 	req.setRequestHeader("Rest-Sign", hmac);
