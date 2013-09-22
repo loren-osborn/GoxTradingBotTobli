@@ -1,29 +1,42 @@
 describe("getMtGoxApi", function() {
-    var getFakeDateConstructor = function (getTestTimeStamp) { 
-        return (function FakeDateConstructor() {
-            expect(arguments.length).toEqual(0);
-            return {getTime: (function () { return getTestTimeStamp();})};
-        });
-    };
-    
-    var getFakeMtGoxAPI2BaseURL = function (getTestMtGoxAPI2BaseURL) { return getTestMtGoxAPI2BaseURL(); };
-    it("should be a function", function() {
-        expect(getMtGoxApi).isAFunction({withName:'getMtGoxApi'});
+    var testTimeStamp = 946684800000;
+    var FakeDateConstructor = (function FakeDateConstructor() {
+        expect(arguments.length).toEqual(0);
+        return {getTime: (function () { return testTimeStamp;})};
     });
-
+    var testHmacMessage = undefined;
+    var testHmacKey = undefined;
+    var testHmacHash = undefined;
+    var FakeJsSha = (function FakeJsSha(srcString, inputFormat, charSize) {
+        expect(srcString).toEqual(testHmacMessage);
+        expect(inputFormat).toEqual('TEXT');
+        expect(charSize).toBeUndefined();
+        return {getHMAC: (function getHMAC(key, inputFormat, variant, outputFormat, outputFormatOpts) {
+            expect(key).toEqual(testHmacKey);
+            expect(inputFormat).toEqual('B64');
+            expect(variant).toEqual('SHA-512');
+            expect(outputFormat).toEqual('B64');
+            expect(outputFormatOpts).toBeUndefined();
+            return testHmacHash;
+        })};
+    });
     var mgApiV1Container = new DependancyInjectionContainer({
-        TobliDate: getFakeDateConstructor,
+        TobliDate: DependancyInjectionContainer.wrap(FakeDateConstructor),
         MtGoxApi: getMtGoxApi,
         MtGoxApiVersion: 1,
-        TestTimeStamp: 946684800000,
-        MtGoxAPI2BaseURL: 'https://fake.mtgox.hostname/fake/api/path/'
+        MtGoxAPI2BaseURL: 'https://fake.mtgox.hostname/fake/api/path/',
+        JsSha: DependancyInjectionContainer.wrap(FakeJsSha)
     });
     var mgApiV2Container = new DependancyInjectionContainer({
-        TobliDate: getFakeDateConstructor,
+        TobliDate: DependancyInjectionContainer.wrap(FakeDateConstructor),
         MtGoxApi: getMtGoxApi,
         MtGoxApiVersion: 2,
-        TestTimeStamp: 946684800000,
-        MtGoxAPI2BaseURL: 'https://fake.mtgox.hostname/fake/api/path/'
+        MtGoxAPI2BaseURL: 'https://fake.mtgox.hostname/fake/api/path/',
+        JsSha: DependancyInjectionContainer.wrap(FakeJsSha)
+    });
+    
+    it("should be a function", function() {
+        expect(getMtGoxApi).isAFunction({withName:'getMtGoxApi'});
     });
     it("should return v1 API object", function() {
         expect(mgApiV1Container.get('MtGoxApi')).toBeDefined();
@@ -65,10 +78,32 @@ describe("getMtGoxApi", function() {
                 for (k = 0; k < testDateStamps.length; k++ ) {
                     mgApiV1Container.set('MtGoxAPI2BaseURL', testBaseUrls[j]);
                     mgApiV2Container.set('MtGoxAPI2BaseURL', testBaseUrls[j]);
-                    mgApiV1Container.set('TestTimeStamp', testDateStamps[k]);
-                    mgApiV2Container.set('TestTimeStamp', testDateStamps[k]);
+                    testTimeStamp = testDateStamps[k];
                     expect(mgApiV1Container.get('MtGoxApi').getUncachablePostUrl(testPaths[i])).toEqual('https://mtgox.com/api/0/' + testPaths[i] + '?t=' + testDateStamps[k].toString());
                     expect(mgApiV2Container.get('MtGoxApi').getUncachablePostUrl(testPaths[i])).toEqual(testBaseUrls[j] + testPaths[i] + '?t=' + testDateStamps[k].toString());
+                }
+            }
+        }
+    });
+    it("should return API object supporting computeMessageHmac() method", function() {
+        var testPaths = ['foo', 'bar'];
+        var testData = ['BIG DATA', 'little data'];
+        var testSecrets = ['STRONG KEY', 'weak key'];
+        var testHashes = ['hash1', 'hash2'];
+        var i,j,k,m;
+        expect(mgApiV1Container.get('MtGoxApi').computeMessageHmac).isAFunction({withName:'computeMessageHmac'});
+        expect(mgApiV2Container.get('MtGoxApi').computeMessageHmac).isAFunction({withName:'computeMessageHmac'});
+        for (i = 0; i < testPaths.length; i++ ) {
+            for (j = 0; j < testData.length; j++ ) {
+                for (k = 0; k < testSecrets.length; k++ ) {
+                    for (m = 0; m < testHashes.length; m++ ) {
+                        testHmacMessage = testData[j];
+                        testHmacKey = testSecrets[k];
+                        testHmacHash = testHashes[m];
+                        expect(mgApiV1Container.get('MtGoxApi').computeMessageHmac(testPaths[i], testData[j], testSecrets[k])).toEqual(testHashes[m]);
+                        testHmacMessage = testPaths[i] + '\0' + testData[j];
+                        expect(mgApiV2Container.get('MtGoxApi').computeMessageHmac(testPaths[i], testData[j], testSecrets[k])).toEqual(testHashes[m]);
+                    }
                 }
             }
         }
