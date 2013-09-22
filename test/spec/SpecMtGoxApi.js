@@ -60,11 +60,11 @@ describe("getMtGoxApi", function() {
         expect(mgApiV2Container.get('MtGoxApi').getAccountBalancePath({currency:'USD'})).toEqual("BTCUSD/money/info");
         expect(mgApiV2Container.get('MtGoxApi').getAccountBalancePath({currency:'Simolions'})).toEqual("BTCSimolions/money/info");
     });
-    it("should return API object supporting getAccountBalanceResponseData() method", function() {
-        expect(mgApiV1Container.get('MtGoxApi').getAccountBalanceResponseData).isAFunction({withName:'getAccountBalanceResponseData'});
-        expect(mgApiV1Container.get('MtGoxApi').getAccountBalanceResponseData('"My Dog Has Fleas"')).toEqual("My Dog Has Fleas");
-        expect(mgApiV2Container.get('MtGoxApi').getAccountBalanceResponseData).isAFunction({withName:'getAccountBalanceResponseData'});
-        expect(mgApiV2Container.get('MtGoxApi').getAccountBalanceResponseData('{"data":"My Dog Has Fleas"}')).toEqual("My Dog Has Fleas");
+    it("should return API object supporting getResponseData() method", function() {
+        expect(mgApiV1Container.get('MtGoxApi').getResponseData).isAFunction({withName:'getResponseData'});
+        expect(mgApiV1Container.get('MtGoxApi').getResponseData('"My Dog Has Fleas"')).toEqual("My Dog Has Fleas");
+        expect(mgApiV2Container.get('MtGoxApi').getResponseData).isAFunction({withName:'getResponseData'});
+        expect(mgApiV2Container.get('MtGoxApi').getResponseData('{"data":"My Dog Has Fleas"}')).toEqual("My Dog Has Fleas");
     });
     it("should return API object supporting getUncachablePostUrl() method", function() {
         var testPaths = ['info.php', 'BTCSimolions/money/info'];
@@ -107,5 +107,58 @@ describe("getMtGoxApi", function() {
                 }
             }
         }
+    });
+    it("should return API object supporting addBuyOrder() method", function() {
+        var testCurrencies = ['USD', 'Simoleons'];
+        var testAmounts = [314, 42];
+        var testErrorCallback = undefined;
+        var testSuccessCallback = undefined;
+        var expectedPath = undefined;
+        var expectedData = undefined;
+        var expectedCallCount = 0;
+        var testMtGoxPostFunc = (function (a, b, c, d) {
+            expect(arguments.length).toEqual(4);
+            expect(expectedCallCount).toBeGreaterThan(0);
+            expectedCallCount--;
+            expect(a).toEqual(expectedPath);
+            expect(b).toEqual(expectedData);
+            expect(c).toEqual(testErrorCallback);
+            expect(d).toEqual(testSuccessCallback);
+            expect(testErrorCallback).not.toHaveBeenCalled();
+            expect(testSuccessCallback).not.toHaveBeenCalled();
+            c();
+            expect(testErrorCallback).toHaveBeenCalled();
+            expect(testSuccessCallback).not.toHaveBeenCalled();
+            d();
+            expect(testErrorCallback).toHaveBeenCalled();
+            expect(testSuccessCallback).toHaveBeenCalled();
+        });
+        var i,j;
+        expect(mgApiV1Container.get('MtGoxApi').addBuyOrder).isAFunction({withName:'addBuyOrder'});
+        expect(mgApiV2Container.get('MtGoxApi').addBuyOrder).isAFunction({withName:'addBuyOrder'});
+        for (i = 0; i < testCurrencies.length; i++ ) {
+            for (j = 0; j < testAmounts.length; j++ ) {
+                testErrorCallback = jasmine.createSpy('testErrorCallback');
+                testSuccessCallback = jasmine.createSpy('testSuccessCallback');
+                expectedPath = 'buyBTC.php';
+                expectedData = ['Currency='+testCurrencies[i],'amount='+testAmounts[j]];
+                expectedCallCount = 1;
+                mgApiV1Container.get('MtGoxApi').addBuyOrder(testMtGoxPostFunc, testCurrencies[i], testAmounts[j], testErrorCallback, testSuccessCallback);
+                expect(expectedCallCount).toEqual(0);
+                testErrorCallback = jasmine.createSpy('testErrorCallback');
+                testSuccessCallback = jasmine.createSpy('testSuccessCallback');
+                expectedPath = 'BTC'+testCurrencies[i]+'/money/order/add';
+                expectedData = ['type=bid','amount_int='+(testAmounts[j]*100000000).toString()];
+                expectedCallCount = 1;
+                mgApiV2Container.get('MtGoxApi').addBuyOrder(testMtGoxPostFunc, testCurrencies[i], testAmounts[j], testErrorCallback, testSuccessCallback);
+                expect(expectedCallCount).toEqual(0);
+            }
+        }
+    });
+    it("should return API object supporting toString() method", function() {
+        expect(mgApiV1Container.get('MtGoxApi').toString).isAFunction({withName:'toString'});
+        expect(mgApiV1Container.get('MtGoxApi').toString()).toEqual('MtGox API v0');
+        expect(mgApiV2Container.get('MtGoxApi').toString).isAFunction({withName:'toString'});
+        expect(mgApiV2Container.get('MtGoxApi').toString()).toEqual('MtGox API v2');
     });
 });

@@ -9,20 +9,28 @@ getMtGoxApi = (function () {
 	});
 	var MtGoxApiV1 = (function MtGoxApiV1() {});
 	MtGoxApiV1.prototype.getAccountBalancePath = function getAccountBalancePath() { return 'info.php'; };
-	MtGoxApiV1.prototype.getAccountBalanceResponseData = function getAccountBalanceResponseData(input) { return JSON.parse(input); };
+	MtGoxApiV1.prototype.getResponseData = function getResponseData(input) { return JSON.parse(input); };
 	MtGoxApiV1.prototype.getUncachablePostUrl = function getUncachablePostUrl(path) {
 		var curTime = new (localGetTobliDate())();
 		return ('https://mtgox.com/api/0/' + path + '?t=' + curTime.getTime()); // Extra cache-busting...
 	};
 	MtGoxApiV1.prototype.computeMessageHmac = (function computeMessageHmac(path, data, key) { return computeHmac512(data, key); });
+	MtGoxApiV1.prototype.addBuyOrder = (function addBuyOrder(fn, currency, amount, errorCallback, successCallback) {
+		fn('buyBTC.php', ['Currency='+currency,'amount='+amount], errorCallback, successCallback);
+	});
+	MtGoxApiV1.prototype.toString = (function toString() { return 'MtGox API v0'; });
 	var MtGoxApiV2 = (function MtGoxApiV2() {});
 	MtGoxApiV2.prototype.getAccountBalancePath = function getAccountBalancePath(params) { return ('BTC' + (params.currency) + '/money/info'); };
-	MtGoxApiV2.prototype.getAccountBalanceResponseData = function getAccountBalanceResponseData(input) { return JSON.parse(input).data; };
+	MtGoxApiV2.prototype.getResponseData = function getResponseData(input) { return JSON.parse(input).data; };
 	MtGoxApiV2.prototype.getUncachablePostUrl = function getUncachablePostUrl(path) {
 		var curTime = new (localGetTobliDate())();
 		return (localGetMtGoxAPI2BaseURL() + path + '?t=' + curTime.getTime()); // Extra cache-busting...
 	};
 	MtGoxApiV2.prototype.computeMessageHmac = (function computeMessageHmac(path, data, key) { return computeHmac512(path + '\0' + data, key); });
+	MtGoxApiV2.prototype.addBuyOrder = (function addBuyOrder(fn, currency, amount, errorCallback, successCallback) {
+		fn('BTC'+currency+'/money/order/add', [ 'type=bid', 'amount_int=' + amount + '00000000' ], errorCallback, successCallback);
+	});
+	MtGoxApiV2.prototype.toString = (function toString() { return 'MtGox API v2'; });
 	return (function getMtGoxApi(getMtGoxApiVersion, getMtGoxAPI2BaseURL, getTobliDate, getJsSha) {
 		localGetMtGoxAPI2BaseURL = getMtGoxAPI2BaseURL;
 		localGetTobliDate = getTobliDate;
