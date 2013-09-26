@@ -100,6 +100,9 @@ function getTobliDateConstructor(getNativeDate) {
     tobliDateMethods.getUnixTime = (function getUnixTime() { return Math.floor(this.getTime()/1000);});
     tobliDateMethods.getMicroTime = (function getMicroTime() { return this.getTime() * 1000; });
     tobliDateMethods.getMinuteId = (function getMinuteId() { return Math.floor(this.getTime()/(60*1000)); });
+    tobliDateMethods.setUnixTime = (function setUnixTime(unixTime) { this.setTime(unixTime*1000); return this.getUnixTime();});
+    tobliDateMethods.setMicroTime = (function setMicroTime(microTime) {this.setTime(microTime/1000); return this.getMicroTime();});
+    tobliDateMethods.setMinuteId = (function setMinuteId() {});
     TobliDate = (function TobliDate() {
         var result = createWithVariadicArgs(getNativeDate(), arguments);
         var methodName;

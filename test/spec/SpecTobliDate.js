@@ -59,7 +59,10 @@ describe("getTobliDateConstructor", function() {
             'getWeekdayName',
             'getUnixTime',
             'getMicroTime',
-            'getMinuteId'
+            'getMinuteId',
+            'setUnixTime',
+            'setMicroTime',
+            'setMinuteId'
         ];
         var i;
         var newObj = new (getTobliDateConstructor(DependancyInjectionContainer.wrap(Date)))();
@@ -339,11 +342,11 @@ describe("getTobliDateConstructor", function() {
         var TobliDate = getTobliDateConstructor(DependancyInjectionContainer.wrap(Date));
         var testDate = new TobliDate(946684800000);
         expect(testDate.getUnixTime()).toEqual(946684800);
-        var testDate = new TobliDate(946684800333);
+        testDate = new TobliDate(946684800333);
         expect(testDate.getUnixTime()).toEqual(946684800);
-        var testDate = new TobliDate(946684800999);
+        testDate = new TobliDate(946684800999);
         expect(testDate.getUnixTime()).toEqual(946684800);
-        var testDate = new TobliDate(946684801000);
+        testDate = new TobliDate(946684801000);
         expect(testDate.getUnixTime()).toEqual(946684801);
     });
     
@@ -351,11 +354,72 @@ describe("getTobliDateConstructor", function() {
         var TobliDate = getTobliDateConstructor(DependancyInjectionContainer.wrap(Date));
         var testDate = new TobliDate(946684800000);
         expect(testDate.getMicroTime()).toEqual(946684800000000);
-        var testDate = new TobliDate(946684800333);
+        testDate = new TobliDate(946684800333);
         expect(testDate.getMicroTime()).toEqual(946684800333000);
     });
     
     it("returns a constructor with working getMinuteId() method", function() {
+        var TobliDate = getTobliDateConstructor(DependancyInjectionContainer.wrap(Date));
+        var testDate = new TobliDate(946684800000);
+        expect(testDate.getMinuteId()).toEqual(15778080);
+        testDate = new TobliDate(946684800333);
+        expect(testDate.getMinuteId()).toEqual(15778080); 
+        testDate = new TobliDate(946684800999);
+        expect(testDate.getMinuteId()).toEqual(15778080);
+        testDate = new TobliDate(946684801000);
+        expect(testDate.getMinuteId()).toEqual(15778080);
+        testDate = new TobliDate(946684871000);
+        expect(testDate.getMinuteId()).toEqual(15778081);
+        testDate = new TobliDate((15778081*60000) + 1000);
+        expect(testDate.getMinuteId()).toEqual(15778081);
+        testDate = new TobliDate((15778081*60000) + 59000);
+        expect(testDate.getMinuteId()).toEqual(15778081);
+        testDate = new TobliDate((15778081*60000) + 60000);
+        expect(testDate.getMinuteId()).toEqual(15778082);
+    });
+    
+    it("returns a constructor with working setUnixTime() method", function() {
+        var TobliDate = getTobliDateConstructor(DependancyInjectionContainer.wrap(Date));
+        var testDate = new TobliDate();
+        var retVal = testDate.setUnixTime(946684800);
+        expect(testDate.getTime()).toEqual(946684800000);
+        expect(Object.prototype.toString.apply(retVal)).toEqual(Object.prototype.toString.apply(testDate.setTime(946684800000)));
+        expect(Object.prototype.toString.apply(testDate.setTime(946684800000))).toEqual('[object Number]');
+        expect(retVal).toEqual(testDate.setTime(946684800000)/1000);
+        expect(retVal).toEqual(946684800);
+        var retVal = testDate.setUnixTime(946684800.000999);
+        expect(testDate.getTime()).toEqual(946684800000);
+        expect(Object.prototype.toString.apply(retVal)).toEqual(Object.prototype.toString.apply(testDate.setTime(946684800000)));
+        expect(Object.prototype.toString.apply(testDate.setTime(946684800000))).toEqual('[object Number]');
+        expect(retVal).toEqual(testDate.setTime(946684800000)/1000);
+        expect(retVal).toEqual(946684800);
+        expect(testDate.setUnixTime(946684800.333)).toEqual(946684800);
+        expect(testDate.getTime()).toEqual(946684800333);
+        expect(testDate.setUnixTime(946684800.999)).toEqual(946684800);
+        expect(testDate.getTime()).toEqual(946684800999);
+        expect(testDate.setUnixTime(946684801)).toEqual(946684801);
+        expect(testDate.getTime()).toEqual(946684801000);
+    });
+
+    it("returns a constructor with working setMicroTime() method", function() {
+        var TobliDate = getTobliDateConstructor(DependancyInjectionContainer.wrap(Date));
+        var testDate = new TobliDate();
+        var retVal = testDate.setMicroTime(946684800000000);
+        expect(testDate.getTime()).toEqual(946684800000);
+        expect(Object.prototype.toString.apply(retVal)).toEqual(Object.prototype.toString.apply(testDate.setTime(946684800000)));
+        expect(Object.prototype.toString.apply(testDate.setTime(946684800000))).toEqual('[object Number]');
+        expect(retVal).toEqual(testDate.setTime(946684800000)*1000);
+        expect(retVal).toEqual(946684800000000);
+        expect(testDate.setMicroTime(946684800000333)).toEqual(946684800000000);
+        expect(testDate.getTime()).toEqual(946684800000);
+        expect(testDate.setMicroTime(946684800000999)).toEqual(946684800000000);
+        expect(testDate.getTime()).toEqual(946684800000);
+        expect(testDate.setMicroTime(946684800001000)).toEqual(946684800001000);
+        expect(testDate.getTime()).toEqual(946684800001);
+    });
+
+	/*
+    it("returns a constructor with working setMinuteId() method", function() {
         var TobliDate = getTobliDateConstructor(DependancyInjectionContainer.wrap(Date));
         var testDate = new TobliDate(946684800000);
         expect(testDate.getMinuteId()).toEqual(15778080);
@@ -374,4 +438,5 @@ describe("getTobliDateConstructor", function() {
         var testDate = new TobliDate((15778081*60000) + 60000);
         expect(testDate.getMinuteId()).toEqual(15778082);
     });
+    */
 });
