@@ -15,9 +15,15 @@ getMtGoxApi = (function () {
 		return ('https://mtgox.com/api/0/' + path + '?t=' + curTime.getTime()); // Extra cache-busting...
 	};
 	MtGoxApiV1.prototype.computeMessageHmac = (function computeMessageHmac(path, data, key) { return computeHmac512(data, key); });
-	MtGoxApiV1.prototype.addBuyOrder = (function addBuyOrder(fn, currency, amount, errorCallback, successCallback) {
-		fn('buyBTC.php', ['Currency='+currency,'amount='+amount], errorCallback, successCallback);
-	});
+	var getV1AddOrderMethod = (function (orderType) { return (function addOrder(fn, currency, amount, errorCallback, successCallback) {
+		fn(orderType + 'BTC.php', ['Currency='+currency,'amount='+amount], errorCallback, successCallback);
+	}); });
+	MtGoxApiV1.prototype.addBuyOrder = getV1AddOrderMethod('buy');
+	MtGoxApiV1.prototype.addSellOrder = getV1AddOrderMethod('sell');
+	MtGoxApiV1.prototype.getRequestSamplesUrl = function getRequestSamplesUrl(currency, since) {
+		var curTime = new (localGetTobliDate())();
+		return 'https://data.mtgox.com/api/0/data/getTrades.php?Currency=' + currency + '&since=' + (since.getTime() * 1000) + '&nonce=' + (curTime.getTime() * 1000);
+	};
 	MtGoxApiV1.prototype.toString = (function toString() { return 'MtGox API v0'; });
 	var MtGoxApiV2 = (function MtGoxApiV2() {});
 	MtGoxApiV2.prototype.getAccountBalancePath = function getAccountBalancePath(params) { return ('BTC' + (params.currency) + '/money/info'); };
@@ -27,9 +33,15 @@ getMtGoxApi = (function () {
 		return (localGetMtGoxAPI2BaseURL() + path + '?t=' + curTime.getTime()); // Extra cache-busting...
 	};
 	MtGoxApiV2.prototype.computeMessageHmac = (function computeMessageHmac(path, data, key) { return computeHmac512(path + '\0' + data, key); });
-	MtGoxApiV2.prototype.addBuyOrder = (function addBuyOrder(fn, currency, amount, errorCallback, successCallback) {
-		fn('BTC'+currency+'/money/order/add', [ 'type=bid', 'amount_int=' + amount + '00000000' ], errorCallback, successCallback);
-	});
+	var getV2AddOrderMethod = (function (orderType) { return (function addOrder(fn, currency, amount, errorCallback, successCallback) {
+		fn('BTC'+currency+'/money/order/add', [ 'type=' + orderType, 'amount_int=' + Math.round(amount*100000000).toString() ], errorCallback, successCallback);
+	}); });
+	MtGoxApiV2.prototype.addBuyOrder = getV2AddOrderMethod('bid');
+	MtGoxApiV2.prototype.addSellOrder = getV2AddOrderMethod('ask');
+	MtGoxApiV2.prototype.getRequestSamplesUrl = function getRequestSamplesUrl(currency, since) {
+		var curTime = new (localGetTobliDate())();
+		return localGetMtGoxAPI2BaseURL() + 'BTC' + currency + '/money/trades/fetch?since=' + (since.getTime() * 1000) + '&nonce=' + (curTime.getTime() * 1000);
+	};
 	MtGoxApiV2.prototype.toString = (function toString() { return 'MtGox API v2'; });
 	return (function getMtGoxApi(getMtGoxApiVersion, getMtGoxAPI2BaseURL, getTobliDate, getJsSha) {
 		localGetMtGoxAPI2BaseURL = getMtGoxAPI2BaseURL;

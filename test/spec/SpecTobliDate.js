@@ -56,7 +56,10 @@ describe("getTobliDateConstructor", function() {
             'FIXME_formatDayMonthAndTimeWithImplicitTodayDate',
             'FIXME_formatUtcDateWithLocalTimeWithSeconds',
             'isSameDate',
-            'getWeekdayName'
+            'getWeekdayName',
+            'getUnixTime',
+            'getMicroTime',
+            'getMinuteId'
         ];
         var i;
         var newObj = new (getTobliDateConstructor(DependancyInjectionContainer.wrap(Date)))();
@@ -330,5 +333,45 @@ describe("getTobliDateConstructor", function() {
             testDate = new TobliDate('Jan ' + i + ', 2000 23:59:59');
             expect(testDate.getWeekdayName()).toEqual(expectedDayNames[i]);
         }
+    });
+    
+    it("returns a constructor with working getUnixTime() method", function() {
+        var TobliDate = getTobliDateConstructor(DependancyInjectionContainer.wrap(Date));
+        var testDate = new TobliDate(946684800000);
+        expect(testDate.getUnixTime()).toEqual(946684800);
+        var testDate = new TobliDate(946684800333);
+        expect(testDate.getUnixTime()).toEqual(946684800);
+        var testDate = new TobliDate(946684800999);
+        expect(testDate.getUnixTime()).toEqual(946684800);
+        var testDate = new TobliDate(946684801000);
+        expect(testDate.getUnixTime()).toEqual(946684801);
+    });
+    
+    it("returns a constructor with working getMicroTime() method", function() {
+        var TobliDate = getTobliDateConstructor(DependancyInjectionContainer.wrap(Date));
+        var testDate = new TobliDate(946684800000);
+        expect(testDate.getMicroTime()).toEqual(946684800000000);
+        var testDate = new TobliDate(946684800333);
+        expect(testDate.getMicroTime()).toEqual(946684800333000);
+    });
+    
+    it("returns a constructor with working getMinuteId() method", function() {
+        var TobliDate = getTobliDateConstructor(DependancyInjectionContainer.wrap(Date));
+        var testDate = new TobliDate(946684800000);
+        expect(testDate.getMinuteId()).toEqual(15778080);
+        var testDate = new TobliDate(946684800333);
+        expect(testDate.getMinuteId()).toEqual(15778080); 
+        var testDate = new TobliDate(946684800999);
+        expect(testDate.getMinuteId()).toEqual(15778080);
+        var testDate = new TobliDate(946684801000);
+        expect(testDate.getMinuteId()).toEqual(15778080);
+        var testDate = new TobliDate(946684871000);
+        expect(testDate.getMinuteId()).toEqual(15778081);
+        var testDate = new TobliDate((15778081*60000) + 1000);
+        expect(testDate.getMinuteId()).toEqual(15778081);
+        var testDate = new TobliDate((15778081*60000) + 59000);
+        expect(testDate.getMinuteId()).toEqual(15778081);
+        var testDate = new TobliDate((15778081*60000) + 60000);
+        expect(testDate.getMinuteId()).toEqual(15778082);
     });
 });

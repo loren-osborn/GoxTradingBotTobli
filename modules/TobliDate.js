@@ -97,6 +97,9 @@ function getTobliDateConstructor(getNativeDate) {
     tobliDateMethods.getWeekdayName = (function getWeekdayName() {
         return weekdays[this.getDay()];
     });
+    tobliDateMethods.getUnixTime = (function getUnixTime() { return Math.floor(this.getTime()/1000);});
+    tobliDateMethods.getMicroTime = (function getMicroTime() { return this.getTime() * 1000; });
+    tobliDateMethods.getMinuteId = (function getMinuteId() { return Math.floor(this.getTime()/(60*1000)); });
     TobliDate = (function TobliDate() {
         var result = createWithVariadicArgs(getNativeDate(), arguments);
         var methodName;

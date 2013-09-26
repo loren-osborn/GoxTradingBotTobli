@@ -20,6 +20,25 @@ describe("getMtGoxApi", function() {
             return testHmacHash;
         })};
     });
+    var testMtGoxPostFunc = {};
+    testMtGoxPostFunc = (function testMtGoxPostFunc(a, b, c, d) {
+        expect(arguments.length).toEqual(4);
+        expect(testMtGoxPostFunc.expectedCallCount).toBeGreaterThan(0);
+        testMtGoxPostFunc.expectedCallCount--;
+        expect(a).toEqual(testMtGoxPostFunc.expectedPath);
+        expect(b).toEqual(testMtGoxPostFunc.expectedData);
+        expect(c).toEqual(testMtGoxPostFunc.testErrorCallback);
+        expect(d).toEqual(testMtGoxPostFunc.testSuccessCallback);
+        expect(testMtGoxPostFunc.testErrorCallback).not.toHaveBeenCalled();
+        expect(testMtGoxPostFunc.testSuccessCallback).not.toHaveBeenCalled();
+        c();
+        expect(testMtGoxPostFunc.testErrorCallback).toHaveBeenCalled();
+        expect(testMtGoxPostFunc.testSuccessCallback).not.toHaveBeenCalled();
+        d();
+        expect(testMtGoxPostFunc.testErrorCallback).toHaveBeenCalled();
+        expect(testMtGoxPostFunc.testSuccessCallback).toHaveBeenCalled();
+    });
+    testMtGoxPostFunc.expectedCallCount = 0;
     var mgApiV1Container = new DependancyInjectionContainer({
         TobliDate: DependancyInjectionContainer.wrap(FakeDateConstructor),
         MtGoxApi: getMtGoxApi,
@@ -110,48 +129,76 @@ describe("getMtGoxApi", function() {
     });
     it("should return API object supporting addBuyOrder() method", function() {
         var testCurrencies = ['USD', 'Simoleons'];
-        var testAmounts = [314, 42];
-        var testErrorCallback = undefined;
-        var testSuccessCallback = undefined;
-        var expectedPath = undefined;
-        var expectedData = undefined;
-        var expectedCallCount = 0;
-        var testMtGoxPostFunc = (function (a, b, c, d) {
-            expect(arguments.length).toEqual(4);
-            expect(expectedCallCount).toBeGreaterThan(0);
-            expectedCallCount--;
-            expect(a).toEqual(expectedPath);
-            expect(b).toEqual(expectedData);
-            expect(c).toEqual(testErrorCallback);
-            expect(d).toEqual(testSuccessCallback);
-            expect(testErrorCallback).not.toHaveBeenCalled();
-            expect(testSuccessCallback).not.toHaveBeenCalled();
-            c();
-            expect(testErrorCallback).toHaveBeenCalled();
-            expect(testSuccessCallback).not.toHaveBeenCalled();
-            d();
-            expect(testErrorCallback).toHaveBeenCalled();
-            expect(testSuccessCallback).toHaveBeenCalled();
-        });
+        var testAmounts = [314, 42, 3.14159];
         var i,j;
-        expect(mgApiV1Container.get('MtGoxApi').addBuyOrder).isAFunction({withName:'addBuyOrder'});
-        expect(mgApiV2Container.get('MtGoxApi').addBuyOrder).isAFunction({withName:'addBuyOrder'});
+        expect(mgApiV1Container.get('MtGoxApi').addBuyOrder).isAFunction({withName:'addOrder'});
+        expect(mgApiV2Container.get('MtGoxApi').addBuyOrder).isAFunction({withName:'addOrder'});
         for (i = 0; i < testCurrencies.length; i++ ) {
             for (j = 0; j < testAmounts.length; j++ ) {
-                testErrorCallback = jasmine.createSpy('testErrorCallback');
-                testSuccessCallback = jasmine.createSpy('testSuccessCallback');
-                expectedPath = 'buyBTC.php';
-                expectedData = ['Currency='+testCurrencies[i],'amount='+testAmounts[j]];
-                expectedCallCount = 1;
-                mgApiV1Container.get('MtGoxApi').addBuyOrder(testMtGoxPostFunc, testCurrencies[i], testAmounts[j], testErrorCallback, testSuccessCallback);
-                expect(expectedCallCount).toEqual(0);
-                testErrorCallback = jasmine.createSpy('testErrorCallback');
-                testSuccessCallback = jasmine.createSpy('testSuccessCallback');
-                expectedPath = 'BTC'+testCurrencies[i]+'/money/order/add';
-                expectedData = ['type=bid','amount_int='+(testAmounts[j]*100000000).toString()];
-                expectedCallCount = 1;
-                mgApiV2Container.get('MtGoxApi').addBuyOrder(testMtGoxPostFunc, testCurrencies[i], testAmounts[j], testErrorCallback, testSuccessCallback);
-                expect(expectedCallCount).toEqual(0);
+            	testMtGoxPostFunc.testErrorCallback = jasmine.createSpy('testErrorCallback');
+                testMtGoxPostFunc.testSuccessCallback = jasmine.createSpy('testSuccessCallback');
+                testMtGoxPostFunc.expectedPath = 'buyBTC.php';
+                testMtGoxPostFunc.expectedData = ['Currency='+testCurrencies[i],'amount='+testAmounts[j]];
+                testMtGoxPostFunc.expectedCallCount = 1;
+                mgApiV1Container.get('MtGoxApi').addBuyOrder(testMtGoxPostFunc, testCurrencies[i], testAmounts[j], testMtGoxPostFunc.testErrorCallback, testMtGoxPostFunc.testSuccessCallback);
+                expect(testMtGoxPostFunc.expectedCallCount).toEqual(0);
+                testMtGoxPostFunc.testErrorCallback = jasmine.createSpy('testErrorCallback');
+                testMtGoxPostFunc.testSuccessCallback = jasmine.createSpy('testSuccessCallback');
+                testMtGoxPostFunc.expectedPath = 'BTC'+testCurrencies[i]+'/money/order/add';
+                testMtGoxPostFunc.expectedData = ['type=bid','amount_int='+(testAmounts[j]*100000000).toString()];
+                testMtGoxPostFunc.expectedCallCount = 1;
+                mgApiV2Container.get('MtGoxApi').addBuyOrder(testMtGoxPostFunc, testCurrencies[i], testAmounts[j], testMtGoxPostFunc.testErrorCallback, testMtGoxPostFunc.testSuccessCallback);
+                expect(testMtGoxPostFunc.expectedCallCount).toEqual(0);
+            }
+        }
+    });
+    it("should return API object supporting addSellOrder() method", function() {
+        var testCurrencies = ['USD', 'Simoleons'];
+        var testAmounts = [314, 42, 3.14159];
+        var i,j;
+        expect(mgApiV1Container.get('MtGoxApi').addSellOrder).isAFunction({withName:'addOrder'});
+        expect(mgApiV2Container.get('MtGoxApi').addSellOrder).isAFunction({withName:'addOrder'});
+        for (i = 0; i < testCurrencies.length; i++ ) {
+            for (j = 0; j < testAmounts.length; j++ ) {
+            	testMtGoxPostFunc.testErrorCallback = jasmine.createSpy('testErrorCallback');
+                testMtGoxPostFunc.testSuccessCallback = jasmine.createSpy('testSuccessCallback');
+                testMtGoxPostFunc.expectedPath = 'sellBTC.php';
+                testMtGoxPostFunc.expectedData = ['Currency='+testCurrencies[i],'amount='+testAmounts[j]];
+                testMtGoxPostFunc.expectedCallCount = 1;
+                mgApiV1Container.get('MtGoxApi').addSellOrder(testMtGoxPostFunc, testCurrencies[i], testAmounts[j], testMtGoxPostFunc.testErrorCallback, testMtGoxPostFunc.testSuccessCallback);
+                expect(testMtGoxPostFunc.expectedCallCount).toEqual(0);
+                testMtGoxPostFunc.testErrorCallback = jasmine.createSpy('testErrorCallback');
+                testMtGoxPostFunc.testSuccessCallback = jasmine.createSpy('testSuccessCallback');
+                testMtGoxPostFunc.expectedPath = 'BTC'+testCurrencies[i]+'/money/order/add';
+                testMtGoxPostFunc.expectedData = ['type=ask','amount_int='+(testAmounts[j]*100000000).toString()];
+                testMtGoxPostFunc.expectedCallCount = 1;
+                mgApiV2Container.get('MtGoxApi').addSellOrder(testMtGoxPostFunc, testCurrencies[i], testAmounts[j], testMtGoxPostFunc.testErrorCallback, testMtGoxPostFunc.testSuccessCallback);
+                expect(testMtGoxPostFunc.expectedCallCount).toEqual(0);
+            }
+        }
+    });
+    it("should return API object supporting getRequestSamplesUrl() method", function() {
+        var testBaseUrls = ['https://data.mtgox.com/api/2/', 'https://fake.mtgox.hostname/fake/api/path/'];
+        var testCurrencies = ['USD', 'Simoleons'];
+        var testSinceStamps = [946674800000, 946674800333];
+        var testNowStamps = [946684800000, 946684800333];
+        var i,j,k,m,n;
+        var fakeSinceDate = {getTime: (function () { return testSinceStamps[k];})};
+        expect(mgApiV1Container.get('MtGoxApi').getRequestSamplesUrl).isAFunction({withName:'getRequestSamplesUrl'});
+        expect(mgApiV2Container.get('MtGoxApi').getRequestSamplesUrl).isAFunction({withName:'getRequestSamplesUrl'});
+        for (i = 0; i < testBaseUrls.length; i++ ) {
+            for (j = 0; j < testCurrencies.length; j++ ) {
+                for (k = 0; k < testSinceStamps.length; k++ ) {
+                    for (m = 0; m < testNowStamps.length; m++ ) {
+                        testTimeStamp = testNowStamps[m];
+                        mgApiV1Container.set('MtGoxAPI2BaseURL', testBaseUrls[i]);
+                        mgApiV2Container.set('MtGoxAPI2BaseURL', testBaseUrls[i]);
+                        expect(mgApiV1Container.get('MtGoxApi').getRequestSamplesUrl(testCurrencies[j], fakeSinceDate))
+                            .toEqual("https://data.mtgox.com/api/0/data/getTrades.php?Currency=" + testCurrencies[j] + "&since=" + (testSinceStamps[k] * 1000) + "&nonce=" + (testNowStamps[m] * 1000));
+                        expect(mgApiV2Container.get('MtGoxApi').getRequestSamplesUrl(testCurrencies[j], fakeSinceDate))
+                            .toEqual(testBaseUrls[i] + "BTC" + testCurrencies[j] + "/money/trades/fetch?since=" + (testSinceStamps[k] * 1000) + "&nonce=" + (testNowStamps[m] * 1000));
+                    }
+                }
             }
         }
     });

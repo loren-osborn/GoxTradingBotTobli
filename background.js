@@ -284,10 +284,7 @@ function trade() {
 					} else {
 						// Crazy Ivan!
 						console.log("Crazy Ivan SELL "+sellAmount+" BTC!"+(keepBTC>0?" (keep "+(keepBTC.toString()+(keepBTCUnitIsPercentage==1?" %":" BTC"))+")":"")+" EMA("+EmaShortPar+")/EMA("+EmaLongPar+")>"+MinBuyThreshold+"% for "+tickCountBuy+" or more ticks");
-						if (useAPIv2)
-							mtgoxpost("BTC"+currency+"/money/order/add", ['type=ask','amount_int='+Math.round(sellAmount*100000000).toString()], logOnErrorCallback, logOnLoadCallback);
-						else
-							mtgoxpost("sellBTC.php", ['Currency='+currency,'amount='+sellAmount.toString()], logOnErrorCallback, logOnLoadCallback);
+						tobliGoxBot.get('MtGoxApi').addSellOrder(mtgoxpost, currency, sellAmount, logOnErrorCallback, logOnLoadCallback);
 					}
 				} else {
 					// Simulation only
@@ -321,10 +318,7 @@ function trade() {
 					if (inverseEMA!=1) {
 						// Normal EMA-strategy
 						console.log("SELL "+sellAmount+" BTC! (keep "+(keepBTC.toString()+(keepBTCUnitIsPercentage==1?" %":" BTC"))+") EMA("+EmaShortPar+")/EMA("+EmaLongPar+")<-"+MinSellThreshold+"% for "+tickCountSell+" or more ticks");
-						if (useAPIv2)
-							mtgoxpost("BTC"+currency+"/money/order/add", ['type=ask','amount_int='+Math.round(sellAmount*100000000).toString()], logOnErrorCallback, logOnLoadCallback);
-						else
-							mtgoxpost("sellBTC.php", ['Currency='+currency,'amount='+sellAmount.toString()], logOnErrorCallback, logOnLoadCallback);
+						tobliGoxBot.get('MtGoxApi').addSellOrder(mtgoxpost, currency, sellAmount, logOnErrorCallback, logOnLoadCallback);
 					} else {
 						// Crazy Ivan!
 						console.log("Crazy Ivan BUY! (EMA("+EmaShortPar+")/EMA("+EmaLongPar+")<-"+MinSellThreshold+"% for "+tickCountSell+" or more ticks)");
@@ -524,11 +518,8 @@ function addSample(minuteFetch,price,nocache) {
 }
 
 function getSampleFromMtGox(req,minute_fetch) {
-	var since=(minute_fetch*60*1000000).toString();
-	if (useAPIv2)
-		get_url(req, MtGoxAPI2BaseURL+"BTC"+currency+"/money/trades/fetch?since="+since+"&nonce="+((new Date()).getTime()*1000));
-	else
-		get_url(req, "https://data.mtgox.com/api/0/data/getTrades.php?Currency="+currency+"&since="+since+"&nonce="+((new Date()).getTime()*1000));
+	var since = new (tobliGoxBot.get('TobliDate'))(minute_fetch*60*1000);
+	get_url(req, tobliGoxBot.get('MtGoxApi').getRequestSamplesUrl(currency, since));
 }
 
 function refreshPopup(fullRefresh) {
