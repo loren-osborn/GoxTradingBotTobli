@@ -22,7 +22,7 @@ getMtGoxApi = (function () {
 	MtGoxApiV1.prototype.addSellOrder = getV1AddOrderMethod('sell');
 	MtGoxApiV1.prototype.getRequestSamplesUrl = function getRequestSamplesUrl(currency, since) {
 		var curTime = new (localGetTobliDate())();
-		return 'https://data.mtgox.com/api/0/data/getTrades.php?Currency=' + currency + '&since=' + (since.getTime() * 1000) + '&nonce=' + (curTime.getTime() * 1000);
+		return 'https://data.mtgox.com/api/0/data/getTrades.php?Currency=' + currency + '&since=' + (since.getMicroTime()) + '&nonce=' + (curTime.getMicroTime());
 	};
 	MtGoxApiV1.prototype.toString = (function toString() { return 'MtGox API v0'; });
 	var MtGoxApiV2 = (function MtGoxApiV2() {});
@@ -40,7 +40,7 @@ getMtGoxApi = (function () {
 	MtGoxApiV2.prototype.addSellOrder = getV2AddOrderMethod('ask');
 	MtGoxApiV2.prototype.getRequestSamplesUrl = function getRequestSamplesUrl(currency, since) {
 		var curTime = new (localGetTobliDate())();
-		return localGetMtGoxAPI2BaseURL() + 'BTC' + currency + '/money/trades/fetch?since=' + (since.getTime() * 1000) + '&nonce=' + (curTime.getTime() * 1000);
+		return localGetMtGoxAPI2BaseURL() + 'BTC' + currency + '/money/trades/fetch?since=' + (since.getMicroTime()) + '&nonce=' + (curTime.getMicroTime());
 	};
 	MtGoxApiV2.prototype.toString = (function toString() { return 'MtGox API v2'; });
 	return (function getMtGoxApi(getMtGoxApiVersion, getMtGoxAPI2BaseURL, getTobliDate, getJsSha) {

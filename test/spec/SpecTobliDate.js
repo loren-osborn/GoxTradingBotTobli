@@ -417,26 +417,27 @@ describe("getTobliDateConstructor", function() {
         expect(testDate.setMicroTime(946684800001000)).toEqual(946684800001000);
         expect(testDate.getTime()).toEqual(946684800001);
     });
-
-	/*
+    
     it("returns a constructor with working setMinuteId() method", function() {
         var TobliDate = getTobliDateConstructor(DependancyInjectionContainer.wrap(Date));
-        var testDate = new TobliDate(946684800000);
-        expect(testDate.getMinuteId()).toEqual(15778080);
-        var testDate = new TobliDate(946684800333);
-        expect(testDate.getMinuteId()).toEqual(15778080); 
-        var testDate = new TobliDate(946684800999);
-        expect(testDate.getMinuteId()).toEqual(15778080);
-        var testDate = new TobliDate(946684801000);
-        expect(testDate.getMinuteId()).toEqual(15778080);
-        var testDate = new TobliDate(946684871000);
-        expect(testDate.getMinuteId()).toEqual(15778081);
-        var testDate = new TobliDate((15778081*60000) + 1000);
-        expect(testDate.getMinuteId()).toEqual(15778081);
-        var testDate = new TobliDate((15778081*60000) + 59000);
-        expect(testDate.getMinuteId()).toEqual(15778081);
-        var testDate = new TobliDate((15778081*60000) + 60000);
-        expect(testDate.getMinuteId()).toEqual(15778082);
+        var testDate = new TobliDate();
+        var retVal = testDate.setMinuteId(15778080);
+        expect(testDate.getTime()).toEqual(946684800000);
+        expect(Object.prototype.toString.apply(retVal)).toEqual(Object.prototype.toString.apply(testDate.setTime(946684800000)));
+        expect(Object.prototype.toString.apply(testDate.setTime(946684800000))).toEqual('[object Number]');
+        expect(retVal).toEqual(testDate.setTime(946684800000)/(60*1000));
+        expect(retVal).toEqual(15778080);
+        retVal = testDate.setMinuteId(15778080.00001665);
+        expect(testDate.getTime()).toEqual(946684800000);
+        expect(Object.prototype.toString.apply(retVal)).toEqual(Object.prototype.toString.apply(testDate.setTime(946684800000)));
+        expect(Object.prototype.toString.apply(testDate.setTime(946684800000))).toEqual('[object Number]');
+        expect(retVal).toEqual(testDate.setTime(946684800000)/(60*1000));
+        expect(retVal).toEqual(15778080);
+        expect(testDate.setMinuteId(15778080.333)).toEqual(15778080);
+        expect(testDate.getTime()).toEqual(946684819980);
+        expect(testDate.setMinuteId(15778080.999)).toEqual(15778080);
+        expect(testDate.getTime()).toEqual(946684859940);
+        expect(testDate.setMinuteId(15778081)).toEqual(15778081);
+        expect(testDate.getTime()).toEqual(946684860000);
     });
-    */
 });

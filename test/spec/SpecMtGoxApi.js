@@ -2,7 +2,7 @@ describe("getMtGoxApi", function() {
     var testTimeStamp = 946684800000;
     var FakeDateConstructor = (function FakeDateConstructor() {
         expect(arguments.length).toEqual(0);
-        return {getTime: (function () { return testTimeStamp;})};
+        return {getTime: (function () { return testTimeStamp;}), getMicroTime: (function () { return testTimeStamp * 1000;}) };
     });
     var testHmacMessage = undefined;
     var testHmacKey = undefined;
@@ -180,10 +180,10 @@ describe("getMtGoxApi", function() {
     it("should return API object supporting getRequestSamplesUrl() method", function() {
         var testBaseUrls = ['https://data.mtgox.com/api/2/', 'https://fake.mtgox.hostname/fake/api/path/'];
         var testCurrencies = ['USD', 'Simoleons'];
-        var testSinceStamps = [946674800000, 946674800333];
+        var testSinceStamps = [946674800000000, 946674800333000];
         var testNowStamps = [946684800000, 946684800333];
         var i,j,k,m,n;
-        var fakeSinceDate = {getTime: (function () { return testSinceStamps[k];})};
+        var fakeSinceDate = {getMicroTime: (function () { return testSinceStamps[k];})};
         expect(mgApiV1Container.get('MtGoxApi').getRequestSamplesUrl).isAFunction({withName:'getRequestSamplesUrl'});
         expect(mgApiV2Container.get('MtGoxApi').getRequestSamplesUrl).isAFunction({withName:'getRequestSamplesUrl'});
         for (i = 0; i < testBaseUrls.length; i++ ) {
@@ -194,9 +194,9 @@ describe("getMtGoxApi", function() {
                         mgApiV1Container.set('MtGoxAPI2BaseURL', testBaseUrls[i]);
                         mgApiV2Container.set('MtGoxAPI2BaseURL', testBaseUrls[i]);
                         expect(mgApiV1Container.get('MtGoxApi').getRequestSamplesUrl(testCurrencies[j], fakeSinceDate))
-                            .toEqual("https://data.mtgox.com/api/0/data/getTrades.php?Currency=" + testCurrencies[j] + "&since=" + (testSinceStamps[k] * 1000) + "&nonce=" + (testNowStamps[m] * 1000));
+                            .toEqual("https://data.mtgox.com/api/0/data/getTrades.php?Currency=" + testCurrencies[j] + "&since=" + testSinceStamps[k] + "&nonce=" + (testNowStamps[m] * 1000));
                         expect(mgApiV2Container.get('MtGoxApi').getRequestSamplesUrl(testCurrencies[j], fakeSinceDate))
-                            .toEqual(testBaseUrls[i] + "BTC" + testCurrencies[j] + "/money/trades/fetch?since=" + (testSinceStamps[k] * 1000) + "&nonce=" + (testNowStamps[m] * 1000));
+                            .toEqual(testBaseUrls[i] + "BTC" + testCurrencies[j] + "/money/trades/fetch?since=" + testSinceStamps[k] + "&nonce=" + (testNowStamps[m] * 1000));
                     }
                 }
             }

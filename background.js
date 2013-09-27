@@ -129,11 +129,11 @@ function updateInfo() {
 
 function mtgoxpost(path, params, ef, df) {
 	var req = new XMLHttpRequest();
-	var t=(new Date()).getTime();
+	var now = new (tobliGoxBot.get('TobliDate'))();
 	req.open("POST", tobliGoxBot.get('MtGoxApi').getUncachablePostUrl(path), true);
 	req.onerror = ef;
 	req.onload = df;
-	var data = "nonce="+(t*1000);
+	var data = "nonce="+(now.getMicroTime());
 	for (var i in params)
 		data+="&"+params[i];
 	data = encodeURI(data);
@@ -388,9 +388,9 @@ function refreshEMA(reset) {
 
 var origLog = console.log;
 var log = console.log = function() {
-		var t=new (tobliGoxBot.get('TobliDate'))();
-		var file="";
-		var line="";
+		var t = new (tobliGoxBot.get('TobliDate'))();
+		var file = "";
+		var line = "";
 		try {
 			var stack = new Error().stack;
     	file = stack.split("\n")[2].split("/")[3].split(":")[0];
@@ -485,7 +485,7 @@ function emptySampleCache() {
 function cleanSampleCache() {
 	// Clean old, cached items from local storage
 	//log("cleanSampleCache()");
-	var minute_first = parseInt((new Date()).getTime()/(60*1000)) - (MaxSamplesToKeep+1)*(validSampleIntervalMinutes[validSampleIntervalMinutes.length-1]);
+	var minute_first = parseInt((new (tobliGoxBot.get('TobliDate'))()).getMinuteId()) - (MaxSamplesToKeep+1)*(validSampleIntervalMinutes[validSampleIntervalMinutes.length-1]);
 	for (var key in localStorage) {
 		if (key.indexOf("sample.")==0) {
 			var tid=parseInt(key.substring(7));
@@ -518,7 +518,8 @@ function addSample(minuteFetch,price,nocache) {
 }
 
 function getSampleFromMtGox(req,minute_fetch) {
-	var since = new (tobliGoxBot.get('TobliDate'))(minute_fetch*60*1000);
+	var since = new (tobliGoxBot.get('TobliDate'))();
+	since.setMinuteId(minute_fetch);
 	get_url(req, tobliGoxBot.get('MtGoxApi').getRequestSamplesUrl(currency, since));
 }
 
