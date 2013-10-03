@@ -1,4 +1,23 @@
 (function (jasmine) {
+    var toBeOneOfMatcher = function(possibleValues) {
+        var retVal = false;
+        var i
+        for (i = 0; !retVal && (i < possibleValues.length); i++) {
+            retVal = (this.actual === possibleValues[i]);
+        }
+        return retVal;
+    };
+    var toEqualOneOfMatcher = function(possibleValues) {
+        var retVal = false;
+        var i
+        for (i = 0; !retVal && (i < possibleValues.length); i++) {
+            retVal = (this.actual == possibleValues[i]);
+        }
+        return retVal;
+    };
+    var toBeOfTypeMatcher = function(typeName) {
+        return (this.actual) && (({}).toString.call(this.actual) === ('[object ' + typeName + ']'));
+    };
     var isAFunctionMatcher = function(parameterObject) {
         // This is a hack I pulled from here: 
         // http://stackoverflow.com/questions/5999998/how-can-i-check-if-a-javascript-variable-is-function-type
@@ -77,6 +96,9 @@
     };
     beforeEach(function() {
         this.addMatchers({
+            toBeOneOf: toBeOneOfMatcher,
+            toEqualOneOf: toEqualOneOfMatcher,
+            toBeOfType: toBeOfTypeMatcher,
             isAFunction: isAFunctionMatcher,
             toBeAWellBehavedConstructor: toBeAWellBehavedConstructorMatcher
         });

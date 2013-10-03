@@ -338,106 +338,93 @@ describe("getTobliDateConstructor", function() {
         }
     });
     
-    it("returns a constructor with working getUnixTime() method", function() {
+    it("returns a constructor with working getters and setters for MinuteId, UnixTime, and MicroTime comparable to getTime and setTime methods", function() {
         var TobliDate = getTobliDateConstructor(DependancyInjectionContainer.wrap(Date));
-        var testDate = new TobliDate(946684800000);
-        expect(testDate.getUnixTime()).toEqual(946684800);
-        testDate = new TobliDate(946684800333);
-        expect(testDate.getUnixTime()).toEqual(946684800);
-        testDate = new TobliDate(946684800999);
-        expect(testDate.getUnixTime()).toEqual(946684800);
-        testDate = new TobliDate(946684801000);
-        expect(testDate.getUnixTime()).toEqual(946684801);
-    });
-    
-    it("returns a constructor with working getMicroTime() method", function() {
-        var TobliDate = getTobliDateConstructor(DependancyInjectionContainer.wrap(Date));
-        var testDate = new TobliDate(946684800000);
-        expect(testDate.getMicroTime()).toEqual(946684800000000);
-        testDate = new TobliDate(946684800333);
-        expect(testDate.getMicroTime()).toEqual(946684800333000);
-    });
-    
-    it("returns a constructor with working getMinuteId() method", function() {
-        var TobliDate = getTobliDateConstructor(DependancyInjectionContainer.wrap(Date));
-        var testDate = new TobliDate(946684800000);
-        expect(testDate.getMinuteId()).toEqual(15778080);
-        testDate = new TobliDate(946684800333);
-        expect(testDate.getMinuteId()).toEqual(15778080); 
-        testDate = new TobliDate(946684800999);
-        expect(testDate.getMinuteId()).toEqual(15778080);
-        testDate = new TobliDate(946684801000);
-        expect(testDate.getMinuteId()).toEqual(15778080);
-        testDate = new TobliDate(946684871000);
-        expect(testDate.getMinuteId()).toEqual(15778081);
-        testDate = new TobliDate((15778081*60000) + 1000);
-        expect(testDate.getMinuteId()).toEqual(15778081);
-        testDate = new TobliDate((15778081*60000) + 59000);
-        expect(testDate.getMinuteId()).toEqual(15778081);
-        testDate = new TobliDate((15778081*60000) + 60000);
-        expect(testDate.getMinuteId()).toEqual(15778082);
-    });
-    
-    it("returns a constructor with working setUnixTime() method", function() {
-        var TobliDate = getTobliDateConstructor(DependancyInjectionContainer.wrap(Date));
-        var testDate = new TobliDate();
-        var retVal = testDate.setUnixTime(946684800);
-        expect(testDate.getTime()).toEqual(946684800000);
-        expect(Object.prototype.toString.apply(retVal)).toEqual(Object.prototype.toString.apply(testDate.setTime(946684800000)));
-        expect(Object.prototype.toString.apply(testDate.setTime(946684800000))).toEqual('[object Number]');
-        expect(retVal).toEqual(testDate.setTime(946684800000)/1000);
-        expect(retVal).toEqual(946684800);
-        var retVal = testDate.setUnixTime(946684800.000999);
-        expect(testDate.getTime()).toEqual(946684800000);
-        expect(Object.prototype.toString.apply(retVal)).toEqual(Object.prototype.toString.apply(testDate.setTime(946684800000)));
-        expect(Object.prototype.toString.apply(testDate.setTime(946684800000))).toEqual('[object Number]');
-        expect(retVal).toEqual(testDate.setTime(946684800000)/1000);
-        expect(retVal).toEqual(946684800);
-        expect(testDate.setUnixTime(946684800.333)).toEqual(946684800);
-        expect(testDate.getTime()).toEqual(946684800333);
-        expect(testDate.setUnixTime(946684800.999)).toEqual(946684800);
-        expect(testDate.getTime()).toEqual(946684800999);
-        expect(testDate.setUnixTime(946684801)).toEqual(946684801);
-        expect(testDate.getTime()).toEqual(946684801000);
-    });
-
-    it("returns a constructor with working setMicroTime() method", function() {
-        var TobliDate = getTobliDateConstructor(DependancyInjectionContainer.wrap(Date));
-        var testDate = new TobliDate();
-        var retVal = testDate.setMicroTime(946684800000000);
-        expect(testDate.getTime()).toEqual(946684800000);
-        expect(Object.prototype.toString.apply(retVal)).toEqual(Object.prototype.toString.apply(testDate.setTime(946684800000)));
-        expect(Object.prototype.toString.apply(testDate.setTime(946684800000))).toEqual('[object Number]');
-        expect(retVal).toEqual(testDate.setTime(946684800000)*1000);
-        expect(retVal).toEqual(946684800000000);
-        expect(testDate.setMicroTime(946684800000333)).toEqual(946684800000000);
-        expect(testDate.getTime()).toEqual(946684800000);
-        expect(testDate.setMicroTime(946684800000999)).toEqual(946684800000000);
-        expect(testDate.getTime()).toEqual(946684800000);
-        expect(testDate.setMicroTime(946684800001000)).toEqual(946684800001000);
-        expect(testDate.getTime()).toEqual(946684800001);
-    });
-    
-    it("returns a constructor with working setMinuteId() method", function() {
-        var TobliDate = getTobliDateConstructor(DependancyInjectionContainer.wrap(Date));
-        var testDate = new TobliDate();
-        var retVal = testDate.setMinuteId(15778080);
-        expect(testDate.getTime()).toEqual(946684800000);
-        expect(Object.prototype.toString.apply(retVal)).toEqual(Object.prototype.toString.apply(testDate.setTime(946684800000)));
-        expect(Object.prototype.toString.apply(testDate.setTime(946684800000))).toEqual('[object Number]');
-        expect(retVal).toEqual(testDate.setTime(946684800000)/(60*1000));
-        expect(retVal).toEqual(15778080);
-        retVal = testDate.setMinuteId(15778080.00001665);
-        expect(testDate.getTime()).toEqual(946684800000);
-        expect(Object.prototype.toString.apply(retVal)).toEqual(Object.prototype.toString.apply(testDate.setTime(946684800000)));
-        expect(Object.prototype.toString.apply(testDate.setTime(946684800000))).toEqual('[object Number]');
-        expect(retVal).toEqual(testDate.setTime(946684800000)/(60*1000));
-        expect(retVal).toEqual(15778080);
-        expect(testDate.setMinuteId(15778080.333)).toEqual(15778080);
-        expect(testDate.getTime()).toEqual(946684819980);
-        expect(testDate.setMinuteId(15778080.999)).toEqual(15778080);
-        expect(testDate.getTime()).toEqual(946684859940);
-        expect(testDate.setMinuteId(15778081)).toEqual(15778081);
-        expect(testDate.getTime()).toEqual(946684860000);
+        var dateObj = new TobliDate();
+        expect(TobliDate.createFromTime).toBeUndefined();
+        TobliDate.createFromTime = (function createFromTime(t) {
+            expect(t).toBeOfType('Number');
+            var result = new TobliDate();
+            result.setTime(t);
+            return result;
+        });
+        var unitsToTest = [
+            {name:'MinuteId', microseconds:60000000},
+            {name:'UnixTime', microseconds:1000000},
+            {name:'Time', microseconds:1000}, // built-in JavaScript time units
+            {name:'MicroTime', microseconds:1},
+        ];
+        var testTime = 946684800000;
+        var unitOffsets = [0, 0.333, 0.499999, 0.5, 0.999, 1, 1.25, 2, 5];
+        var unitIndex, offsetIndex;
+        var sample;
+        var getExpectedValue = (function getExpectedValue(input, unitMicroSeconds) {
+            // JavaScript Numbers are stored as double-precision floating points, that have 53 bit mantissas
+            // so should be able to store any integer from -1.8014399e+16 to +1.8014399e+16 losslessly
+            // JavaScript Dates are stored as millisecond offsets from January 1, 1970 which we are converting to
+            // microseconds here, so we should be able to loose no precision with any date through
+            // October 29, 2540 23:35:09.481984 UTC instead of the 285,000 years we could measure if we stuck
+            // to millisecond accuracy
+            expect(input).toBeOfType('Number');
+            expect(unitMicroSeconds).toBeOneOf([1,1000,1000000,60000000]);
+            var jsTime = Math.floor((input * unitMicroSeconds) / 1000);
+            return Math.floor((jsTime * 1000) / unitMicroSeconds);
+        });
+        var toUnits = (function toUnits(input, unitMicroSeconds) {
+            expect(input).toBeOfType('Number');
+            expect(unitMicroSeconds).toBeOneOf([1,1000,1000000,60000000]);
+            return (input * 1000) / unitMicroSeconds;
+        });
+        var toNativeTime = (function toNativeTime(input, unitMicroSeconds) {
+            expect(input).toBeOfType('Number');
+            expect(unitMicroSeconds).toBeOneOf([1,1000,1000000,60000000]);
+            return (input * unitMicroSeconds) / 1000;
+        });
+        var getDateSetTo = (function getDateSetTo(units, name, microseconds) {
+            expect(units).toBeOfType('Number');
+            expect(name).toBeOfType('String');
+            expect(microseconds).toBeOneOf([1,1000,1000000,60000000]);
+            expect(units).not.toBeUndefined();
+            expect(name).not.toBeUndefined();
+            expect(microseconds).not.toBeUndefined();
+            expect(units).toBeGreaterThan(0);
+            expect(microseconds).toBeGreaterThan(0);
+            var otherDateObj = new TobliDate();
+            var retVal = dateObj['set' + name](units);
+            var expected = getExpectedValue(units, microseconds);
+            var nativeExpected = toNativeTime(expected, microseconds);
+            var otherRetVal = otherDateObj.setTime(nativeExpected);
+            expect(Object.prototype.toString.apply(retVal)).toEqual(Object.prototype.toString.apply(otherRetVal));
+            expect(Object.prototype.toString.apply(otherRetVal)).toEqual('[object Number]');
+            expect(retVal).toEqual(expected);
+            expect(otherRetVal).toEqual(nativeExpected);
+            return dateObj;
+        });
+        var testSetterAndGetter = (function testSetterAndGetter(input, name, microseconds, setterFunction) {
+            expect(input).toBeOfType('Number');
+            expect(name).toBeOfType('String');
+            expect(microseconds).toBeOneOf([1,1000,1000000,60000000]);
+            expect(setterFunction).isAFunction();
+            var expected = getExpectedValue(input, microseconds);
+            var nativeExpected = toNativeTime(expected, microseconds);
+            var result = setterFunction(input);
+            expect(result.getTime()).toEqual(nativeExpected);
+            expect(result['get' + name]()).toEqual(expected);
+        });
+        for (unitIndex = 0; unitIndex < unitsToTest.length; unitIndex++) {
+            expect(TobliDate['createFrom' + unitsToTest[unitIndex].name]).isAFunction({withName:('createFrom' + unitsToTest[unitIndex].name)});
+            expect(dateObj['get' + unitsToTest[unitIndex].name]).isAFunction({withName:('get' + unitsToTest[unitIndex].name)});
+            expect(dateObj['set' + unitsToTest[unitIndex].name]).isAFunction({withName:('set' + unitsToTest[unitIndex].name)});
+            for (offsetIndex = 0; offsetIndex < unitOffsets.length; offsetIndex++) {
+                sample = toUnits(testTime + unitOffsets[offsetIndex], unitsToTest[unitIndex].microseconds);
+                testSetterAndGetter(sample, unitsToTest[unitIndex].name, unitsToTest[unitIndex].microseconds, (function (x) { return getDateSetTo(x, unitsToTest[unitIndex].name, unitsToTest[unitIndex].microseconds); }));
+                testSetterAndGetter(sample, unitsToTest[unitIndex].name, unitsToTest[unitIndex].microseconds, (function (x) { return (TobliDate['createFrom' + unitsToTest[unitIndex].name])(x); }));
+            }
+            for (offsetIndex = 0; offsetIndex < unitOffsets.length; offsetIndex++) {
+                sample = toUnits(testTime, unitsToTest[unitIndex].microseconds) + unitOffsets[offsetIndex];
+                testSetterAndGetter(sample, unitsToTest[unitIndex].name, unitsToTest[unitIndex].microseconds, (function (x) { return getDateSetTo(x, unitsToTest[unitIndex].name, unitsToTest[unitIndex].microseconds); }));
+                testSetterAndGetter(sample, unitsToTest[unitIndex].name, unitsToTest[unitIndex].microseconds, (function (x) { return (TobliDate['createFrom' + unitsToTest[unitIndex].name])(x); }));
+            }
+        }
     });
 });

@@ -100,9 +100,9 @@ function getTobliDateConstructor(getNativeDate) {
     tobliDateMethods.getUnixTime = (function getUnixTime() { return Math.floor(this.getTime()/1000);});
     tobliDateMethods.getMicroTime = (function getMicroTime() { return this.getTime() * 1000; });
     tobliDateMethods.getMinuteId = (function getMinuteId() { return Math.floor(this.getTime()/(60000)); });
-    tobliDateMethods.setUnixTime = (function setUnixTime(unixTime) { this.setTime(unixTime*1000); return this.getUnixTime(); });
+    tobliDateMethods.setUnixTime = (function setUnixTime(unixTime) { this.setTime(Math.floor(unixTime)*1000); return this.getUnixTime(); });
     tobliDateMethods.setMicroTime = (function setMicroTime(microTime) { this.setTime(microTime/1000); return this.getMicroTime(); });
-    tobliDateMethods.setMinuteId = (function setMinuteId(minuteId) { this.setTime(minuteId*60000); return this.getMinuteId(); });
+    tobliDateMethods.setMinuteId = (function setMinuteId(minuteId) { this.setTime(Math.floor(minuteId)*60000); return this.getMinuteId(); });
     TobliDate = (function TobliDate() {
         var result = createWithVariadicArgs(getNativeDate(), arguments);
         var methodName;
@@ -110,6 +110,21 @@ function getTobliDateConstructor(getNativeDate) {
             result[methodName] = tobliDateMethods[methodName];
         }
         return result;
+    });
+    TobliDate.createFromUnixTime = (function createFromUnixTime(timestamp) {
+        var retVal = new TobliDate();
+        retVal.setUnixTime(timestamp);
+        return retVal;
+    });
+    TobliDate.createFromMinuteId = (function createFromMinuteId(minuteId) {
+        var retVal = new TobliDate();
+        retVal.setMinuteId(minuteId);
+        return retVal;
+    });
+    TobliDate.createFromMicroTime = (function createFromMicroTime(microTime) {
+        var retVal = new TobliDate();
+        retVal.setMicroTime(microTime);
+        return retVal;
     });
     return TobliDate;
 }

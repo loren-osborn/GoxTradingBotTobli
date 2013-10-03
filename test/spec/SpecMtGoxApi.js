@@ -152,6 +152,7 @@ describe("getMtGoxApi", function() {
             }
         }
     });
+
     it("should return API object supporting addSellOrder() method", function() {
         var testCurrencies = ['USD', 'Simoleons'];
         var testAmounts = [314, 42, 3.14159];
@@ -177,6 +178,7 @@ describe("getMtGoxApi", function() {
             }
         }
     });
+
     it("should return API object supporting getRequestSamplesUrl() method", function() {
         var testBaseUrls = ['https://data.mtgox.com/api/2/', 'https://fake.mtgox.hostname/fake/api/path/'];
         var testCurrencies = ['USD', 'Simoleons'];
