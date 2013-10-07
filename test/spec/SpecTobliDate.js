@@ -349,8 +349,8 @@ describe("getTobliDateConstructor", function() {
             return result;
         });
         var unitsToTest = [
-            {name:'MinuteId', microseconds:60000000},
-            {name:'UnixTime', microseconds:1000000},
+            {name:'MinuteId', microseconds:60*1000*1000},
+            {name:'UnixTime', microseconds:1000*1000},
             {name:'Time', microseconds:1000}, // built-in JavaScript time units
             {name:'MicroTime', microseconds:1},
         ];
@@ -363,27 +363,27 @@ describe("getTobliDateConstructor", function() {
             // so should be able to store any integer from -1.8014399e+16 to +1.8014399e+16 losslessly
             // JavaScript Dates are stored as millisecond offsets from January 1, 1970 which we are converting to
             // microseconds here, so we should be able to loose no precision with any date through
-            // October 29, 2540 23:35:09.481984 UTC instead of the 285,000 years we could measure if we stuck
+            // October 29, 2540 23:35:09.481984 UTC instead of the ~285,000 years we could measure if we stuck
             // to millisecond accuracy
             expect(input).toBeOfType('Number');
-            expect(unitMicroSeconds).toBeOneOf([1,1000,1000000,60000000]);
+            expect(unitMicroSeconds).toBeOneOf([1,1000,1000*1000,60*1000*1000]);
             var jsTime = Math.floor((input * unitMicroSeconds) / 1000);
             return Math.floor((jsTime * 1000) / unitMicroSeconds);
         });
         var toUnits = (function toUnits(input, unitMicroSeconds) {
             expect(input).toBeOfType('Number');
-            expect(unitMicroSeconds).toBeOneOf([1,1000,1000000,60000000]);
+            expect(unitMicroSeconds).toBeOneOf([1,1000,1000*1000,60*1000*1000]);
             return (input * 1000) / unitMicroSeconds;
         });
         var toNativeTime = (function toNativeTime(input, unitMicroSeconds) {
             expect(input).toBeOfType('Number');
-            expect(unitMicroSeconds).toBeOneOf([1,1000,1000000,60000000]);
+            expect(unitMicroSeconds).toBeOneOf([1,1000,1000*1000,60*1000*1000]);
             return (input * unitMicroSeconds) / 1000;
         });
         var getDateSetTo = (function getDateSetTo(units, name, microseconds) {
             expect(units).toBeOfType('Number');
             expect(name).toBeOfType('String');
-            expect(microseconds).toBeOneOf([1,1000,1000000,60000000]);
+            expect(microseconds).toBeOneOf([1,1000,1000*1000,60*1000*1000]);
             expect(units).not.toBeUndefined();
             expect(name).not.toBeUndefined();
             expect(microseconds).not.toBeUndefined();
@@ -394,16 +394,16 @@ describe("getTobliDateConstructor", function() {
             var expected = getExpectedValue(units, microseconds);
             var nativeExpected = toNativeTime(expected, microseconds);
             var otherRetVal = otherDateObj.setTime(nativeExpected);
-            expect(Object.prototype.toString.apply(retVal)).toEqual(Object.prototype.toString.apply(otherRetVal));
-            expect(Object.prototype.toString.apply(otherRetVal)).toEqual('[object Number]');
-            expect(retVal).toEqual(expected);
-            expect(otherRetVal).toEqual(nativeExpected);
+            expect(retVal).toBeOfType('Number');
+            expect(otherRetVal).toBeOfType('Number');
+            expect(retVal).toBe(expected);
+            expect(otherRetVal).toBe(nativeExpected);
             return dateObj;
         });
         var testSetterAndGetter = (function testSetterAndGetter(input, name, microseconds, setterFunction) {
             expect(input).toBeOfType('Number');
             expect(name).toBeOfType('String');
-            expect(microseconds).toBeOneOf([1,1000,1000000,60000000]);
+            expect(microseconds).toBeOneOf([1,1000,1000*1000,60*1000*1000]);
             expect(setterFunction).isAFunction();
             var expected = getExpectedValue(input, microseconds);
             var nativeExpected = toNativeTime(expected, microseconds);
