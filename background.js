@@ -47,7 +47,8 @@ var tobliGoxBot = new DependancyInjectionContainer({
 	MtGoxApi: getMtGoxApi,
 	MtGoxApiVersion: (useAPIv2?2:1),
 	MtGoxAPI2BaseURL: MtGoxAPI2BaseURL,
-	JsSha: DependancyInjectionContainer.wrap(jsSHA)
+	JsSha: DependancyInjectionContainer.wrap(jsSHA),
+	AjaxRequest: DependancyInjectionContainer.wrap(XMLHttpRequest)
 });
 
 var BTC = Number.NaN;
