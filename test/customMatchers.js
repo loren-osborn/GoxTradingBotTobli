@@ -9,22 +9,44 @@
         return parsedNameMatches ? parsedNameMatches[1] : null;
     });
 
-    var toBeOneOfMatcher = function(possibleValues) {
-        var retVal = false;
-        var i
-        for (i = 0; !retVal && (i < possibleValues.length); i++) {
-            retVal = (this.actual === possibleValues[i]);
-        }
-        return retVal;
+    var oneOfGenerator = function oneOfGenerator(name, comparison) {
+        return (function(possibleValues) {
+            var retVal = false;
+            var i, setName, last, nonLast;
+            if (toBeOfTypeMatcher.call({actual: possibleValues}, 'Array')) {
+                nonLast = [];
+                for (i = 0; i < possibleValues.length; i++) {
+                    retVal = retVal || comparison(this.actual, possibleValues[i]);
+                    nonLast[i] = jasmine.pp(possibleValues[i]);
+                }
+                switch (possibleValues.length) {
+                    case 0:
+                        setName = 'be in the empty set';
+                        break;
+                    case 1:
+                        setName = name + ' ' + nonLast[0];
+                        break;
+                    default:
+                        last = nonLast.pop();
+                        setName = name + ' one of ' + [nonLast.join(', '), last].join(' or ');
+                        break;
+                }
+                this.message = function () {
+                    return [
+                        ('Expected ' + jasmine.pp(this.actual) + ' to ' + setName + '.'),
+                        ('Expected ' + jasmine.pp(this.actual) + ' not to ' + setName + '.')
+                    ];
+                }
+            } else {
+                throw ('Expected ' + jasmine.pp(possibleValues) + ' to be an Array.');
+            }
+            return retVal;
+        });
     };
-    var toEqualOneOfMatcher = function(possibleValues) {
-        var retVal = false;
-        var i
-        for (i = 0; !retVal && (i < possibleValues.length); i++) {
-            retVal = this.env.equals_(this.actual, possibleValues[i]);
-        }
-        return retVal;
-    };
+
+    var toBeOneOfMatcher = oneOfGenerator('be', (function (a,b) { return (a === b) }));
+    var toEqualOneOfMatcher = oneOfGenerator('equal', (function (a,b) { return jasmine.getEnv().equals_(a,b); }));
+
     var toBeOfTypeMatcher = function(typeName) {
         return (this.actual) && (({}).toString.call(this.actual) === ('[object ' + typeName + ']'));
     };
@@ -69,7 +91,7 @@
         if (!retVal) {
             if (this.message) {
                 messages.push((this.message())[0]);
-            } else if (this.actual.identity) {
+            } else {
                 messages.push("Expected " + jasmine.pp(this.actual) + " to be a function.");
             }
         } else {
@@ -129,9 +151,42 @@
             expect(jasmine.getNameOfFunction(function callMe() {})).toEqual('callMe');
         });
 
+        jasmine.expectMessageFromExpecting = (function expectMessageFromExpecting(value, matcherName, matcherArgs) {
+            var isNot = (arguments[1] == 'not');
+            if (isNot) {
+                matcherName = arguments[2];
+                matcherArgs = (arguments.length == 4) ? arguments[3] : null;
+            }
+            expect(arguments.length - (isNot ? 1 : 0)).toEqualOneOf([2,3]);
+            matcherArgs = matcherArgs || [];
+            var expectation = expect(value);
+            if (!isNot) {
+                expectation = expectation.not;
+            }
+            expectation[matcherName].apply(expectation, matcherArgs);
+            expectation = expect(value);
+            if (isNot) {
+                expectation = expectation.not;
+            }
+            var result;
+            var realAddMatcherResults = expectation.spec.addMatcherResult;
+            expectation.spec.addMatcherResult = (function intercept(r) { result = r; });
+            expectation[matcherName].apply(expectation, matcherArgs);
+            expectation.spec.addMatcherResult = realAddMatcherResults;
+            return (expect(result.toString()));
+        });
+
+        it("add jasmine.expectMessageFromExpecting() method", function() {
+            jasmine.expectMessageFromExpecting(0, 'toEqual', [1]).toEqual('Expected 0 to equal 1.');
+        });
+
         it("adds toBeOneOf() matcher", function() {
             var a = {}, b = {}, c = {}, d = {}, e = {}, f = {};
-            expect(3).toBeOneOf([1,3,5,7]);
+            jasmine.expectMessageFromExpecting(3, 'not', 'toBeOneOf', [[1,3,5,7]]).toEqual('Expected 3 not to be one of 1, 3, 5 or 7.');
+            jasmine.expectMessageFromExpecting(3, 'toBeOneOf', [[]]).toEqual('Expected 3 to be in the empty set.');
+            jasmine.expectMessageFromExpecting(3, 'not', 'toBeOneOf', [[3]]).toEqual('Expected 3 not to be 3.');
+            jasmine.expectMessageFromExpecting(3, 'not', 'toBeOneOf', [[3, 5]]).toEqual('Expected 3 not to be one of 3 or 5.');
+            expect(function () { expect(3).toBeOneOf({name: 'Susie'}); }).toThrow('Expected { name : \'Susie\' } to be an Array.')
             expect(3).not.toBeOneOf([2,4,6,8]);
             expect(2+3).toBeOneOf([1,3,5,7]);
             expect(2+3).not.toBeOneOf([2,4,6,8]);
@@ -141,7 +196,11 @@
 
         it("adds toEqualOneOf() matcher", function() {
             var a = {name:'Fred'}, b = {name:'Wilma'}, c = {name:'Barney'}, d = {name:'Betty'}, e = {name:'Fred'}, f = {name:'Bam Bam'};
-            expect(3).toEqualOneOf([1,3,5,7]);
+            jasmine.expectMessageFromExpecting(3, 'not', 'toEqualOneOf', [[1,3,5,7]]).toEqual('Expected 3 not to equal one of 1, 3, 5 or 7.');
+            jasmine.expectMessageFromExpecting(3, 'toEqualOneOf', [[]]).toEqual('Expected 3 to be in the empty set.');
+            jasmine.expectMessageFromExpecting(3, 'not', 'toEqualOneOf', [[3]]).toEqual('Expected 3 not to equal 3.');
+            jasmine.expectMessageFromExpecting(3, 'not', 'toEqualOneOf', [[3, 5]]).toEqual('Expected 3 not to equal one of 3 or 5.');
+            expect(function () { expect(3).toBeOneOf({name: 'Susie'}); }).toThrow('Expected { name : \'Susie\' } to be an Array.')
             expect(3).not.toEqualOneOf([2,4,6,8]);
             expect(2+3).toEqualOneOf([1,3,5,7]);
             expect(2+3).not.toEqualOneOf([2,4,6,8]);
@@ -151,8 +210,8 @@
         });
 
         it("adds toBeOfType() matcher", function() {
-            expect(3).toBeOfType('Number');
-            expect('3').not.toBeOfType('Number');
+            jasmine.expectMessageFromExpecting(3, 'not', 'toBeOfType', ['Number']).toEqual('Expected 3 not to be of type \'Number\'.');
+            jasmine.expectMessageFromExpecting('3', 'toBeOfType', ['Number']).toEqual('Expected \'3\' to be of type \'Number\'.');
             expect('3').toBeOfType('String');
             expect({}).not.toBeOfType('String');
             expect({}).toBeOfType('Object');
@@ -163,6 +222,8 @@
         });
 
         it("adds toBeOfClass() matcher", function() {
+            jasmine.expectMessageFromExpecting(3, 'not', 'toBeOfClass', ['Number']).toEqual('Expected 3 not to be of class \'Number\'.');
+            jasmine.expectMessageFromExpecting('3', 'toBeOfClass', ['Number']).toEqual('Expected \'3\' to be of class \'Number\'.');
             expect(3).toBeOfClass('Number');
             expect('3').not.toBeOfClass('Number');
             expect('3').toBeOfClass('String');
@@ -174,16 +235,60 @@
         });
 
         it("add isAFunction() matcher", function() {
+            var anonymousFunc = (function () {});
+            var doSomethingCool = (function doSomethingCool() {});
+            var callMe = (function callMe() {});
             expect(null).not.isAFunction();
             expect({}).not.isAFunction();
-            expect(function () {}).isAFunction();
-            expect(function doSomethingCool() {}).isAFunction();
-            expect(function callMe() {}).isAFunction();
-            expect(function () {}).not.isAFunction({withName: 'foo'});
-            expect(function doSomethingCool() {}).isAFunction({withName: 'doSomethingCool'});
-            expect(function callMe() {}).isAFunction({withName: 'callMe'});
-            expect(function doSomethingCool() {}).not.isAFunction({withName: 'callMe'});
-            expect(function callMe() {}).not.isAFunction({withName: 'doSomethingCool'});
+            expect(anonymousFunc).isAFunction();
+            expect(doSomethingCool).isAFunction();
+            expect(callMe).isAFunction();
+            expect(anonymousFunc).not.isAFunction({withName: 'foo'});
+            expect(doSomethingCool).isAFunction({withName: 'doSomethingCool'});
+            expect(callMe).isAFunction({withName: 'callMe'});
+            expect(doSomethingCool).not.isAFunction({withName: 'callMe'});
+            expect(callMe).not.isAFunction({withName: 'doSomethingCool'});
+        });
+
+        it("add toBeAWellBehavedConstructor() matcher", function() {
+            var anonymousConstructor = (function () {});
+            var Apple = (function Apple() {});
+            var Banana = (function Banana() {});
+            expect(null).not.toBeAWellBehavedConstructor();
+            expect({}).not.toBeAWellBehavedConstructor();
+            expect(anonymousConstructor).toBeAWellBehavedConstructor();
+            expect(Apple).toBeAWellBehavedConstructor();
+            expect(Banana).toBeAWellBehavedConstructor();
+            expect(anonymousConstructor).not.toBeAWellBehavedConstructor({withName: 'Carrot'});
+            expect(Apple).toBeAWellBehavedConstructor({withName: 'Apple'});
+            expect(Banana).toBeAWellBehavedConstructor({withName: 'Banana'});
+            expect(Apple).not.toBeAWellBehavedConstructor({withName: 'Banana'});
+            expect(Banana).not.toBeAWellBehavedConstructor({withName: 'Apple'});
+            var HasNullPrototype = (function () {});
+            HasNullPrototype.prototype = null;
+            var HasUndefPrototype = (function () {});
+            HasUndefPrototype.prototype = undefined;
+            expect(HasNullPrototype).not.toBeAWellBehavedConstructor();
+            expect(HasUndefPrototype).not.toBeAWellBehavedConstructor();
+            var HasNullConstructor = (function () {});
+            HasNullConstructor.prototype.constructor = null;
+            var HasUndefConstructor = (function () {});
+            HasUndefConstructor.prototype.constructor = undefined;
+            expect(HasNullConstructor).not.toBeAWellBehavedConstructor();
+            expect(HasUndefConstructor).not.toBeAWellBehavedConstructor();
+            var Vehicle = (function Vehicle() {});
+            var Car = (function Car() {});
+            Car.prototype = Object.create(Vehicle.prototype);
+            Car.prototype.constructor = Car;
+            expect(Car).not.toBeAWellBehavedConstructor();
+            expect(Car).toBeAWellBehavedConstructor({withParentClass: Vehicle});
+            expect(Car).toBeAWellBehavedConstructor({withArbitrary: 'parentClass'});
+            var Boat = (function Boat() {});
+            Boat.prototype = Object.create(Vehicle.prototype);
+            Boat.prototype.constructor = Boat;
+            var LostBoat = (function LostBoat() {});
+            LostBoat.prototype = Object.create(Boat.prototype);
+            expect(LostBoat).not.toBeAWellBehavedConstructor({withParentClass: Boat});
         });
 
     });
