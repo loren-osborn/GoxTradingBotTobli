@@ -2,7 +2,7 @@
     jasmine.getNameOfFunction = (function (func) {
         var isFunction = toBeOfTypeMatcher.apply({actual:func}, ['Function']);
         if (!isFunction) {
-            throw ("Expected " + jasmine.pp(func) + " to be of type 'Function'.");
+            throw ("Expected " + jasmine.pp(func) + " to be a function.");
         }
         var funcSource = func.toString();
         var parsedNameMatches = funcSource.match(/^\s*function\s+([A-Za-z_][A-Za-z0-9_]*)\s*\(/);
@@ -61,11 +61,19 @@
         if (retVal && parameterObject && parameterObject.withName) {
             fnName = jasmine.getNameOfFunction(this.actual);
             retVal = (fnName == parameterObject.withName);
-            if (!retVal) {
-                this.message = function() {
-                    return ["function '" + this.actual.toString() + "' isn't named " + parameterObject.withName];
-                };
-            }
+            this.message = function() {
+                return [
+                    this.actual.toString().replace(/^f/, 'F') + " isn't named " + parameterObject.withName + '.',
+                    this.actual.toString().replace(/^f/, 'F') + " is named " + parameterObject.withName + '.'
+                ];
+            };
+        } else {
+            this.message = function() {
+                return [
+                    "Expected " + jasmine.pp(this.actual) + ' to be a function.',
+                    "Expected " + (this.actual ? this.actual.toString() : 'false') + ' not to be a function.'
+                ];
+            };
         }
         return retVal;
     };
@@ -144,8 +152,8 @@
     describe("jasmine extensions", function() {
         it("add jasmine.getNameOfFunction() method", function() {
             expect(jasmine.getNameOfFunction).not.toBeUndefined();
-            expect(function() {jasmine.getNameOfFunction();}).toThrow('Expected undefined to be of type \'Function\'.');
-            expect(function() {jasmine.getNameOfFunction({});}).toThrow('Expected {  } to be of type \'Function\'.');
+            expect(function() {jasmine.getNameOfFunction(null);}).toThrow('Expected null to be a function.');
+            expect(function() {jasmine.getNameOfFunction({});}).toThrow('Expected {  } to be a function.');
             expect(jasmine.getNameOfFunction(function () {})).toBeNull();
             expect(jasmine.getNameOfFunction(function doSomethingCool() {})).toEqual('doSomethingCool');
             expect(jasmine.getNameOfFunction(function callMe() {})).toEqual('callMe');
@@ -238,13 +246,13 @@
             var anonymousFunc = (function () {});
             var doSomethingCool = (function doSomethingCool() {});
             var callMe = (function callMe() {});
-            expect(null).not.isAFunction();
+            jasmine.expectMessageFromExpecting(null, 'isAFunction').toEqual('Expected null to be a function.');
             expect({}).not.isAFunction();
-            expect(anonymousFunc).isAFunction();
+            jasmine.expectMessageFromExpecting(anonymousFunc, 'not', 'isAFunction').toEqual('Expected function () {} not to be a function.');
             expect(doSomethingCool).isAFunction();
             expect(callMe).isAFunction();
-            expect(anonymousFunc).not.isAFunction({withName: 'foo'});
-            expect(doSomethingCool).isAFunction({withName: 'doSomethingCool'});
+            jasmine.expectMessageFromExpecting(anonymousFunc, 'isAFunction', [{withName: 'foo'}]).toEqual('Function () {} isn\'t named foo.');
+            jasmine.expectMessageFromExpecting(doSomethingCool, 'not', 'isAFunction', [{withName: 'doSomethingCool'}]).toEqual('Function doSomethingCool() {} is named doSomethingCool.');
             expect(callMe).isAFunction({withName: 'callMe'});
             expect(doSomethingCool).not.isAFunction({withName: 'callMe'});
             expect(callMe).not.isAFunction({withName: 'doSomethingCool'});
