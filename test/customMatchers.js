@@ -159,41 +159,53 @@
             expect(jasmine.getNameOfFunction(function callMe() {})).toEqual('callMe');
         });
 
-        jasmine.expectMessageFromExpecting = (function expectMessageFromExpecting(value, matcherName, matcherArgs) {
-            var isNot = (arguments[1] == 'not');
-            if (isNot) {
-                matcherName = arguments[2];
-                matcherArgs = (arguments.length == 4) ? arguments[3] : null;
+        expect.messageWhenExpecting = (function messageWhenExpecting(actual) {
+            expect(arguments.length).toEqual(1);
+            var expectation = expect(actual);
+            var wrapUserFacingMatcher = (function (isNot, matcherName) {
+                var wrappedMatcher = (function () {
+                    var matcherArgs = Array.prototype.slice.call(arguments, 0);
+                    if (!isNot) {
+                        expectation = expectation.not;
+                    }
+                    expectation[matcherName].apply(expectation, matcherArgs);
+                    expectation = expect(actual);
+                    if (isNot) {
+                        expectation = expectation.not;
+                    }
+                    var result;
+                    var realAddMatcherResults = expectation.spec.addMatcherResult;
+                    expectation.spec.addMatcherResult = (function intercept(r) {
+                        result = r;
+                    });
+                    expectation[matcherName].apply(expectation, matcherArgs);
+                    expectation.spec.addMatcherResult = realAddMatcherResults;
+                    return (expect(result.toString()));
+                });
+                return wrappedMatcher;
+            });
+            var retVal = {not:{}};
+            var name;
+            for (name in expectation) {
+                if ((name != 'not') && ({}.toString.apply(expectation[name]) === '[object Function]')) {
+                    retVal[name] = wrapUserFacingMatcher(false, name);
+                    retVal.not[name] = wrapUserFacingMatcher(true, name);
+                }
             }
-            expect(arguments.length - (isNot ? 1 : 0)).toEqualOneOf([2,3]);
-            matcherArgs = matcherArgs || [];
-            var expectation = expect(value);
-            if (!isNot) {
-                expectation = expectation.not;
-            }
-            expectation[matcherName].apply(expectation, matcherArgs);
-            expectation = expect(value);
-            if (isNot) {
-                expectation = expectation.not;
-            }
-            var result;
-            var realAddMatcherResults = expectation.spec.addMatcherResult;
-            expectation.spec.addMatcherResult = (function intercept(r) { result = r; });
-            expectation[matcherName].apply(expectation, matcherArgs);
-            expectation.spec.addMatcherResult = realAddMatcherResults;
-            return (expect(result.toString()));
+            return retVal;
         });
 
-        it("add jasmine.expectMessageFromExpecting() method", function() {
-            jasmine.expectMessageFromExpecting(0, 'toEqual', [1]).toEqual('Expected 0 to equal 1.');
+        it("add expect.messageWhenExpecting() method", function() {
+            expect.messageWhenExpecting(0).toEqual(1).toEqual('Expected 0 to equal 1.');
+            expect.messageWhenExpecting(0).not.toEqual(0).toEqual('Expected 0 not to equal 0.');
         });
 
         it("adds toBeOneOf() matcher", function() {
             var a = {}, b = {}, c = {}, d = {}, e = {}, f = {};
-            jasmine.expectMessageFromExpecting(3, 'not', 'toBeOneOf', [[1,3,5,7]]).toEqual('Expected 3 not to be one of 1, 3, 5 or 7.');
-            jasmine.expectMessageFromExpecting(3, 'toBeOneOf', [[]]).toEqual('Expected 3 to be in the empty set.');
-            jasmine.expectMessageFromExpecting(3, 'not', 'toBeOneOf', [[3]]).toEqual('Expected 3 not to be 3.');
-            jasmine.expectMessageFromExpecting(3, 'not', 'toBeOneOf', [[3, 5]]).toEqual('Expected 3 not to be one of 3 or 5.');
+            expect.messageWhenExpecting(3).not.toBeOneOf([1,3,5,7]).toEqual('Expected 3 not to be one of 1, 3, 5 or 7.');
+            expect.messageWhenExpecting(3).toBeOneOf([]).toEqual('Expected 3 to be in the empty set.');
+            expect.messageWhenExpecting(3).not.toBeOneOf([3]).toEqual('Expected 3 not to be 3.');
+            expect.messageWhenExpecting(3).not.toBeOneOf([3, 5]).toEqual('Expected 3 not to be one of 3 or 5.');
             expect(function () { expect(3).toBeOneOf({name: 'Susie'}); }).toThrow('Expected { name : \'Susie\' } to be an Array.')
             expect(3).not.toBeOneOf([2,4,6,8]);
             expect(2+3).toBeOneOf([1,3,5,7]);
@@ -204,10 +216,10 @@
 
         it("adds toEqualOneOf() matcher", function() {
             var a = {name:'Fred'}, b = {name:'Wilma'}, c = {name:'Barney'}, d = {name:'Betty'}, e = {name:'Fred'}, f = {name:'Bam Bam'};
-            jasmine.expectMessageFromExpecting(3, 'not', 'toEqualOneOf', [[1,3,5,7]]).toEqual('Expected 3 not to equal one of 1, 3, 5 or 7.');
-            jasmine.expectMessageFromExpecting(3, 'toEqualOneOf', [[]]).toEqual('Expected 3 to be in the empty set.');
-            jasmine.expectMessageFromExpecting(3, 'not', 'toEqualOneOf', [[3]]).toEqual('Expected 3 not to equal 3.');
-            jasmine.expectMessageFromExpecting(3, 'not', 'toEqualOneOf', [[3, 5]]).toEqual('Expected 3 not to equal one of 3 or 5.');
+            expect.messageWhenExpecting(3).not.toEqualOneOf([1,3,5,7]).toEqual('Expected 3 not to equal one of 1, 3, 5 or 7.');
+            expect.messageWhenExpecting(3).toEqualOneOf([]).toEqual('Expected 3 to be in the empty set.');
+            expect.messageWhenExpecting(3).not.toEqualOneOf([3]).toEqual('Expected 3 not to equal 3.');
+            expect.messageWhenExpecting(3).not.toEqualOneOf([3, 5]).toEqual('Expected 3 not to equal one of 3 or 5.');
             expect(function () { expect(3).toBeOneOf({name: 'Susie'}); }).toThrow('Expected { name : \'Susie\' } to be an Array.')
             expect(3).not.toEqualOneOf([2,4,6,8]);
             expect(2+3).toEqualOneOf([1,3,5,7]);
@@ -218,8 +230,8 @@
         });
 
         it("adds toBeOfType() matcher", function() {
-            jasmine.expectMessageFromExpecting(3, 'not', 'toBeOfType', ['Number']).toEqual('Expected 3 not to be of type \'Number\'.');
-            jasmine.expectMessageFromExpecting('3', 'toBeOfType', ['Number']).toEqual('Expected \'3\' to be of type \'Number\'.');
+            expect.messageWhenExpecting(3).not.toBeOfType('Number').toEqual('Expected 3 not to be of type \'Number\'.');
+            expect.messageWhenExpecting('3').toBeOfType('Number').toEqual('Expected \'3\' to be of type \'Number\'.');
             expect('3').toBeOfType('String');
             expect({}).not.toBeOfType('String');
             expect({}).toBeOfType('Object');
@@ -230,8 +242,8 @@
         });
 
         it("adds toBeOfClass() matcher", function() {
-            jasmine.expectMessageFromExpecting(3, 'not', 'toBeOfClass', ['Number']).toEqual('Expected 3 not to be of class \'Number\'.');
-            jasmine.expectMessageFromExpecting('3', 'toBeOfClass', ['Number']).toEqual('Expected \'3\' to be of class \'Number\'.');
+            expect.messageWhenExpecting(3).not.toBeOfClass('Number').toEqual('Expected 3 not to be of class \'Number\'.');
+            expect.messageWhenExpecting('3').toBeOfClass('Number').toEqual('Expected \'3\' to be of class \'Number\'.');
             expect(3).toBeOfClass('Number');
             expect('3').not.toBeOfClass('Number');
             expect('3').toBeOfClass('String');
@@ -246,13 +258,13 @@
             var anonymousFunc = (function () {});
             var doSomethingCool = (function doSomethingCool() {});
             var callMe = (function callMe() {});
-            jasmine.expectMessageFromExpecting(null, 'isAFunction').toEqual('Expected null to be a function.');
+            expect.messageWhenExpecting(null).isAFunction().toEqual('Expected null to be a function.');
             expect({}).not.isAFunction();
-            jasmine.expectMessageFromExpecting(anonymousFunc, 'not', 'isAFunction').toEqual('Expected function () {} not to be a function.');
+            expect.messageWhenExpecting(anonymousFunc).not.isAFunction().toEqual('Expected function () {} not to be a function.');
             expect(doSomethingCool).isAFunction();
             expect(callMe).isAFunction();
-            jasmine.expectMessageFromExpecting(anonymousFunc, 'isAFunction', [{withName: 'foo'}]).toEqual('Function () {} isn\'t named foo.');
-            jasmine.expectMessageFromExpecting(doSomethingCool, 'not', 'isAFunction', [{withName: 'doSomethingCool'}]).toEqual('Function doSomethingCool() {} is named doSomethingCool.');
+            expect.messageWhenExpecting(anonymousFunc).isAFunction({withName: 'foo'}).toEqual('Function () {} isn\'t named foo.');
+            expect.messageWhenExpecting(doSomethingCool).not.isAFunction({withName: 'doSomethingCool'}).toEqual('Function doSomethingCool() {} is named doSomethingCool.');
             expect(callMe).isAFunction({withName: 'callMe'});
             expect(doSomethingCool).not.isAFunction({withName: 'callMe'});
             expect(callMe).not.isAFunction({withName: 'doSomethingCool'});
