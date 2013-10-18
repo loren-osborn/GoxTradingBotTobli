@@ -1,14 +1,4 @@
 (function (jasmine) {
-    jasmine.getNameOfFunction = (function (func) {
-        var isFunction = toBeOfTypeMatcher.apply({actual:func}, ['Function']);
-        if (!isFunction) {
-            throw ("Expected " + jasmine.pp(func) + " to be a function.");
-        }
-        var funcSource = func.toString();
-        var parsedNameMatches = funcSource.match(/^\s*function\s+([A-Za-z_][A-Za-z0-9_]*)\s*\(/);
-        return parsedNameMatches ? parsedNameMatches[1] : null;
-    });
-
     var oneOfGenerator = function oneOfGenerator(name, comparison) {
         return (function(possibleValues) {
             var retVal = false;
@@ -187,15 +177,27 @@
             isAFunction: isAFunctionMatcher,
             toBeAWellBehavedConstructor: toBeAWellBehavedConstructorMatcher
         });
-    });
-    describe("jasmine extensions", function() {
-        it("add jasmine.getNameOfFunction() method", function() {
-            expect(jasmine.getNameOfFunction).not.toBeUndefined();
-            expect(function() {jasmine.getNameOfFunction(null);}).toThrow('Expected null to be a function.');
-            expect(function() {jasmine.getNameOfFunction({});}).toThrow('Expected {  } to be a function.');
-            expect(jasmine.getNameOfFunction(function () {})).toBeNull();
-            expect(jasmine.getNameOfFunction(function doSomethingCool() {})).toEqual('doSomethingCool');
-            expect(jasmine.getNameOfFunction(function callMe() {})).toEqual('callMe');
+
+        jasmine.getNameOfFunction = (function (func) {
+            var isFunction = toBeOfTypeMatcher.apply({actual:func}, ['Function']);
+            if (!isFunction) {
+                throw ("Expected " + jasmine.pp(func) + " to be a function.");
+            }
+            var funcSource = func.toString();
+            var parsedNameMatches = funcSource.match(/^\s*function\s+([A-Za-z_][A-Za-z0-9_]*)\s*\(/);
+            return parsedNameMatches ? parsedNameMatches[1] : null;
+        });
+
+        jasmine.iterateOverTestDataSets = (function iterateOverTestDataSets(dataSets, paramOverrides, testCallback) {
+            var assert = (function assert(condition, message) {
+                if (!condition) {
+                    throw message;
+                }
+            });
+            assert(arguments.length <= 3, 'Too many parameters.');
+            assert(arguments.length == 3, 'Missing required parameters.');
+            assert(dataSets.constructor === Array, 'First parameter must be an array.');
+            throw 'Second parameter must be null or simple Object.';
         });
 
         expect.messageWhenExpecting = (function messageWhenExpecting(actual) {
@@ -214,11 +216,17 @@
                     }
                     var result;
                     var realAddMatcherResults = expectation.spec.addMatcherResult;
-                    expectation.spec.addMatcherResult = (function intercept(r) {
-                        result = r;
-                    });
-                    expectation[matcherName].apply(expectation, matcherArgs);
-                    expectation.spec.addMatcherResult = realAddMatcherResults;
+                    try {
+                        expectation.spec.addMatcherResult = (function intercept(r) {
+                            result = r;
+                        });
+                        expectation[matcherName].apply(expectation, matcherArgs);
+                        expectation.spec.addMatcherResult = realAddMatcherResults;
+                    }
+                    catch (e) {
+                        expectation.spec.addMatcherResult = realAddMatcherResults;
+                        throw e;
+                    }
                     return (expect(result.toString()));
                 });
                 return wrappedMatcher;
@@ -234,9 +242,145 @@
             return retVal;
         });
 
+        expect.expectationFailuresWhenCalling = (function expectationFailuresWhenCalling(testFunc) {
+            var dummyExpectation = expect('dummy');
+            var resultList = [];
+            var realAddMatcherResults = dummyExpectation.spec.addMatcherResult;
+            var retVal;
+            try {
+                dummyExpectation.spec.addMatcherResult = (function intercept(r) {
+                    resultList.push( r.passed() ? null : r.toString() );
+                });
+                testFunc();
+                dummyExpectation.spec.addMatcherResult = realAddMatcherResults;
+                retVal = (expect(resultList));
+                retVal.whichThrows = (function (expectedException) {
+                    expect(function () {}).toThrow(expectedException);
+                    return (expect(resultList));
+                })
+            }
+            catch (e) {
+                dummyExpectation.spec.addMatcherResult = realAddMatcherResults;
+                retVal = {
+                    toEqual: (function () { throw e; }),
+                    whichThrows: (function (expectedException) {
+                        expect(e).toEqual(expectedException);
+                        return (expect(resultList));
+                    })
+                };
+            }
+            return retVal;
+        });
+    });
+
+    describe("jasmine extensions", function() {
+        it("add jasmine.getNameOfFunction() method", function() {
+            expect(jasmine.getNameOfFunction).not.toBeUndefined();
+            expect(function() {jasmine.getNameOfFunction(null);}).toThrow('Expected null to be a function.');
+            expect(function() {jasmine.getNameOfFunction({});}).toThrow('Expected {  } to be a function.');
+            expect(jasmine.getNameOfFunction(function () {})).toBeNull();
+            expect(jasmine.getNameOfFunction(function doSomethingCool() {})).toEqual('doSomethingCool');
+            expect(jasmine.getNameOfFunction(function callMe() {})).toEqual('callMe');
+        });
+
         it("add expect.messageWhenExpecting() method", function() {
+            var dummyExpectation = expect('dummy');
+            var originalAddMatcherResult = dummyExpectation.spec.addMatcherResult;
             expect.messageWhenExpecting(0).toEqual(1).toEqual('Expected 0 to equal 1.');
+            var newAddMatcherResult = dummyExpectation.spec.addMatcherResult;
+            dummyExpectation.spec.addMatcherResult = originalAddMatcherResult;
+            expect(newAddMatcherResult).toBe(originalAddMatcherResult);
             expect.messageWhenExpecting(0).not.toEqual(0).toEqual('Expected 0 not to equal 0.');
+            newAddMatcherResult = dummyExpectation.spec.addMatcherResult;
+            dummyExpectation.spec.addMatcherResult = originalAddMatcherResult;
+            expect(newAddMatcherResult).toBe(originalAddMatcherResult);
+            var counter = 0;
+            this.addMatchers({
+                toThrowInsteadOfMatch: function () {
+                    if (counter < 1) {
+                        counter++;
+                        return false;
+                    }
+                    throw 'Match failed';
+                }
+            });
+            try {
+                expect.messageWhenExpecting(0).toThrowInsteadOfMatch();
+                expect(0).toEqual('This line should be unreachable');
+            }
+            catch (e) {
+                expect(e).toEqual('Match failed');
+            }
+            newAddMatcherResult = dummyExpectation.spec.addMatcherResult;
+            dummyExpectation.spec.addMatcherResult = originalAddMatcherResult;
+            expect(newAddMatcherResult).toBe(originalAddMatcherResult);
+        });
+
+        it("add expect.expectationFailuresWhenCalling() method", function() {
+            var dummyExpectation = expect('dummy');
+            var originalAddMatcherResult = dummyExpectation.spec.addMatcherResult;
+            expect.expectationFailuresWhenCalling( function() {
+                expect(0).toEqual(1);
+                expect(0).not.toEqual(0);
+            }).toEqual([
+                'Expected 0 to equal 1.', 
+                'Expected 0 not to equal 0.'
+            ]);
+            var newAddMatcherResult = dummyExpectation.spec.addMatcherResult;
+            dummyExpectation.spec.addMatcherResult = originalAddMatcherResult;
+            expect(newAddMatcherResult).toBe(originalAddMatcherResult);
+            expect.expectationFailuresWhenCalling( function() {
+                expect(0).not.toEqual(0);
+                expect(0).toEqual(0);
+                expect(0).toEqual(1);
+            }).toEqual([
+                'Expected 0 not to equal 0.',
+                null,
+                'Expected 0 to equal 1.'
+            ]);
+            var newAddMatcherResult = dummyExpectation.spec.addMatcherResult;
+            dummyExpectation.spec.addMatcherResult = originalAddMatcherResult;
+            expect(newAddMatcherResult).toBe(originalAddMatcherResult);
+            expect.expectationFailuresWhenCalling( function() {
+                expect(0).toEqual(0);
+                expect(0).toEqual(1);
+                expect(0).not.toEqual(0);
+                throw('To be or not to be');
+            }).whichThrows('To be or not to be').toEqual([
+                null,
+                'Expected 0 to equal 1.',
+                'Expected 0 not to equal 0.'
+            ]);
+            var newAddMatcherResult = dummyExpectation.spec.addMatcherResult;
+            dummyExpectation.spec.addMatcherResult = originalAddMatcherResult;
+            expect(newAddMatcherResult).toBe(originalAddMatcherResult);
+            expect.expectationFailuresWhenCalling( function() {
+                expect.expectationFailuresWhenCalling( function() {
+                    expect(0).toEqual(0);
+                    expect(0).not.toEqual(2);
+                    expect(0).not.toEqual(0);
+                }).whichThrows('To be or not to be').toEqual([
+                    null,
+                    'Expected 0 not to equal 0.'
+                ]);
+            }).toEqual([
+                'Expected function to throw an exception.',
+                "Expected [ null, null, 'Expected 0 not to equal 0.' ] to equal [ null, 'Expected 0 not to equal 0.' ]."
+            ]);
+            var newAddMatcherResult = dummyExpectation.spec.addMatcherResult;
+            dummyExpectation.spec.addMatcherResult = originalAddMatcherResult;
+            expect(newAddMatcherResult).toBe(originalAddMatcherResult);
+        });
+
+        it("add jasmine.iterateOverTestDataSets() method", function() {
+            expect(jasmine.iterateOverTestDataSets).isAFunction({withName: 'iterateOverTestDataSets'});
+            expect(jasmine.iterateOverTestDataSets).toThrow('Missing required parameters.');
+            expect(function () { jasmine.iterateOverTestDataSets(1); }).toThrow('Missing required parameters.');
+            expect(function () { jasmine.iterateOverTestDataSets(1, 2); }).toThrow('Missing required parameters.');
+            expect(function () { jasmine.iterateOverTestDataSets(1, 2, 3, 4); }).toThrow('Too many parameters.');
+            expect(function () { jasmine.iterateOverTestDataSets(1, 2, 3, 4, 5); }).toThrow('Too many parameters.');
+            expect(function () { jasmine.iterateOverTestDataSets(1, 2, 3); }).toThrow('First parameter must be an array.');
+            expect(function () { jasmine.iterateOverTestDataSets([], 2, 3); }).toThrow('Second parameter must be null or simple Object.');
         });
 
         it("adds toBeOneOf() matcher", function() {
@@ -360,7 +504,8 @@
             Boat.prototype.constructor = Boat;
             var LostBoat = (function LostBoat() {});
             LostBoat.prototype = Object.create(Boat.prototype);
-            expect(LostBoat).not.toBeAWellBehavedConstructor({withParentClass: Boat});
+            expect.messageWhenExpecting(LostBoat).toBeAWellBehavedConstructor({withParentClass: Boat}).toEqual(
+                'Expected LostBoat\'s prototype to point to itself.');
         });
 
     });
