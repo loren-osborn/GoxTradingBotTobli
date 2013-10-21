@@ -99,6 +99,7 @@ describe("jasmine extensions", function() {
 
     it("add jasmine.iterateOverTestDataSets() method", function() {
         var uncalledFunction = (function () { throw 'This function should never be called'; });
+        var dataSets, paramOverride, dataSetsJson, paramOverrideJson, callback;
         expect(jasmine.iterateOverTestDataSets).isAFunction({withName: 'iterateOverTestDataSets'});
         expect(jasmine.iterateOverTestDataSets).toThrow('Missing required parameters.');
         expect(function () { jasmine.iterateOverTestDataSets(1); }).toThrow('Missing required parameters.');
@@ -111,23 +112,59 @@ describe("jasmine extensions", function() {
         expect(function () { jasmine.iterateOverTestDataSets([], null, 3); }).toThrow('Third parameter must be a function.');
         expect(function () { jasmine.iterateOverTestDataSets([], {}, 3); }).toThrow('Third parameter must be a function.');
         expect(function () { jasmine.iterateOverTestDataSets([], {}, uncalledFunction); }).toThrow('Must have at least 1 data set.');
+        dataSetsJson = JSON.stringify(dataSets = [{name: 'Albert', data: 5}]);
+        paramOverrideJson = JSON.stringify(paramOverride = {});
         expect(function () {
-            jasmine.iterateOverTestDataSets([{name: 'Albert', data: 5}], {}, uncalledFunction);
+            jasmine.iterateOverTestDataSets(dataSets, paramOverride, uncalledFunction);
         }).toThrow('Dataset[0].data must be an Array.');
+        expect(JSON.stringify(dataSets)).toEqual(dataSetsJson);
+        expect(JSON.stringify(paramOverride)).toEqual(paramOverrideJson);
+        dataSetsJson = JSON.stringify(dataSets = [{name:'Fred', data: [1,2,3]},{name: 'Albert'}]);
         expect(function () {
-            jasmine.iterateOverTestDataSets([{name:'Fred', data: [1,2,3]},{name: 'Albert'}], {}, uncalledFunction);
+            jasmine.iterateOverTestDataSets(dataSets, paramOverride, uncalledFunction);
         }).toThrow('Dataset[1].data must be an Array.');
+        expect(JSON.stringify(dataSets)).toEqual(dataSetsJson);
+        expect(JSON.stringify(paramOverride)).toEqual(paramOverrideJson);
+        dataSetsJson = JSON.stringify(dataSets = [{name:'Fred', data: [1,2,3]},{name:'George', data: [2,4,6]},{data: [9]}]);
         expect(function () {
-            jasmine.iterateOverTestDataSets([{name:'Fred', data: [1,2,3]},{name:'George', data: [2,4,6]},{data: [9]}], {}, uncalledFunction);
+            jasmine.iterateOverTestDataSets(dataSets, paramOverride, uncalledFunction);
         }).toThrow('Dataset[2].name must be a non-empty string.');
+        expect(JSON.stringify(dataSets)).toEqual(dataSetsJson);
+        expect(JSON.stringify(paramOverride)).toEqual(paramOverrideJson);
+        dataSetsJson = JSON.stringify(dataSets = [{name:'Fred', data: [1,2,3]},{name:'George', data: [2,4,6]},{name:'Fred', data: [9]}]);
         expect(function () {
-            jasmine.iterateOverTestDataSets([{name:'Fred', data: [1,2,3]},{name:'George', data: [2,4,6]},{name:'Fred', data: [9]}], {}, uncalledFunction);
+            jasmine.iterateOverTestDataSets(dataSets, paramOverride, uncalledFunction);
         }).toThrow('Dataset[2].name must not match Dataset[0].name.');
+        expect(JSON.stringify(dataSets)).toEqual(dataSetsJson);
+        expect(JSON.stringify(paramOverride)).toEqual(paramOverrideJson);
+        dataSetsJson = JSON.stringify(dataSets = [{name:'Fred', data: [1,2,3]},{name:'George', data: []}]);
         expect(function () {
-            jasmine.iterateOverTestDataSets([{name:'Fred', data: [1,2,3]},{name:'George', data: []}], {}, uncalledFunction);
+            jasmine.iterateOverTestDataSets(dataSets, paramOverride, uncalledFunction);
         }).toThrow('Dataset[1].data must be non-empty.');
-        var callback = jasmine.createSpy('test callback');
-        jasmine.iterateOverTestDataSets([{name:'Larry', data: [1,2,3]}, {name:'Moe', data: ['a', 'c']}, {name:'Curly', data: ['b', 'd']}], {}, callback);
+        expect(JSON.stringify(dataSets)).toEqual(dataSetsJson);
+        expect(JSON.stringify(paramOverride)).toEqual(paramOverrideJson);
+        dataSetsJson = JSON.stringify(dataSets = [{name:'Larry', data: [1,2,3]}, {name:'Moe', data: ['a', 'c']}, {name:'Curly', data: ['b', 'd']}]);
+        paramOverrideJson = JSON.stringify(paramOverride = {William: [3,4,5]});
+        expect(function () {
+            jasmine.iterateOverTestDataSets(dataSets, paramOverride, uncalledFunction);
+        }).toThrow('paramOverrides dataset "William" is not defined.');
+        expect(JSON.stringify(dataSets)).toEqual(dataSetsJson);
+        expect(JSON.stringify(paramOverride)).toEqual(paramOverrideJson);
+        paramOverrideJson = JSON.stringify(paramOverride = {Moe: 6});
+        expect(function () {
+            jasmine.iterateOverTestDataSets(dataSets, paramOverride, uncalledFunction);
+        }).toThrow('paramOverrides.Moe must be an Array.');
+        expect(JSON.stringify(dataSets)).toEqual(dataSetsJson);
+        expect(JSON.stringify(paramOverride)).toEqual(paramOverrideJson);
+        paramOverrideJson = JSON.stringify(paramOverride = {Moe: []});
+        expect(function () {
+            jasmine.iterateOverTestDataSets(dataSets, paramOverride, uncalledFunction);
+        }).toThrow('paramOverrides.Moe must be non-empty.');
+        expect(JSON.stringify(dataSets)).toEqual(dataSetsJson);
+        expect(JSON.stringify(paramOverride)).toEqual(paramOverrideJson);
+        paramOverrideJson = JSON.stringify(paramOverride = {});
+        callback = jasmine.createSpy('test callback');
+        jasmine.iterateOverTestDataSets(dataSets, paramOverride, callback);
         expect(callback.calls.length).toEqual(12);
         expect(callback.calls[0].args).toEqual([1, 'a', 'b']);
         expect(callback.calls[1].args).toEqual([1, 'a', 'd']);
@@ -142,7 +179,10 @@ describe("jasmine extensions", function() {
         expect(callback.calls[10].args).toEqual([3, 'c', 'b']);
         expect(callback.calls[11].args).toEqual([3, 'c', 'd']);
         callback = jasmine.createSpy('test callback');
-        jasmine.iterateOverTestDataSets([{name:'Larry', data: [1,2,3]}, {name:'Moe', data: ['a', 'c']}, {name:'Curly', data: ['b', 'd']}], {Moe: ['q', 'r', 's']}, callback);
+        expect(JSON.stringify(dataSets)).toEqual(dataSetsJson);
+        expect(JSON.stringify(paramOverride)).toEqual(paramOverrideJson);
+        paramOverrideJson = JSON.stringify(paramOverride = {Moe: ['q', 'r', 's']});
+        jasmine.iterateOverTestDataSets(dataSets, paramOverride, callback);
         expect(callback.calls.length).toEqual(18);
         expect(callback.calls[0].args).toEqual([1, 'q', 'b']);
         expect(callback.calls[1].args).toEqual([1, 'q', 'd']);
@@ -162,6 +202,8 @@ describe("jasmine extensions", function() {
         expect(callback.calls[15].args).toEqual([3, 'r', 'd']);
         expect(callback.calls[16].args).toEqual([3, 's', 'b']);
         expect(callback.calls[17].args).toEqual([3, 's', 'd']);
+        expect(JSON.stringify(dataSets)).toEqual(dataSetsJson);
+        expect(JSON.stringify(paramOverride)).toEqual(paramOverrideJson);
     });
 
     it("adds toBeOneOf() matcher", function() {
