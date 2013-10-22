@@ -11,10 +11,11 @@ getMtGoxApi = (function () {
 	var MtGoxApiCommon = (function MtGoxApiCommon() {});
 	MtGoxApiCommon.prototype.post = (function post(path, params, apiKey, secret, errorFunc, dataFunc) {
 		var request = new (localAjaxRequest())();
-		request.open("POST", path, true);
+		var now = new (localGetTobliDate())();
+		request.open('POST', this.getUncachablePostUrl(path), true);
 		request.onerror = errorFunc;
 		request.onload = dataFunc;
-		var data = ''; // "nonce="+(now.getMicroTime());
+		var data = 'nonce=' + (now.getMicroTime());
 		var i;
 		for (i in params) {
 			data += ("&" + params[i]);

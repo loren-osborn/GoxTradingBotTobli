@@ -254,85 +254,69 @@ describe("getMtGoxApi", function() {
             {  data: ['car=fast'],
                string: '&car=fast'},
             {  data: ['man=Fred', 'woman=Wilma'],
-               string: '&man=Fred&woman=Wilma'}];
+               string: '&man=Fred&woman=Wilma'},
+           {  data: ['special=_();[]{}', 'chars=\\\'-!'],
+               string: '&special=_();%5B%5D%7B%7D&chars=%5C\'-!'}];
         var testApiKeys = ['USER KEY 1', 'user key 2'];
         var protocolVers = [
             {   container: mgApiV1Container,
-                hmacTester: embeddableTests.v1.HmacComputation},
+                hmacTester: embeddableTests.v1.HmacComputation,
+                urlTester: embeddableTests.v1.UncachablePostUrl},
             {   container: mgApiV2Container,
-                hmacTester: embeddableTests.v2.HmacComputation} ];
+                hmacTester: embeddableTests.v2.HmacComputation,
+                urlTester: embeddableTests.v2.UncachablePostUrl} ];
         var i, j, k;
         for (i = 0; i < protocolVers.length; i++) {
             expect(protocolVers[i].container.get('MtGoxApi').post).isAFunction({withName:'post'});
             for (j = 0; j < paramSets.length; j++) {
                     for (k = 0; k < testApiKeys.length; k++) {
-                        protocolVers[i].hmacTester(function (path, dataSet, secret, expectedHmac) {
-                        var errorCallback, sucessCallback;
-                        var fakeAjaxRequestConstructor;
-                        var fakeRequestHeaders = {};
-                        var fakeAjaxRequest = {
-                            open: jasmine.createSpy("open request event"),
-                            setRequestHeader: (function (key, val) {
-                                expect(arguments.length).toEqual(2);
-                                this.setRequestHeader.callCount++;
-                                expect(this.open.callCount).toEqual(1);
-                                expect(fakeRequestHeaders[key]).not.toBeDefined();
-                                fakeRequestHeaders[key] = val;
-                            }),
-                            send: (function (data) {
-                                expect(arguments.length).toEqual(1);
-                                expect(data).toBe(paramSets[j].string);
-                                this.send.callCount++;
-                                expect(this.open).toHaveBeenCalledWith('POST', path, true);
-                                expect(this.open.callCount).toEqual(1);
-                                expect(fakeRequestHeaders['Content-Type']).toBe('application/x-www-form-urlencoded');
-                                expect(fakeRequestHeaders['Rest-Key']).toBe(testApiKeys[k].toString());
-                                expect(fakeRequestHeaders['Rest-Sign']).toBe(expectedHmac.toString());
-                                expect(this.onerror).toBe(errorCallback);
-                                expect(this.onload).toBe(sucessCallback);
-                            })
-                        };
-                        expect(paramSets[j].string).toBe(dataSet);
-                        fakeAjaxRequest.send.callCount = 0;
-                        fakeAjaxRequest.setRequestHeader.callCount = 0;
-                        fakeAjaxRequestConstructor = (function () { return fakeAjaxRequest;});
-                        errorCallback = jasmine.createSpy("error callback");
-                        sucessCallback = jasmine.createSpy("success callback");
-                        expect(errorCallback).toBe(errorCallback);
-                        expect(sucessCallback).toBe(sucessCallback);
-                        expect(errorCallback).not.toBe(sucessCallback);
-                        protocolVers[i].container.set('AjaxRequest', DependancyInjectionContainer.wrap(fakeAjaxRequestConstructor));
-                        expect(protocolVers[i].container.get('MtGoxApi').post(path, paramSets[j].data, testApiKeys[k], secret, errorCallback, sucessCallback)).not.toBeDefined();
-                        expect(fakeAjaxRequest.send.callCount).toEqual(1);
-                        expect(fakeAjaxRequest.setRequestHeader.callCount).toEqual(3);
-                        expect(errorCallback).not.toHaveBeenCalled();
-                        expect(sucessCallback).not.toHaveBeenCalled();
-                    }, {dataSets: [paramSets[j].string]});
+                        protocolVers[i].urlTester(function (inputPath, baseUrl, dateStamp, expectedUrlResult) {
+                            protocolVers[i].hmacTester(function (expectedUrl, dataSet, secret, expectedHmac) {
+                            var errorCallback, sucessCallback;
+                            var fakeAjaxRequestConstructor;
+                            var fakeRequestHeaders = {};
+                            var fakeAjaxRequest = {
+                                open: jasmine.createSpy("open request event"),
+                                setRequestHeader: (function (key, val) {
+                                    expect(arguments.length).toEqual(2);
+                                    this.setRequestHeader.callCount++;
+                                    expect(this.open.callCount).toEqual(1);
+                                    expect(fakeRequestHeaders[key]).not.toBeDefined();
+                                    fakeRequestHeaders[key] = val;
+                                }),
+                                send: (function (data) {
+                                    expect(arguments.length).toEqual(1);
+                                    expect(data).toBe('nonce=' + (dateStamp*1000).toString() + paramSets[j].string);
+                                    this.send.callCount++;
+                                    expect(this.open).toHaveBeenCalledWith('POST', expectedUrlResult, true);
+                                    expect(this.open.callCount).toEqual(1);
+                                    expect(fakeRequestHeaders['Content-Type']).toBe('application/x-www-form-urlencoded');
+                                    expect(fakeRequestHeaders['Rest-Key']).toBe(testApiKeys[k].toString());
+                                    expect(fakeRequestHeaders['Rest-Sign']).toBe(expectedHmac.toString());
+                                    expect(this.onerror).toBe(errorCallback);
+                                    expect(this.onload).toBe(sucessCallback);
+                                })
+                            };
+                            expect('nonce=' + (dateStamp*1000).toString() + paramSets[j].string).toBe(dataSet);
+                            fakeAjaxRequest.send.callCount = 0;
+                            fakeAjaxRequest.setRequestHeader.callCount = 0;
+                            fakeAjaxRequestConstructor = (function () { return fakeAjaxRequest;});
+                            errorCallback = jasmine.createSpy("error callback");
+                            sucessCallback = jasmine.createSpy("success callback");
+                            expect(errorCallback).toBe(errorCallback);
+                            expect(sucessCallback).toBe(sucessCallback);
+                            expect(errorCallback).not.toBe(sucessCallback);
+                            protocolVers[i].container.set('AjaxRequest', DependancyInjectionContainer.wrap(fakeAjaxRequestConstructor));
+                            expect(protocolVers[i].container.get('MtGoxApi').post(inputPath, paramSets[j].data, testApiKeys[k], secret, errorCallback, sucessCallback)).not.toBeDefined();
+                            expect(fakeAjaxRequest.send.callCount).toEqual(1);
+                            expect(fakeAjaxRequest.setRequestHeader.callCount).toEqual(3);
+                            expect(errorCallback).not.toHaveBeenCalled();
+                            expect(sucessCallback).not.toHaveBeenCalled();
+                        }, {dataSets: ['nonce=' + (dateStamp*1000).toString() + paramSets[j].string], paths: [inputPath]});
+                    });
                 }
             }
         }
     });
 });
 
-/*
-
-
-
-function mtgoxpost(path, params, apiKey, secret, errorFunc, dataFunc) {
-	var request = new XMLHttpRequest();
-	var now = new (tobliGoxBot.get('TobliDate'))();
-	request.open("POST", tobliGoxBot.get('MtGoxApi').getUncachablePostUrl(path), true);
-	request.onerror = errorFunc;
-	request.onload = dataFunc;
-	var data = "nonce="+(now.getMicroTime());
-	for (var i in params) {
-		data+="&"+params[i];
-	}
-	data = encodeURI(data);
-	request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-	request.setRequestHeader("Rest-Key", apiKey);
-	request.setRequestHeader("Rest-Sign", tobliGoxBot.get('MtGoxApi').computeMessageHmac(path, data, secret));
-	request.send(data);
-}
-
-*/
