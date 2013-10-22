@@ -126,6 +126,7 @@ describe("jasmine extensions", function() {
         expect(function () { ensureArgsAreNotModified([], 2, 3); }).toThrow('Second parameter must be null or simple Object.');
         expect(function () { ensureArgsAreNotModified([], [], 3); }).toThrow('Second parameter must be null or simple Object.');
         expect(function () { ensureArgsAreNotModified([], null, 3); }).toThrow('Third parameter must be a function.');
+        expect(function () { ensureArgsAreNotModified([], undefined, 3); }).toThrow('Third parameter must be a function.');
         expect(function () { ensureArgsAreNotModified([], {}, 3); }).toThrow('Third parameter must be a function.');
         expect(function () { ensureArgsAreNotModified([], {}, uncalledFunction); }).toThrow('Must have at least 1 data set.');
         expect(function () {
@@ -152,21 +153,26 @@ describe("jasmine extensions", function() {
         expect(function () {
             ensureArgsAreNotModified([{name:'Larry', data: [1,2,3]}, {name:'Moe', data: ['a', 'c']}, {name:'Curly', data: ['b', 'd']}], {Moe: []}, uncalledFunction);
         }).toThrow('paramOverrides.Moe must be non-empty.');
-        callback = jasmine.createSpy('test callback');
-        ensureArgsAreNotModified([{name:'Larry', data: [1,2,3]}, {name:'Moe', data: ['a', 'c']}, {name:'Curly', data: ['b', 'd']}], {}, callback);
-        expect(callback.calls.length).toEqual(12);
-        expect(callback.calls[0].args).toEqual([1, 'a', 'b']);
-        expect(callback.calls[1].args).toEqual([1, 'a', 'd']);
-        expect(callback.calls[2].args).toEqual([1, 'c', 'b']);
-        expect(callback.calls[3].args).toEqual([1, 'c', 'd']);
-        expect(callback.calls[4].args).toEqual([2, 'a', 'b']);
-        expect(callback.calls[5].args).toEqual([2, 'a', 'd']);
-        expect(callback.calls[6].args).toEqual([2, 'c', 'b']);
-        expect(callback.calls[7].args).toEqual([2, 'c', 'd']);
-        expect(callback.calls[8].args).toEqual([3, 'a', 'b']);
-        expect(callback.calls[9].args).toEqual([3, 'a', 'd']);
-        expect(callback.calls[10].args).toEqual([3, 'c', 'b']);
-        expect(callback.calls[11].args).toEqual([3, 'c', 'd']);
+        var testEmptyOverride = (function testEmptyOverride(override) {
+            callback = jasmine.createSpy('test callback');
+            ensureArgsAreNotModified([{name:'Larry', data: [1,2,3]}, {name:'Moe', data: ['a', 'c']}, {name:'Curly', data: ['b', 'd']}], override, callback);
+            expect(callback.calls.length).toEqual(12);
+            expect(callback.calls[0].args).toEqual([1, 'a', 'b']);
+            expect(callback.calls[1].args).toEqual([1, 'a', 'd']);
+            expect(callback.calls[2].args).toEqual([1, 'c', 'b']);
+            expect(callback.calls[3].args).toEqual([1, 'c', 'd']);
+            expect(callback.calls[4].args).toEqual([2, 'a', 'b']);
+            expect(callback.calls[5].args).toEqual([2, 'a', 'd']);
+            expect(callback.calls[6].args).toEqual([2, 'c', 'b']);
+            expect(callback.calls[7].args).toEqual([2, 'c', 'd']);
+            expect(callback.calls[8].args).toEqual([3, 'a', 'b']);
+            expect(callback.calls[9].args).toEqual([3, 'a', 'd']);
+            expect(callback.calls[10].args).toEqual([3, 'c', 'b']);
+            expect(callback.calls[11].args).toEqual([3, 'c', 'd']);
+        });
+        testEmptyOverride();
+        testEmptyOverride(null);
+        testEmptyOverride({});
         callback = jasmine.createSpy('test callback');
         ensureArgsAreNotModified([{name:'Larry', data: [1,2,3]}, {name:'Moe', data: ['a', 'c']}, {name:'Curly', data: ['b', 'd']}], {Moe: ['q', 'r', 's']}, callback);
         expect(callback.calls.length).toEqual(18);

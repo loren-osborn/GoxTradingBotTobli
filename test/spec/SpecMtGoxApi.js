@@ -91,26 +91,17 @@ describe("getMtGoxApi", function() {
 
     embeddableTests.generators.UncachablePostUrl = (function (container, getBasePath) {
         return (function testUncachablePostUrl(testCallback, testData) {
-            testData = testData || {}
-            var i,j,k;
-            testData.paths = testData.paths || ['info.php', 'BTCSimolions/money/info'];
-            testData.v2BaseUrls = testData.v2BaseUrls || ['https://data.mtgox.com/api/2/', 'https://fake.mtgox.hostname/fake/api/path/'];
-            testData.dateStamps = testData.dateStamps || [946684800000, 946684800333];
-            expect(testData.paths).toBeOfType('Array');
-            expect(testData.paths.length).not.toBeLessThan(1);
-            expect(testData.v2BaseUrls).toBeOfType('Array');
-            expect(testData.v2BaseUrls.length).not.toBeLessThan(1);
-            expect(testData.dateStamps).toBeOfType('Array');
-            expect(testData.dateStamps.length).not.toBeLessThan(1);
-            for (i = 0; i < testData.paths.length; i++ ) {
-                for (j = 0; j < testData.v2BaseUrls.length; j++ ) {
-                    for (k = 0; k < testData.dateStamps.length; k++ ) {
-                        container.set('MtGoxAPI2BaseURL', testData.v2BaseUrls[j]);
-                        testTimeStamp = testData.dateStamps[k];
-                        testCallback(testData.paths[i], testData.v2BaseUrls[j], testData.dateStamps[k], (getBasePath(testData.v2BaseUrls[j])  + testData.paths[i] + '?t=' + testData.dateStamps[k].toString()));
-                    }
-                }
-            }
+            jasmine.iterateOverTestDataSets([
+                    {name: 'paths', data: ['info.php', 'BTCSimolions/money/info']},
+                    {name: 'v2BaseUrls', data: ['https://data.mtgox.com/api/2/', 'https://fake.mtgox.hostname/fake/api/path/']},
+                    {name: 'dateStamps', data: [946684800000, 946684800333]}],
+                testData,
+                (function (path, v2BaseUrl, dateStamp) {
+                    container.set('MtGoxAPI2BaseURL', v2BaseUrl);
+                    testTimeStamp = dateStamp;
+                    testCallback(path, v2BaseUrl, dateStamp, (getBasePath(v2BaseUrl)  + path + '?t=' + dateStamp.toString()));
+                })
+            );
         });
     });
 
@@ -134,30 +125,19 @@ describe("getMtGoxApi", function() {
 
     embeddableTests.generators.HmacComputation = (function (getComposedMessage) {
         return (function testHmacComputation(testCallback, testData) {
-            testData = testData || {}
-            var i,j,k,m;
-            testData.paths = testData.paths || ['foo', 'bar'];
-            testData.dataSets = testData.dataSets || ['BIG DATA', 'little data'];
-            testData.secrets = testData.secrets || ['STRONG SECRET', 'weak secret'];
-            expect(testData.paths).toBeOfType('Array');
-            expect(testData.paths.length).not.toBeLessThan(1);
-            expect(testData.dataSets).toBeOfType('Array');
-            expect(testData.dataSets.length).not.toBeLessThan(1);
-            expect(testData.secrets).toBeOfType('Array');
-            expect(testData.secrets.length).not.toBeLessThan(1);
-            var testHashes = ['hash1', 'hash2'];
-            for (i = 0; i < testData.paths.length; i++ ) {
-                for (j = 0; j < testData.dataSets.length; j++ ) {
-                    for (k = 0; k < testData.secrets.length; k++ ) {
-                        for (m = 0; m < testHashes.length; m++ ) {
-                            testHmacMessage = getComposedMessage(testData.paths[i], testData.dataSets[j]);
-                            testHmacSecret = testData.secrets[k];
-                            testHmacHash = testHashes[m];
-                            testCallback(testData.paths[i], testData.dataSets[j], testData.secrets[k], testHashes[m]);
-                        }
-                    }
-                }
-            }
+            jasmine.iterateOverTestDataSets([
+                    {name: 'paths', data: ['foo', 'bar']},
+                    {name: 'dataSets', data: ['BIG DATA', 'little data']},
+                    {name: 'secrets', data: ['STRONG SECRET', 'weak secret']},
+                    {name: 'testHashes', data: ['hash1', 'hash2']}],
+                testData,
+                (function (path, dataSet, secret, testHash) {
+                    testHmacMessage = getComposedMessage(path, dataSet);
+                    testHmacSecret = secret;
+                    testHmacHash = testHash;
+                    testCallback(path, dataSet, secret, testHash);
+                })
+            );
         });
     });
 
@@ -165,15 +145,20 @@ describe("getMtGoxApi", function() {
     embeddableTests.v2.HmacComputation = embeddableTests.generators.HmacComputation(function (path, data) { return path + '\0' + data; });
 
     it("should return API object supporting computeMessageHmac() method", function() {
-        var i,j,k;
+        var v1RunCount = 0;
+        var v2RunCount = 0;
         expect(mgApiV1Container.get('MtGoxApi').computeMessageHmac).isAFunction({withName:'computeMessageHmac'});
         expect(mgApiV2Container.get('MtGoxApi').computeMessageHmac).isAFunction({withName:'computeMessageHmac'});
         embeddableTests.v1.HmacComputation(function (path, dataSet, secret, expectedResult) {
+            v1RunCount++
             expect(mgApiV1Container.get('MtGoxApi').computeMessageHmac(path, dataSet, secret)).toEqual(expectedResult);
         });
         embeddableTests.v2.HmacComputation(function (path, dataSet, secret, expectedResult) {
+            v2RunCount++
             expect(mgApiV2Container.get('MtGoxApi').computeMessageHmac(path, dataSet, secret)).toEqual(expectedResult);
         });
+        expect(v1RunCount).toEqual(16);
+        expect(v2RunCount).toEqual(16);
     });
 
     it("should return API object supporting addBuyOrder() method", function() {
@@ -184,7 +169,7 @@ describe("getMtGoxApi", function() {
         expect(mgApiV2Container.get('MtGoxApi').addBuyOrder).isAFunction({withName:'addOrder'});
         for (i = 0; i < testCurrencies.length; i++ ) {
             for (j = 0; j < testAmounts.length; j++ ) {
-            	testMtGoxPostFunc.testErrorCallback = jasmine.createSpy('testErrorCallback');
+                testMtGoxPostFunc.testErrorCallback = jasmine.createSpy('testErrorCallback');
                 testMtGoxPostFunc.testSuccessCallback = jasmine.createSpy('testSuccessCallback');
                 testMtGoxPostFunc.expectedPath = 'buyBTC.php';
                 testMtGoxPostFunc.expectedData = ['Currency='+testCurrencies[i],'amount='+testAmounts[j]];
@@ -210,7 +195,7 @@ describe("getMtGoxApi", function() {
         expect(mgApiV2Container.get('MtGoxApi').addSellOrder).isAFunction({withName:'addOrder'});
         for (i = 0; i < testCurrencies.length; i++ ) {
             for (j = 0; j < testAmounts.length; j++ ) {
-            	testMtGoxPostFunc.testErrorCallback = jasmine.createSpy('testErrorCallback');
+                testMtGoxPostFunc.testErrorCallback = jasmine.createSpy('testErrorCallback');
                 testMtGoxPostFunc.testSuccessCallback = jasmine.createSpy('testSuccessCallback');
                 testMtGoxPostFunc.expectedPath = 'sellBTC.php';
                 testMtGoxPostFunc.expectedData = ['Currency='+testCurrencies[i],'amount='+testAmounts[j]];

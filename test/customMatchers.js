@@ -198,7 +198,7 @@
             assert(arguments.length <= 3, 'Too many parameters.');
             assert(arguments.length == 3, 'Missing required parameters.');
             assert(dataSets instanceof Array, 'First parameter must be an array.');
-            assert((paramOverrides === null) || (paramOverrides.constructor === Object), 'Second parameter must be null or simple Object.');
+            assert((paramOverrides === null) || (paramOverrides === undefined) || (paramOverrides.constructor === Object), 'Second parameter must be null or simple Object.');
             assert(testCallback instanceof Function, 'Third parameter must be a function.');
             assert(dataSets.length >= 1, 'Must have at least 1 data set.');
             var i, j, totalIterations = 1;
@@ -215,7 +215,7 @@
                 definedDataSets[dataSets[i].name] = true;
                 assert(dataSets[i].data instanceof Array, 'Dataset[' + i + '].data must be an Array.');
                 assert(dataSets[i].data.length > 0, 'Dataset[' + i + '].data must be non-empty.');
-                if (paramOverrides[dataSets[i].name] !== undefined) {
+                if (paramOverrides && (paramOverrides[dataSets[i].name] !== undefined)) {
                     assert(paramOverrides[dataSets[i].name] instanceof Array, 'paramOverrides.' + dataSets[i].name + ' must be an Array.');
                     assert(paramOverrides[dataSets[i].name].length > 0, 'paramOverrides.' + dataSets[i].name + ' must be non-empty.');
                     iterateData[i] = paramOverrides[dataSets[i].name];
