@@ -5,9 +5,6 @@ const showLastHours=[1,2,3,6,12,24,48,72,96,120,240,0];
 const MtGoxAPI2BaseURL = 'https://data.mtgox.com/api/2/';
 const useAPIv2=true;
 
-var ApiKey = localStorage.ApiKey || '';
-var ApiSec = localStorage.ApiSec || '';
-
 var tradingDisabledOnStart = (localStorage.tradingDisabledOnStart || 0);
 var tradingEnabled = (tradingDisabledOnStart==1 ? 0 : (localStorage.tradingEnabled || 0));
 if (tradingEnabled==1) {
@@ -51,6 +48,9 @@ var tobliGoxBot = new DependancyInjectionContainer({
 	AjaxRequest: DependancyInjectionContainer.wrap(XMLHttpRequest)
 });
 
+tobliGoxBot.get('MtGoxApi').setKey(localStorage.ApiKey || '');
+tobliGoxBot.get('MtGoxApi').setSecret(localStorage.ApiSec || '');
+
 var BTC = Number.NaN;
 var fiat = Number.NaN;
 
@@ -89,7 +89,7 @@ function schedUpdateInfo(t) {
 
 function updateInfo() {
 	updateInfoTimer=null;
-	if (ApiKey=='') {
+	if (!(tobliGoxBot.get('MtGoxApi').isKeySet())) {
 		// No API key. No use trying to fetch info...
 		BTC = Number.NaN;
 		fiat = Number.NaN;
@@ -99,7 +99,7 @@ function updateInfo() {
 
 	var path = tobliGoxBot.get('MtGoxApi').getAccountBalancePath({currency:currency});
 
-	mtgoxpost(path, [],
+	tobliGoxBot.get('MtGoxApi').post(path, [],
 		function(e) {
 			console.log("info error", e);
 			chrome.browserAction.setTitle({title: "Error getting user info. MtGox problem?"});
@@ -126,23 +126,6 @@ function updateInfo() {
 			schedUpdateInfo(5*60*1000); // Update balance every 5 minutes (should be smaller than the trading interval?)
 		}
 	)
-}
-
-function mtgoxpost(path, params, ef, df) {
-	var req = new XMLHttpRequest();
-	var now = new (tobliGoxBot.get('TobliDate'))();
-	req.open("POST", tobliGoxBot.get('MtGoxApi').getUncachablePostUrl(path), true);
-	req.onerror = ef;
-	req.onload = df;
-	var data = "nonce="+(now.getMicroTime());
-	for (var i in params)
-		data+="&"+params[i];
-	data = encodeURI(data);
-	var hmac = tobliGoxBot.get('MtGoxApi').computeMessageHmac(path, data, ApiSec);
-	req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-	req.setRequestHeader("Rest-Key", ApiKey);
-	req.setRequestHeader("Rest-Sign", hmac);
-	req.send(data);
 }
 
 function logOnErrorCallback(e) {
@@ -277,15 +260,15 @@ function trade() {
 			if ((fiat>0) || ((inverseEMA==1)&&(sellAmount>0))) {
 			//if (fiat>(Math.max(0,keepFiat))) {
 				//var s = fiat - keepFiat;
-				if ((tradingEnabled==1)&&(ApiKey!='')) {
+				if ((tradingEnabled==1)&&(tobliGoxBot.get('MtGoxApi').isKeySet())) {
 					if (inverseEMA!=1) {
 						// Normal EMA-strategy
 						console.log("BUY! (EMA("+EmaShortPar+")/EMA("+EmaLongPar+")>"+MinBuyThreshold+"% for "+tickCountBuy+" or more ticks)");
-						tobliGoxBot.get('MtGoxApi').addBuyOrder(mtgoxpost, currency, 1000, logOnErrorCallback, logOnLoadCallback);
+						tobliGoxBot.get('MtGoxApi').addBuyOrder(currency, 1000, logOnErrorCallback, logOnLoadCallback);
 					} else {
 						// Crazy Ivan!
 						console.log("Crazy Ivan SELL "+sellAmount+" BTC!"+(keepBTC>0?" (keep "+(keepBTC.toString()+(keepBTCUnitIsPercentage==1?" %":" BTC"))+")":"")+" EMA("+EmaShortPar+")/EMA("+EmaLongPar+")>"+MinBuyThreshold+"% for "+tickCountBuy+" or more ticks");
-						tobliGoxBot.get('MtGoxApi').addSellOrder(mtgoxpost, currency, sellAmount, logOnErrorCallback, logOnLoadCallback);
+						tobliGoxBot.get('MtGoxApi').addSellOrder(currency, sellAmount, logOnErrorCallback, logOnLoadCallback);
 					}
 				} else {
 					// Simulation only
@@ -315,15 +298,15 @@ function trade() {
 			latestSolidTrend=-3;
 
 			if ((sellAmount>0)||((inverseEMA==1)&&(fiat>0))) {
-				if ((tradingEnabled==1)&&(ApiKey!='')) {
+				if ((tradingEnabled==1)&&(tobliGoxBot.get('MtGoxApi').isKeySet())) {
 					if (inverseEMA!=1) {
 						// Normal EMA-strategy
 						console.log("SELL "+sellAmount+" BTC! (keep "+(keepBTC.toString()+(keepBTCUnitIsPercentage==1?" %":" BTC"))+") EMA("+EmaShortPar+")/EMA("+EmaLongPar+")<-"+MinSellThreshold+"% for "+tickCountSell+" or more ticks");
-						tobliGoxBot.get('MtGoxApi').addSellOrder(mtgoxpost, currency, sellAmount, logOnErrorCallback, logOnLoadCallback);
+						tobliGoxBot.get('MtGoxApi').addSellOrder(currency, sellAmount, logOnErrorCallback, logOnLoadCallback);
 					} else {
 						// Crazy Ivan!
 						console.log("Crazy Ivan BUY! (EMA("+EmaShortPar+")/EMA("+EmaLongPar+")<-"+MinSellThreshold+"% for "+tickCountSell+" or more ticks)");
-						tobliGoxBot.get('MtGoxApi').addBuyOrder(mtgoxpost, currency, 1000, logOnErrorCallback, logOnLoadCallback);
+						tobliGoxBot.get('MtGoxApi').addBuyOrder(currency, 1000, logOnErrorCallback, logOnLoadCallback);
 					}
 				} else {
 					// Simulation only
@@ -738,7 +721,7 @@ function onLod(d) {
 	log("getTrades post ok", d.currentTarget.responseText);
 }
 setTimeout(function(){
-	mtgoxpost("money/wallet/history", ['currency=USD'], onErr, onLod);
-	mtgoxpost("BTCUSD/money/info", [], onErr, onLod);
+	tobliGoxBot.get('MtGoxApi').post("money/wallet/history", ['currency=USD'], onErr, onLod);
+	tobliGoxBot.get('MtGoxApi').post("BTCUSD/money/info", [], onErr, onLod);
 },1000);
 */

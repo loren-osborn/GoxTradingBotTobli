@@ -1,5 +1,5 @@
 describe("getMtGoxApi", function() {
-    var embeddableTests = { v1: {}, v2: {}, generators: {}};
+    var embeddableTests = { v1: {}, v2: {}, common: {}, generators: {}};
     var testTimeStamp = 946684800000;
     var FakeDateConstructor = (function FakeDateConstructor() {
         expect(arguments.length).toEqual(0);
@@ -21,25 +21,6 @@ describe("getMtGoxApi", function() {
             return testHmacHash;
         })};
     });
-    var testMtGoxPostFunc = {};
-    testMtGoxPostFunc = (function testMtGoxPostFunc(a, b, c, d) {
-        expect(arguments.length).toEqual(4);
-        expect(testMtGoxPostFunc.expectedCallCount).toBeGreaterThan(0);
-        testMtGoxPostFunc.expectedCallCount--;
-        expect(a).toEqual(testMtGoxPostFunc.expectedPath);
-        expect(b).toEqual(testMtGoxPostFunc.expectedData);
-        expect(c).toEqual(testMtGoxPostFunc.testErrorCallback);
-        expect(d).toEqual(testMtGoxPostFunc.testSuccessCallback);
-        expect(testMtGoxPostFunc.testErrorCallback).not.toHaveBeenCalled();
-        expect(testMtGoxPostFunc.testSuccessCallback).not.toHaveBeenCalled();
-        c();
-        expect(testMtGoxPostFunc.testErrorCallback).toHaveBeenCalled();
-        expect(testMtGoxPostFunc.testSuccessCallback).not.toHaveBeenCalled();
-        d();
-        expect(testMtGoxPostFunc.testErrorCallback).toHaveBeenCalled();
-        expect(testMtGoxPostFunc.testSuccessCallback).toHaveBeenCalled();
-    });
-    testMtGoxPostFunc.expectedCallCount = 0;
     var mgApiV1Container = new DependancyInjectionContainer({
         TobliDate: DependancyInjectionContainer.wrap(FakeDateConstructor),
         MtGoxApi: getMtGoxApi,
@@ -162,54 +143,176 @@ describe("getMtGoxApi", function() {
     });
 
     it("should return API object supporting addBuyOrder() method", function() {
-        var testCurrencies = ['USD', 'Simoleons'];
-        var testAmounts = [314, 42, 3.14159];
-        var i,j;
+        var amountPermutations = [
+            {
+                currency: 'USD',
+                amount: 314,
+                v1Data: '&Currency=USD&amount=314',
+                v2Data: '&type=bid&amount_int=31400000000',
+                v2Path: 'BTCUSD/money/order/add'},
+            {
+                currency: 'USD',
+                amount: 42,
+                v1Data: '&Currency=USD&amount=42',
+                v2Data: '&type=bid&amount_int=4200000000',
+                v2Path: 'BTCUSD/money/order/add'},
+            {
+                currency: 'USD',
+                amount: 3.14159,
+                v1Data: '&Currency=USD&amount=3.14159',
+                v2Data: '&type=bid&amount_int=314159000',
+                v2Path: 'BTCUSD/money/order/add'},
+            {
+                currency: 'Simoleons',
+                amount: 314,
+                v1Data: '&Currency=Simoleons&amount=314',
+                v2Data: '&type=bid&amount_int=31400000000',
+                v2Path: 'BTCSimoleons/money/order/add'},
+            {
+                currency: 'Simoleons',
+                amount: 42,
+                v1Data: '&Currency=Simoleons&amount=42',
+                v2Data: '&type=bid&amount_int=4200000000',
+                v2Path: 'BTCSimoleons/money/order/add'},
+            {
+                currency: 'Simoleons',
+                amount: 3.14159,
+                v1Data: '&Currency=Simoleons&amount=3.14159',
+                v2Data: '&type=bid&amount_int=314159000',
+                v2Path: 'BTCSimoleons/money/order/add'}
+        ];
+        var i;
+        var errorCallback, sucessCallback;
         expect(mgApiV1Container.get('MtGoxApi').addBuyOrder).isAFunction({withName:'addOrder'});
         expect(mgApiV2Container.get('MtGoxApi').addBuyOrder).isAFunction({withName:'addOrder'});
-        for (i = 0; i < testCurrencies.length; i++ ) {
-            for (j = 0; j < testAmounts.length; j++ ) {
-                testMtGoxPostFunc.testErrorCallback = jasmine.createSpy('testErrorCallback');
-                testMtGoxPostFunc.testSuccessCallback = jasmine.createSpy('testSuccessCallback');
-                testMtGoxPostFunc.expectedPath = 'buyBTC.php';
-                testMtGoxPostFunc.expectedData = ['Currency='+testCurrencies[i],'amount='+testAmounts[j]];
-                testMtGoxPostFunc.expectedCallCount = 1;
-                mgApiV1Container.get('MtGoxApi').addBuyOrder(testMtGoxPostFunc, testCurrencies[i], testAmounts[j], testMtGoxPostFunc.testErrorCallback, testMtGoxPostFunc.testSuccessCallback);
-                expect(testMtGoxPostFunc.expectedCallCount).toEqual(0);
-                testMtGoxPostFunc.testErrorCallback = jasmine.createSpy('testErrorCallback');
-                testMtGoxPostFunc.testSuccessCallback = jasmine.createSpy('testSuccessCallback');
-                testMtGoxPostFunc.expectedPath = 'BTC'+testCurrencies[i]+'/money/order/add';
-                testMtGoxPostFunc.expectedData = ['type=bid','amount_int='+(testAmounts[j]*100000000).toString()];
-                testMtGoxPostFunc.expectedCallCount = 1;
-                mgApiV2Container.get('MtGoxApi').addBuyOrder(testMtGoxPostFunc, testCurrencies[i], testAmounts[j], testMtGoxPostFunc.testErrorCallback, testMtGoxPostFunc.testSuccessCallback);
-                expect(testMtGoxPostFunc.expectedCallCount).toEqual(0);
-            }
+        for (i = 0; i < amountPermutations.length; i++ ) {
+            embeddableTests.v1.post(
+                (function (dataHash) {
+                    errorCallback = jasmine.createSpy("error callback");
+                    sucessCallback = jasmine.createSpy("success callback");
+                    expect(errorCallback).toBe(errorCallback);
+                    expect(sucessCallback).toBe(sucessCallback);
+                    expect(errorCallback).not.toBe(sucessCallback);
+                    expect(dataHash.container.get('MtGoxApi').addBuyOrder(amountPermutations[i].currency, amountPermutations[i].amount, errorCallback, sucessCallback)).not.toBeDefined();
+                    expect(errorCallback).not.toHaveBeenCalled();
+                    expect(sucessCallback).not.toHaveBeenCalled();
+                }),
+                (function (eventCallbacks) {
+                    expect(eventCallbacks.errorCallback).toBe(errorCallback);
+                    expect(eventCallbacks.sucessCallback).toBe(sucessCallback);
+                }),
+                {
+                    paramSets: [{data: ['NOT', 'USED'], string: amountPermutations[i].v1Data}],
+                    paths: ['buyBTC.php']
+                }
+            );
+            embeddableTests.v2.post(
+                (function (dataHash) {
+                    errorCallback = jasmine.createSpy("error callback");
+                    sucessCallback = jasmine.createSpy("success callback");
+                    expect(errorCallback).toBe(errorCallback);
+                    expect(sucessCallback).toBe(sucessCallback);
+                    expect(errorCallback).not.toBe(sucessCallback);
+                    expect(dataHash.container.get('MtGoxApi').addBuyOrder(amountPermutations[i].currency, amountPermutations[i].amount, errorCallback, sucessCallback)).not.toBeDefined();
+                    expect(errorCallback).not.toHaveBeenCalled();
+                    expect(sucessCallback).not.toHaveBeenCalled();
+                }),
+                (function (eventCallbacks) {
+                    expect(eventCallbacks.errorCallback).toBe(errorCallback);
+                    expect(eventCallbacks.sucessCallback).toBe(sucessCallback);
+                }),
+                {
+                    paramSets: [{data: ['NOT', 'USED'], string: amountPermutations[i].v2Data}],
+                    paths: [amountPermutations[i].v2Path]
+                }
+            );
         }
     });
 
     it("should return API object supporting addSellOrder() method", function() {
-        var testCurrencies = ['USD', 'Simoleons'];
-        var testAmounts = [314, 42, 3.14159];
-        var i,j;
+        var amountPermutations = [
+            {
+                currency: 'USD',
+                amount: 314,
+                v1Data: '&Currency=USD&amount=314',
+                v2Data: '&type=ask&amount_int=31400000000',
+                v2Path: 'BTCUSD/money/order/add'},
+            {
+                currency: 'USD',
+                amount: 42,
+                v1Data: '&Currency=USD&amount=42',
+                v2Data: '&type=ask&amount_int=4200000000',
+                v2Path: 'BTCUSD/money/order/add'},
+            {
+                currency: 'USD',
+                amount: 3.14159,
+                v1Data: '&Currency=USD&amount=3.14159',
+                v2Data: '&type=ask&amount_int=314159000',
+                v2Path: 'BTCUSD/money/order/add'},
+            {
+                currency: 'Simoleons',
+                amount: 314,
+                v1Data: '&Currency=Simoleons&amount=314',
+                v2Data: '&type=ask&amount_int=31400000000',
+                v2Path: 'BTCSimoleons/money/order/add'},
+            {
+                currency: 'Simoleons',
+                amount: 42,
+                v1Data: '&Currency=Simoleons&amount=42',
+                v2Data: '&type=ask&amount_int=4200000000',
+                v2Path: 'BTCSimoleons/money/order/add'},
+            {
+                currency: 'Simoleons',
+                amount: 3.14159,
+                v1Data: '&Currency=Simoleons&amount=3.14159',
+                v2Data: '&type=ask&amount_int=314159000',
+                v2Path: 'BTCSimoleons/money/order/add'}
+        ];
+        var i;
+        var errorCallback, sucessCallback;
         expect(mgApiV1Container.get('MtGoxApi').addSellOrder).isAFunction({withName:'addOrder'});
         expect(mgApiV2Container.get('MtGoxApi').addSellOrder).isAFunction({withName:'addOrder'});
-        for (i = 0; i < testCurrencies.length; i++ ) {
-            for (j = 0; j < testAmounts.length; j++ ) {
-                testMtGoxPostFunc.testErrorCallback = jasmine.createSpy('testErrorCallback');
-                testMtGoxPostFunc.testSuccessCallback = jasmine.createSpy('testSuccessCallback');
-                testMtGoxPostFunc.expectedPath = 'sellBTC.php';
-                testMtGoxPostFunc.expectedData = ['Currency='+testCurrencies[i],'amount='+testAmounts[j]];
-                testMtGoxPostFunc.expectedCallCount = 1;
-                mgApiV1Container.get('MtGoxApi').addSellOrder(testMtGoxPostFunc, testCurrencies[i], testAmounts[j], testMtGoxPostFunc.testErrorCallback, testMtGoxPostFunc.testSuccessCallback);
-                expect(testMtGoxPostFunc.expectedCallCount).toEqual(0);
-                testMtGoxPostFunc.testErrorCallback = jasmine.createSpy('testErrorCallback');
-                testMtGoxPostFunc.testSuccessCallback = jasmine.createSpy('testSuccessCallback');
-                testMtGoxPostFunc.expectedPath = 'BTC'+testCurrencies[i]+'/money/order/add';
-                testMtGoxPostFunc.expectedData = ['type=ask','amount_int='+(testAmounts[j]*100000000).toString()];
-                testMtGoxPostFunc.expectedCallCount = 1;
-                mgApiV2Container.get('MtGoxApi').addSellOrder(testMtGoxPostFunc, testCurrencies[i], testAmounts[j], testMtGoxPostFunc.testErrorCallback, testMtGoxPostFunc.testSuccessCallback);
-                expect(testMtGoxPostFunc.expectedCallCount).toEqual(0);
-            }
+        for (i = 0; i < amountPermutations.length; i++ ) {
+            embeddableTests.v1.post(
+                (function (dataHash) {
+                    errorCallback = jasmine.createSpy("error callback");
+                    sucessCallback = jasmine.createSpy("success callback");
+                    expect(errorCallback).toBe(errorCallback);
+                    expect(sucessCallback).toBe(sucessCallback);
+                    expect(errorCallback).not.toBe(sucessCallback);
+                    expect(dataHash.container.get('MtGoxApi').addSellOrder(amountPermutations[i].currency, amountPermutations[i].amount, errorCallback, sucessCallback)).not.toBeDefined();
+                    expect(errorCallback).not.toHaveBeenCalled();
+                    expect(sucessCallback).not.toHaveBeenCalled();
+                }),
+                (function (eventCallbacks) {
+                    expect(eventCallbacks.errorCallback).toBe(errorCallback);
+                    expect(eventCallbacks.sucessCallback).toBe(sucessCallback);
+                }),
+                {
+                    paramSets: [{data: ['NOT', 'USED'], string: amountPermutations[i].v1Data}],
+                    paths: ['sellBTC.php']
+                }
+            );
+            embeddableTests.v2.post(
+                (function (dataHash) {
+                    errorCallback = jasmine.createSpy("error callback");
+                    sucessCallback = jasmine.createSpy("success callback");
+                    expect(errorCallback).toBe(errorCallback);
+                    expect(sucessCallback).toBe(sucessCallback);
+                    expect(errorCallback).not.toBe(sucessCallback);
+                    expect(dataHash.container.get('MtGoxApi').addSellOrder(amountPermutations[i].currency, amountPermutations[i].amount, errorCallback, sucessCallback)).not.toBeDefined();
+                    expect(errorCallback).not.toHaveBeenCalled();
+                    expect(sucessCallback).not.toHaveBeenCalled();
+                }),
+                (function (eventCallbacks) {
+                    expect(eventCallbacks.errorCallback).toBe(errorCallback);
+                    expect(eventCallbacks.sucessCallback).toBe(sucessCallback);
+                }),
+                {
+                    paramSets: [{data: ['NOT', 'USED'], string: amountPermutations[i].v2Data}],
+                    paths: [amountPermutations[i].v2Path]
+                }
+            );
         }
     });
 
@@ -246,33 +349,29 @@ describe("getMtGoxApi", function() {
         expect(mgApiV2Container.get('MtGoxApi').toString()).toEqual('MtGox API v2');
     });
 
-    it("should return API object supporting post() method", function() {
-        expect(mgApiV1Container.get('MtGoxApi').post).toBe(mgApiV2Container.get('MtGoxApi').post);
-        var paramSets = [
+    embeddableTests.generators.post = (function (container, hmacTester, urlTester) {
+        var defaultParamSets = [
             {  data: [],
-               string: ''},
+                string: ''},
             {  data: ['car=fast'],
-               string: '&car=fast'},
+                string: '&car=fast'},
             {  data: ['man=Fred', 'woman=Wilma'],
-               string: '&man=Fred&woman=Wilma'},
-           {  data: ['special=_();[]{}', 'chars=\\\'-!'],
-               string: '&special=_();%5B%5D%7B%7D&chars=%5C\'-!'}];
-        var testApiKeys = ['USER KEY 1', 'user key 2'];
-        var protocolVers = [
-            {   container: mgApiV1Container,
-                hmacTester: embeddableTests.v1.HmacComputation,
-                urlTester: embeddableTests.v1.UncachablePostUrl},
-            {   container: mgApiV2Container,
-                hmacTester: embeddableTests.v2.HmacComputation,
-                urlTester: embeddableTests.v2.UncachablePostUrl} ];
-        var i, j, k;
-        for (i = 0; i < protocolVers.length; i++) {
-            expect(protocolVers[i].container.get('MtGoxApi').post).isAFunction({withName:'post'});
-            for (j = 0; j < paramSets.length; j++) {
-                    for (k = 0; k < testApiKeys.length; k++) {
-                        protocolVers[i].urlTester(function (inputPath, baseUrl, dateStamp, expectedUrlResult) {
-                            protocolVers[i].hmacTester(function (expectedUrl, dataSet, secret, expectedHmac) {
-                            var errorCallback, sucessCallback;
+                string: '&man=Fred&woman=Wilma'},
+            {  data: ['special=_();[]{}', 'chars=\\\'-!'],
+                string: '&special=_();%5B%5D%7B%7D&chars=%5C\'-!'}];
+        return (function testPost(testCallback, confirmEventCallbacks, testData) {
+            jasmine.iterateOverTestDataSets([
+                    {name: 'paramSets', data: defaultParamSets},
+                    {name: 'apiKeys', data: ['USER KEY 1', 'user key 2']},
+                    {name: 'paths', data: ['info.php', 'BTCSimolions/money/info']},
+                    {name: 'v2BaseUrls', data: ['https://data.mtgox.com/api/2/', 'https://fake.mtgox.hostname/fake/api/path/']},
+                    {name: 'dateStamps', data: [946684800000, 946684800333]},
+                    {name: 'secrets', data: ['STRONG SECRET', 'weak secret']},
+                    {name: 'testHashes', data: ['hash1', 'hash2']}],
+                testData,
+                (function (paramSet, apiKey, inputPath, v2BaseUrl, dateStamp, apiSecret, testHash) {
+                    urlTester(function (innerPath, innerV2BaseUrl, innerDateStamp, expectedUrlResult) {
+                        hmacTester(function (hmacUrl, hmacDataSet, hmacSecret, expectedHmacResult) {
                             var fakeAjaxRequestConstructor;
                             var fakeRequestHeaders = {};
                             var fakeAjaxRequest = {
@@ -286,37 +385,108 @@ describe("getMtGoxApi", function() {
                                 }),
                                 send: (function (data) {
                                     expect(arguments.length).toEqual(1);
-                                    expect(data).toBe('nonce=' + (dateStamp*1000).toString() + paramSets[j].string);
+                                    expect(data).toBe(hmacDataSet);
                                     this.send.callCount++;
                                     expect(this.open).toHaveBeenCalledWith('POST', expectedUrlResult, true);
                                     expect(this.open.callCount).toEqual(1);
                                     expect(fakeRequestHeaders['Content-Type']).toBe('application/x-www-form-urlencoded');
-                                    expect(fakeRequestHeaders['Rest-Key']).toBe(testApiKeys[k].toString());
-                                    expect(fakeRequestHeaders['Rest-Sign']).toBe(expectedHmac.toString());
-                                    expect(this.onerror).toBe(errorCallback);
-                                    expect(this.onload).toBe(sucessCallback);
+                                    expect(fakeRequestHeaders['Rest-Key']).toBe(apiKey.toString());
+                                    expect(fakeRequestHeaders['Rest-Sign']).toBe(expectedHmacResult.toString());
+                                    confirmEventCallbacks({errorCallback: this.onerror, sucessCallback: this.onload});
                                 })
                             };
-                            expect('nonce=' + (dateStamp*1000).toString() + paramSets[j].string).toBe(dataSet);
                             fakeAjaxRequest.send.callCount = 0;
                             fakeAjaxRequest.setRequestHeader.callCount = 0;
                             fakeAjaxRequestConstructor = (function () { return fakeAjaxRequest;});
-                            errorCallback = jasmine.createSpy("error callback");
-                            sucessCallback = jasmine.createSpy("success callback");
-                            expect(errorCallback).toBe(errorCallback);
-                            expect(sucessCallback).toBe(sucessCallback);
-                            expect(errorCallback).not.toBe(sucessCallback);
-                            protocolVers[i].container.set('AjaxRequest', DependancyInjectionContainer.wrap(fakeAjaxRequestConstructor));
-                            expect(protocolVers[i].container.get('MtGoxApi').post(inputPath, paramSets[j].data, testApiKeys[k], secret, errorCallback, sucessCallback)).not.toBeDefined();
+                            container.set('AjaxRequest', DependancyInjectionContainer.wrap(fakeAjaxRequestConstructor));
+                            container.get('MtGoxApi').setKey(apiKey);
+                            container.get('MtGoxApi').setSecret(hmacSecret);
+                            testCallback({
+                                container: container,
+                                paramSet: paramSet,
+                                apiKey: apiKey,
+                                inputPath: inputPath,
+                                v2BaseUrl: v2BaseUrl,
+                                dateStamp: dateStamp,
+                                apiSecret: apiSecret,
+                                testHash: testHash,
+                                expectedUrlResult: expectedUrlResult
+                            });
                             expect(fakeAjaxRequest.send.callCount).toEqual(1);
                             expect(fakeAjaxRequest.setRequestHeader.callCount).toEqual(3);
-                            expect(errorCallback).not.toHaveBeenCalled();
-                            expect(sucessCallback).not.toHaveBeenCalled();
-                        }, {dataSets: ['nonce=' + (dateStamp*1000).toString() + paramSets[j].string], paths: [inputPath]});
+                        }, {
+                            paths: [inputPath],
+                            dataSets: ['nonce=' + (innerDateStamp*1000).toString() + paramSet.string],
+                            secrets: [apiSecret],
+                            testHashes: [testHash]
+                        });
+                    }, {
+                        paths: [inputPath],
+                        v2BaseUrls: [v2BaseUrl],
+                        dateStamps: [dateStamp]
                     });
-                }
-            }
+                })
+            );
+        });
+    });
+
+    embeddableTests.v1.post = embeddableTests.generators.post(mgApiV1Container, embeddableTests.v1.HmacComputation, embeddableTests.v1.UncachablePostUrl);
+    embeddableTests.v2.post = embeddableTests.generators.post(mgApiV2Container, embeddableTests.v2.HmacComputation, embeddableTests.v2.UncachablePostUrl);
+
+    it("should return API object supporting post() method", function() {
+        expect(mgApiV1Container.get('MtGoxApi').post).toBe(mgApiV2Container.get('MtGoxApi').post);
+        var protocolTesters = [ embeddableTests.v1.post, embeddableTests.v2.post ];
+        var i;
+        for (i = 0; i < protocolTesters.length; i++) {
+            var errorCallback, sucessCallback;
+            protocolTesters[i](
+                (function (dataHash) {
+                    errorCallback = jasmine.createSpy("error callback");
+                    sucessCallback = jasmine.createSpy("success callback");
+                    expect(errorCallback).toBe(errorCallback);
+                    expect(sucessCallback).toBe(sucessCallback);
+                    expect(errorCallback).not.toBe(sucessCallback);
+                    expect(dataHash.container.get('MtGoxApi').post(dataHash.inputPath, dataHash.paramSet.data, errorCallback, sucessCallback)).not.toBeDefined();
+                    expect(errorCallback).not.toHaveBeenCalled();
+                    expect(sucessCallback).not.toHaveBeenCalled();
+                }),
+                (function (eventCallbacks) {
+                    expect(eventCallbacks.errorCallback).toBe(errorCallback);
+                    expect(eventCallbacks.sucessCallback).toBe(sucessCallback);
+
+                })
+            );
         }
+    });
+
+    embeddableTests.common.accessors = (function accessors(testCallback, testData) {
+        jasmine.iterateOverTestDataSets([
+                {name: 'keys', data: [{set: false, value: ''}, {set: true, value: 'USER KEY 1'}, {set: true, value: 'user key 2'}]},
+                {name: 'secrets', data: ['STRONG SECRET', 'weak secret']}],
+            testData,
+            (function (keyData, secret) {
+                testCallback(keyData.value, secret, keyData.set);
+            })
+        );
+    });
+
+    it("should return API object supporting key and secret accessor methods", function() {
+        embeddableTests.common.accessors(function (key, secret, isKeySet) {
+            mgApiV1Container.get('MtGoxApi').setKey(key);
+            mgApiV1Container.get('MtGoxApi').setSecret(secret);
+            expect(mgApiV1Container.get('MtGoxApi').getKey()).toBe(key);
+            expect(mgApiV1Container.get('MtGoxApi').getSecret()).toBe(secret);
+            expect(mgApiV1Container.get('MtGoxApi').isKeySet()).toBe(isKeySet);
+            mgApiV2Container.get('MtGoxApi').setKey(key);
+            mgApiV2Container.get('MtGoxApi').setSecret(secret);
+            expect(mgApiV2Container.get('MtGoxApi').getKey()).toBe(key);
+            expect(mgApiV2Container.get('MtGoxApi').getSecret()).toBe(secret);
+            expect(mgApiV2Container.get('MtGoxApi').isKeySet()).toBe(isKeySet);
+        });
+        expect(mgApiV1Container.get('MtGoxApi').toString).isAFunction({withName:'toString'});
+        expect(mgApiV1Container.get('MtGoxApi').toString()).toEqual('MtGox API v0');
+        expect(mgApiV2Container.get('MtGoxApi').toString).isAFunction({withName:'toString'});
+        expect(mgApiV2Container.get('MtGoxApi').toString()).toEqual('MtGox API v2');
     });
 });
 

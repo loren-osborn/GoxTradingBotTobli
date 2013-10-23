@@ -153,8 +153,8 @@ function save() {
 		if (!confirm("Applying different Trading interval/EMA/Threshold values may case an instant trigger to execute a trade."))  return;
 	}
 
-	localStorage.ApiKey=bkgdPg.ApiKey=document.getElementById("apikey").value;
-	localStorage.ApiSec=bkgdPg.ApiSec=document.getElementById("apisec").value;
+	bkgdPg.tobliGoxBot.get('MtGoxApi').setKey(localStorage.ApiKey = document.getElementById("apikey").value);
+	bkgdPg.tobliGoxBot.get('MtGoxApi').setSecret(localStorage.ApiSec = document.getElementById("apisec").value);
 	bkgdPg.schedUpdateInfo(10);
 
 	localStorage.tradingEnabled=bkgdPg.tradingEnabled=(document.getElementById("tradingEnabled").checked?1:0);
@@ -227,8 +227,8 @@ function save() {
 }
 
 function setfields() {
-	document.getElementById("apikey").value=bkgdPg.ApiKey;
-	document.getElementById("apisec").value=bkgdPg.ApiSec;
+	document.getElementById("apikey").value = bkgdPg.tobliGoxBot.get('MtGoxApi').getKey();
+	document.getElementById("apisec").value = bkgdPg.tobliGoxBot.get('MtGoxApi').getSecret();
 	document.getElementById("emas").value=bkgdPg.EmaShortPar.toString();
 	document.getElementById("emal").value=bkgdPg.EmaLongPar.toString();
 	//document.getElementById("tras").value=bkgdPg.MinThreshold.toFixed(2);

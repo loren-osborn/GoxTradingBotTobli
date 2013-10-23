@@ -8,8 +8,15 @@ getMtGoxApi = (function () {
 	    var hmac = shaObj.getHMAC(secret, "B64", "SHA-512", "B64");
 	    return hmac;
 	});
-	var MtGoxApiCommon = (function MtGoxApiCommon() {});
-	MtGoxApiCommon.prototype.post = (function post(path, params, apiKey, secret, errorFunc, dataFunc) {
+	var MtGoxApiCommon = (function MtGoxApiCommon() {
+		var privateData = {};
+		this.setKey = (function setKey(newKey) {privateData.key = newKey;});
+		this.setSecret = (function setSecret(newSecret) {privateData.secret = newSecret;});
+		this.getKey = (function getKey() {return privateData.key;});
+		this.getSecret = (function getSecret() {return privateData.secret;});
+		this.isKeySet = (function isKeySet() {return (privateData.key != '');});
+	});
+	MtGoxApiCommon.prototype.post = (function post(path, params, errorFunc, dataFunc) {
 		var request = new (localAjaxRequest())();
 		var now = new (localGetTobliDate())();
 		request.open('POST', this.getUncachablePostUrl(path), true);
@@ -22,11 +29,13 @@ getMtGoxApi = (function () {
 		}
 		data = encodeURI(data);
 		request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-		request.setRequestHeader('Rest-Key', apiKey);
-		request.setRequestHeader('Rest-Sign', this.computeMessageHmac(path, data, secret));
+		request.setRequestHeader('Rest-Key', this.getKey());
+		request.setRequestHeader('Rest-Sign', this.computeMessageHmac(path, data, this.getSecret()));
 		request.send(data);
 	});
-	var MtGoxApiV1 = (function MtGoxApiV1() {});
+	var MtGoxApiV1 = (function MtGoxApiV1() {
+		MtGoxApiCommon.call(this);
+	});
 	MtGoxApiV1.prototype =  Object.create(MtGoxApiCommon.prototype);
 	MtGoxApiV1.prototype.constructor =  MtGoxApiV1;
 	MtGoxApiV1.prototype.getAccountBalancePath = function getAccountBalancePath() { return 'info.php'; };
@@ -36,8 +45,8 @@ getMtGoxApi = (function () {
 		return ('https://mtgox.com/api/0/' + path + '?t=' + curTime.getTime()); // Extra cache-busting...
 	};
 	MtGoxApiV1.prototype.computeMessageHmac = (function computeMessageHmac(path, data, key) { return computeHmac512(data, key); });
-	var getV1AddOrderMethod = (function (orderType) { return (function addOrder(fn, currency, amount, errorCallback, successCallback) {
-		fn(orderType + 'BTC.php', ['Currency='+currency,'amount='+amount], errorCallback, successCallback);
+	var getV1AddOrderMethod = (function (orderType) { return (function addOrder(currency, amount, errorCallback, successCallback) {
+		this.post(orderType + 'BTC.php', ['Currency='+currency,'amount='+amount], errorCallback, successCallback);
 	}); });
 	MtGoxApiV1.prototype.addBuyOrder = getV1AddOrderMethod('buy');
 	MtGoxApiV1.prototype.addSellOrder = getV1AddOrderMethod('sell');
@@ -46,7 +55,9 @@ getMtGoxApi = (function () {
 		return 'https://data.mtgox.com/api/0/data/getTrades.php?Currency=' + currency + '&since=' + (since.getMicroTime()) + '&nonce=' + (curTime.getMicroTime());
 	};
 	MtGoxApiV1.prototype.toString = (function toString() { return 'MtGox API v0'; });
-	var MtGoxApiV2 = (function MtGoxApiV2() {});
+	var MtGoxApiV2 = (function MtGoxApiV2() {
+		MtGoxApiCommon.call(this);
+	});
 	MtGoxApiV2.prototype =  Object.create(MtGoxApiCommon.prototype);
 	MtGoxApiV2.prototype.constructor =  MtGoxApiV2;
 	MtGoxApiV2.prototype.getAccountBalancePath = function getAccountBalancePath(params) { return ('BTC' + (params.currency) + '/money/info'); };
@@ -56,8 +67,8 @@ getMtGoxApi = (function () {
 		return (localGetMtGoxAPI2BaseURL() + path + '?t=' + curTime.getTime()); // Extra cache-busting...
 	};
 	MtGoxApiV2.prototype.computeMessageHmac = (function computeMessageHmac(path, data, key) { return computeHmac512(path + '\0' + data, key); });
-	var getV2AddOrderMethod = (function (orderType) { return (function addOrder(fn, currency, amount, errorCallback, successCallback) {
-		fn('BTC'+currency+'/money/order/add', [ 'type=' + orderType, 'amount_int=' + Math.round(amount*100000000).toString() ], errorCallback, successCallback);
+	var getV2AddOrderMethod = (function (orderType) { return (function addOrder(currency, amount, errorCallback, successCallback) {
+		this.post('BTC'+currency+'/money/order/add', [ 'type=' + orderType, 'amount_int=' + Math.round(amount*100000000).toString() ], errorCallback, successCallback);
 	}); });
 	MtGoxApiV2.prototype.addBuyOrder = getV2AddOrderMethod('bid');
 	MtGoxApiV2.prototype.addSellOrder = getV2AddOrderMethod('ask');
