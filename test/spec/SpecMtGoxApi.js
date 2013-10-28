@@ -9,6 +9,9 @@ describe("getMtGoxApi", function() {
     var testHmacSecret = undefined;
     var testHmacHash = undefined;
     var FakeJsSha = (function FakeJsSha(srcString, inputFormat, charSize) {
+        if (srcString != testHmacMessage) {
+            throw "somewhere to start debugging";
+        }
         expect(srcString).toEqual(testHmacMessage);
         expect(inputFormat).toEqual('TEXT');
         expect(charSize).toBeUndefined();
@@ -142,180 +145,6 @@ describe("getMtGoxApi", function() {
         expect(v2RunCount).toEqual(16);
     });
 
-    it("should return API object supporting addBuyOrder() method", function() {
-        var amountPermutations = [
-            {
-                currency: 'USD',
-                amount: 314,
-                v1Data: '&Currency=USD&amount=314',
-                v2Data: '&type=bid&amount_int=31400000000',
-                v2Path: 'BTCUSD/money/order/add'},
-            {
-                currency: 'USD',
-                amount: 42,
-                v1Data: '&Currency=USD&amount=42',
-                v2Data: '&type=bid&amount_int=4200000000',
-                v2Path: 'BTCUSD/money/order/add'},
-            {
-                currency: 'USD',
-                amount: 3.14159,
-                v1Data: '&Currency=USD&amount=3.14159',
-                v2Data: '&type=bid&amount_int=314159000',
-                v2Path: 'BTCUSD/money/order/add'},
-            {
-                currency: 'Simoleons',
-                amount: 314,
-                v1Data: '&Currency=Simoleons&amount=314',
-                v2Data: '&type=bid&amount_int=31400000000',
-                v2Path: 'BTCSimoleons/money/order/add'},
-            {
-                currency: 'Simoleons',
-                amount: 42,
-                v1Data: '&Currency=Simoleons&amount=42',
-                v2Data: '&type=bid&amount_int=4200000000',
-                v2Path: 'BTCSimoleons/money/order/add'},
-            {
-                currency: 'Simoleons',
-                amount: 3.14159,
-                v1Data: '&Currency=Simoleons&amount=3.14159',
-                v2Data: '&type=bid&amount_int=314159000',
-                v2Path: 'BTCSimoleons/money/order/add'}
-        ];
-        var i;
-        var errorCallback, sucessCallback;
-        expect(mgApiV1Container.get('MtGoxApi').addBuyOrder).isAFunction({withName:'addOrder'});
-        expect(mgApiV2Container.get('MtGoxApi').addBuyOrder).isAFunction({withName:'addOrder'});
-        for (i = 0; i < amountPermutations.length; i++ ) {
-            embeddableTests.v1.post(
-                (function (dataHash) {
-                    errorCallback = jasmine.createSpy("error callback");
-                    sucessCallback = jasmine.createSpy("success callback");
-                    expect(errorCallback).toBe(errorCallback);
-                    expect(sucessCallback).toBe(sucessCallback);
-                    expect(errorCallback).not.toBe(sucessCallback);
-                    expect(dataHash.container.get('MtGoxApi').addBuyOrder(amountPermutations[i].currency, amountPermutations[i].amount, errorCallback, sucessCallback)).not.toBeDefined();
-                    expect(errorCallback).not.toHaveBeenCalled();
-                    expect(sucessCallback).not.toHaveBeenCalled();
-                }),
-                (function (eventCallbacks) {
-                    expect(eventCallbacks.errorCallback).toBe(errorCallback);
-                    expect(eventCallbacks.sucessCallback).toBe(sucessCallback);
-                }),
-                {
-                    paramSets: [{data: ['NOT', 'USED'], string: amountPermutations[i].v1Data}],
-                    paths: ['buyBTC.php']
-                }
-            );
-            embeddableTests.v2.post(
-                (function (dataHash) {
-                    errorCallback = jasmine.createSpy("error callback");
-                    sucessCallback = jasmine.createSpy("success callback");
-                    expect(errorCallback).toBe(errorCallback);
-                    expect(sucessCallback).toBe(sucessCallback);
-                    expect(errorCallback).not.toBe(sucessCallback);
-                    expect(dataHash.container.get('MtGoxApi').addBuyOrder(amountPermutations[i].currency, amountPermutations[i].amount, errorCallback, sucessCallback)).not.toBeDefined();
-                    expect(errorCallback).not.toHaveBeenCalled();
-                    expect(sucessCallback).not.toHaveBeenCalled();
-                }),
-                (function (eventCallbacks) {
-                    expect(eventCallbacks.errorCallback).toBe(errorCallback);
-                    expect(eventCallbacks.sucessCallback).toBe(sucessCallback);
-                }),
-                {
-                    paramSets: [{data: ['NOT', 'USED'], string: amountPermutations[i].v2Data}],
-                    paths: [amountPermutations[i].v2Path]
-                }
-            );
-        }
-    });
-
-    it("should return API object supporting addSellOrder() method", function() {
-        var amountPermutations = [
-            {
-                currency: 'USD',
-                amount: 314,
-                v1Data: '&Currency=USD&amount=314',
-                v2Data: '&type=ask&amount_int=31400000000',
-                v2Path: 'BTCUSD/money/order/add'},
-            {
-                currency: 'USD',
-                amount: 42,
-                v1Data: '&Currency=USD&amount=42',
-                v2Data: '&type=ask&amount_int=4200000000',
-                v2Path: 'BTCUSD/money/order/add'},
-            {
-                currency: 'USD',
-                amount: 3.14159,
-                v1Data: '&Currency=USD&amount=3.14159',
-                v2Data: '&type=ask&amount_int=314159000',
-                v2Path: 'BTCUSD/money/order/add'},
-            {
-                currency: 'Simoleons',
-                amount: 314,
-                v1Data: '&Currency=Simoleons&amount=314',
-                v2Data: '&type=ask&amount_int=31400000000',
-                v2Path: 'BTCSimoleons/money/order/add'},
-            {
-                currency: 'Simoleons',
-                amount: 42,
-                v1Data: '&Currency=Simoleons&amount=42',
-                v2Data: '&type=ask&amount_int=4200000000',
-                v2Path: 'BTCSimoleons/money/order/add'},
-            {
-                currency: 'Simoleons',
-                amount: 3.14159,
-                v1Data: '&Currency=Simoleons&amount=3.14159',
-                v2Data: '&type=ask&amount_int=314159000',
-                v2Path: 'BTCSimoleons/money/order/add'}
-        ];
-        var i;
-        var errorCallback, sucessCallback;
-        expect(mgApiV1Container.get('MtGoxApi').addSellOrder).isAFunction({withName:'addOrder'});
-        expect(mgApiV2Container.get('MtGoxApi').addSellOrder).isAFunction({withName:'addOrder'});
-        for (i = 0; i < amountPermutations.length; i++ ) {
-            embeddableTests.v1.post(
-                (function (dataHash) {
-                    errorCallback = jasmine.createSpy("error callback");
-                    sucessCallback = jasmine.createSpy("success callback");
-                    expect(errorCallback).toBe(errorCallback);
-                    expect(sucessCallback).toBe(sucessCallback);
-                    expect(errorCallback).not.toBe(sucessCallback);
-                    expect(dataHash.container.get('MtGoxApi').addSellOrder(amountPermutations[i].currency, amountPermutations[i].amount, errorCallback, sucessCallback)).not.toBeDefined();
-                    expect(errorCallback).not.toHaveBeenCalled();
-                    expect(sucessCallback).not.toHaveBeenCalled();
-                }),
-                (function (eventCallbacks) {
-                    expect(eventCallbacks.errorCallback).toBe(errorCallback);
-                    expect(eventCallbacks.sucessCallback).toBe(sucessCallback);
-                }),
-                {
-                    paramSets: [{data: ['NOT', 'USED'], string: amountPermutations[i].v1Data}],
-                    paths: ['sellBTC.php']
-                }
-            );
-            embeddableTests.v2.post(
-                (function (dataHash) {
-                    errorCallback = jasmine.createSpy("error callback");
-                    sucessCallback = jasmine.createSpy("success callback");
-                    expect(errorCallback).toBe(errorCallback);
-                    expect(sucessCallback).toBe(sucessCallback);
-                    expect(errorCallback).not.toBe(sucessCallback);
-                    expect(dataHash.container.get('MtGoxApi').addSellOrder(amountPermutations[i].currency, amountPermutations[i].amount, errorCallback, sucessCallback)).not.toBeDefined();
-                    expect(errorCallback).not.toHaveBeenCalled();
-                    expect(sucessCallback).not.toHaveBeenCalled();
-                }),
-                (function (eventCallbacks) {
-                    expect(eventCallbacks.errorCallback).toBe(errorCallback);
-                    expect(eventCallbacks.sucessCallback).toBe(sucessCallback);
-                }),
-                {
-                    paramSets: [{data: ['NOT', 'USED'], string: amountPermutations[i].v2Data}],
-                    paths: [amountPermutations[i].v2Path]
-                }
-            );
-        }
-    });
-
     it("should return API object supporting getRequestSamplesUrl() method", function() {
         var testBaseUrls = ['https://data.mtgox.com/api/2/', 'https://fake.mtgox.hostname/fake/api/path/'];
         var testCurrencies = ['USD', 'Simoleons'];
@@ -359,7 +188,9 @@ describe("getMtGoxApi", function() {
                 string: '&man=Fred&woman=Wilma'},
             {  data: ['special=_();[]{}', 'chars=\\\'-!'],
                 string: '&special=_();%5B%5D%7B%7D&chars=%5C\'-!'}];
-        return (function testPost(testCallback, confirmEventCallbacks, testData) {
+        return (function testPost(testCallback, testData) {
+            var defaultErrorCallback = jasmine.createSpy("error callback");
+            var defaultSucessCallback = jasmine.createSpy("success callback");
             jasmine.iterateOverTestDataSets([
                     {name: 'paramSets', data: defaultParamSets},
                     {name: 'apiKeys', data: ['USER KEY 1', 'user key 2']},
@@ -367,9 +198,13 @@ describe("getMtGoxApi", function() {
                     {name: 'v2BaseUrls', data: ['https://data.mtgox.com/api/2/', 'https://fake.mtgox.hostname/fake/api/path/']},
                     {name: 'dateStamps', data: [946684800000, 946684800333]},
                     {name: 'secrets', data: ['STRONG SECRET', 'weak secret']},
-                    {name: 'testHashes', data: ['hash1', 'hash2']}],
+                    {name: 'testHashes', data: ['hash1', 'hash2']},
+                    {name: 'testErrorCallback', data: [defaultErrorCallback]},
+                    {name: 'testSucessCallback', data: [defaultSucessCallback]}],
                 testData,
-                (function (paramSet, apiKey, inputPath, v2BaseUrl, dateStamp, apiSecret, testHash) {
+                (function (paramSet, apiKey, inputPath, v2BaseUrl, dateStamp, apiSecret, testHash, errorCallback, sucessCallback) {
+                    var usingDefaultErrorCallback = (errorCallback === defaultErrorCallback);
+                    var usingDefaultSucessCallback = (sucessCallback === defaultSucessCallback);
                     urlTester(function (innerPath, innerV2BaseUrl, innerDateStamp, expectedUrlResult) {
                         hmacTester(function (hmacUrl, hmacDataSet, hmacSecret, expectedHmacResult) {
                             var fakeAjaxRequestConstructor;
@@ -392,7 +227,8 @@ describe("getMtGoxApi", function() {
                                     expect(fakeRequestHeaders['Content-Type']).toBe('application/x-www-form-urlencoded');
                                     expect(fakeRequestHeaders['Rest-Key']).toBe(apiKey.toString());
                                     expect(fakeRequestHeaders['Rest-Sign']).toBe(expectedHmacResult.toString());
-                                    confirmEventCallbacks({errorCallback: this.onerror, sucessCallback: this.onload});
+                                    expect(this.onerror).toBe(errorCallback);
+                                    expect(this.onload).toBe(sucessCallback);
                                 })
                             };
                             fakeAjaxRequest.send.callCount = 0;
@@ -410,10 +246,14 @@ describe("getMtGoxApi", function() {
                                 dateStamp: dateStamp,
                                 apiSecret: apiSecret,
                                 testHash: testHash,
-                                expectedUrlResult: expectedUrlResult
+                                expectedUrlResult: expectedUrlResult,
+                                errorCallback: errorCallback,
+                                sucessCallback: sucessCallback
                             });
                             expect(fakeAjaxRequest.send.callCount).toEqual(1);
                             expect(fakeAjaxRequest.setRequestHeader.callCount).toEqual(3);
+                            usingDefaultErrorCallback || expect(errorCallback).not.toHaveBeenCalled();
+                            usingDefaultSucessCallback || expect(sucessCallback).not.toHaveBeenCalled();
                         }, {
                             paths: [inputPath],
                             dataSets: ['nonce=' + (innerDateStamp*1000).toString() + paramSet.string],
@@ -441,22 +281,99 @@ describe("getMtGoxApi", function() {
             var errorCallback, sucessCallback;
             protocolTesters[i](
                 (function (dataHash) {
-                    errorCallback = jasmine.createSpy("error callback");
-                    sucessCallback = jasmine.createSpy("success callback");
-                    expect(errorCallback).toBe(errorCallback);
-                    expect(sucessCallback).toBe(sucessCallback);
-                    expect(errorCallback).not.toBe(sucessCallback);
-                    expect(dataHash.container.get('MtGoxApi').post(dataHash.inputPath, dataHash.paramSet.data, errorCallback, sucessCallback)).not.toBeDefined();
-                    expect(errorCallback).not.toHaveBeenCalled();
-                    expect(sucessCallback).not.toHaveBeenCalled();
-                }),
-                (function (eventCallbacks) {
-                    expect(eventCallbacks.errorCallback).toBe(errorCallback);
-                    expect(eventCallbacks.sucessCallback).toBe(sucessCallback);
-
+                    expect(dataHash.container.get('MtGoxApi').post(dataHash.inputPath, dataHash.paramSet.data, dataHash.errorCallback, dataHash.sucessCallback)).not.toBeDefined();
                 })
             );
         }
+    });
+
+    embeddableTests.generators.addOrder = (function (container, embeddablePostTest, convertCurrencyAndAmountToDataAndPath) {
+        return (function testPost(testCallback, testData) {
+            var defaultErrorCallback = jasmine.createSpy("error callback");
+            var defaultSucessCallback = jasmine.createSpy("success callback");
+            jasmine.iterateOverTestDataSets([
+                    {name: 'currencies', data: [{raw: 'USD', encoded: 'USD'}, {raw: 'Simoleons', encoded: 'Simoleons'}, {raw:'[Smakers]', encoded:'%5BSmakers%5D'}]},
+                    {name: 'amounts', data: [314, 42, 3.14159]},
+                    {name: 'apiKeys', data: ['USER KEY 1', 'user key 2']},
+                    {name: 'v2BaseUrls', data: ['https://data.mtgox.com/api/2/', 'https://fake.mtgox.hostname/fake/api/path/']},
+                    {name: 'dateStamps', data: [946684800000, 946684800333]},
+                    {name: 'secrets', data: ['STRONG SECRET', 'weak secret']},
+                    {name: 'testHashes', data: ['hash1', 'hash2']},
+                    {name: 'testErrorCallback', data: ['DEFAULT']},
+                    {name: 'testSucessCallback', data: ['DEFAULT']}],
+                testData,
+                (function (currency, amount, apiKey, v2BaseUrl, dateStamp, apiSecret, testHash, errorCallback, sucessCallback) {
+                    var dataAndPath = convertCurrencyAndAmountToDataAndPath(currency, amount);
+                    var iterationParams = {
+                        paramSets: [dataAndPath.data],
+                        paths: [dataAndPath.path],
+                        apiKeys: [apiKey],
+                        v2BaseUrls: [v2BaseUrl],
+                        dateStamps: [dateStamp],
+                        secrets: [apiSecret],
+                        testHashes: [testHash]
+                    };
+                    if (errorCallback !== 'DEFAULT') {
+                        iterationParams.errorCallback = [errorCallback];
+                    }
+                    if (sucessCallback !== 'DEFAULT') {
+                        iterationParams.sucessCallback = [sucessCallback];
+                    }
+                    embeddablePostTest(
+                        (function (dataHash) {
+                            var innerDataHash = {
+                                container: dataHash.container,
+                                currency: currency,
+                                amount: amount,
+                                apiKey: dataHash.apiKey,
+                                v2BaseUrl: dataHash.v2BaseUrl,
+                                dateStamp: dataHash.dateStamp,
+                                apiSecret: dataHash.apiSecret,
+                                testHash: dataHash.testHash,
+                                errorCallback: dataHash.errorCallback,
+                                sucessCallback: dataHash.sucessCallback
+                            };
+                            testCallback(innerDataHash);
+                        }), iterationParams
+                    );
+                })
+            );
+        });
+    });
+
+    embeddableTests.v1.addBuyOrder = embeddableTests.generators.addOrder(mgApiV1Container, embeddableTests.v1.post, (function (currency, amount) {
+        return {data: {data: ['NOT_USED'], string: '&Currency=' + currency.encoded + '&amount=' + amount}, path: 'buyBTC.php'};
+    }));
+    embeddableTests.v1.addSellOrder = embeddableTests.generators.addOrder(mgApiV1Container, embeddableTests.v1.post, (function (currency, amount) {
+        return {data: {data: ['NOT_USED'], string: '&Currency=' + currency.encoded + '&amount=' + amount}, path: 'sellBTC.php'};
+    }));
+    embeddableTests.v2.addBuyOrder = embeddableTests.generators.addOrder(mgApiV2Container, embeddableTests.v2.post, (function (currency, amount) {
+        return {data: {data: ['NOT_USED'], string: '&type=bid&amount_int=' + (amount * 100000000).toString()}, path: 'BTC' + currency.raw + '/money/order/add'};
+    }));
+    embeddableTests.v2.addSellOrder = embeddableTests.generators.addOrder(mgApiV2Container, embeddableTests.v2.post, (function (currency, amount) {
+        return {data: {data: ['NOT_USED'], string: '&type=ask&amount_int=' + (amount * 100000000).toString()}, path: 'BTC' + currency.raw + '/money/order/add'};
+    }));
+
+    it("should return API object supporting addBuyOrder() method", function() {
+        expect(mgApiV1Container.get('MtGoxApi').addBuyOrder).isAFunction({withName:'addOrder'});
+        embeddableTests.v1.addBuyOrder((function (dataHash) {
+            expect(dataHash.container.get('MtGoxApi').addBuyOrder(dataHash.currency.raw, dataHash.amount, dataHash.errorCallback, dataHash.sucessCallback)).not.toBeDefined();
+        }));
+        expect(mgApiV2Container.get('MtGoxApi').addBuyOrder).isAFunction({withName:'addOrder'});
+        embeddableTests.v2.addBuyOrder((function (dataHash) {
+            expect(dataHash.container.get('MtGoxApi').addBuyOrder(dataHash.currency.raw, dataHash.amount, dataHash.errorCallback, dataHash.sucessCallback)).not.toBeDefined();
+        }));
+    });
+
+    it("should return API object supporting addSellOrder() method", function() {
+        expect(mgApiV1Container.get('MtGoxApi').addSellOrder).isAFunction({withName:'addOrder'});
+        embeddableTests.v1.addSellOrder((function (dataHash) {
+            expect(dataHash.container.get('MtGoxApi').addSellOrder(dataHash.currency.raw, dataHash.amount, dataHash.errorCallback, dataHash.sucessCallback)).not.toBeDefined();
+        }));
+        expect(mgApiV2Container.get('MtGoxApi').addSellOrder).isAFunction({withName:'addOrder'});
+        embeddableTests.v2.addSellOrder((function (dataHash) {
+            expect(dataHash.container.get('MtGoxApi').addSellOrder(dataHash.currency.raw, dataHash.amount, dataHash.errorCallback, dataHash.sucessCallback)).not.toBeDefined();
+        }));
     });
 
     embeddableTests.common.accessors = (function accessors(testCallback, testData) {
