@@ -9,9 +9,6 @@ describe("getMtGoxApi", function() {
     var testHmacSecret = undefined;
     var testHmacHash = undefined;
     var FakeJsSha = (function FakeJsSha(srcString, inputFormat, charSize) {
-        if (srcString != testHmacMessage) {
-            throw "somewhere to start debugging";
-        }
         expect(srcString).toEqual(testHmacMessage);
         expect(inputFormat).toEqual('TEXT');
         expect(charSize).toBeUndefined();
@@ -92,19 +89,9 @@ describe("getMtGoxApi", function() {
     embeddableTests.v1.UncachablePostUrl = embeddableTests.generators.UncachablePostUrl(mgApiV1Container, function (v2BaseUrl) { return 'https://mtgox.com/api/0/'; });
     embeddableTests.v2.UncachablePostUrl = embeddableTests.generators.UncachablePostUrl(mgApiV2Container, function (v2BaseUrl) { return v2BaseUrl; });
 
-    it("should return API object supporting getUncachablePostUrl() method", function() {
-        var v1RunCount = 0;
-        var v2RunCount = 0;
-        embeddableTests.v1.UncachablePostUrl( function (path, baseUrl, dateStamp, expectedResult) {
-            v1RunCount++;
-            expect(mgApiV1Container.get('MtGoxApi').getUncachablePostUrl(path)).toEqual(expectedResult);
-        });
-        embeddableTests.v2.UncachablePostUrl( function (path, baseUrl, dateStamp, expectedResult) {
-            v2RunCount++;
-            expect(mgApiV2Container.get('MtGoxApi').getUncachablePostUrl(path)).toEqual(expectedResult);
-        });
-        expect(v1RunCount).toEqual(8);
-        expect(v2RunCount).toEqual(8);
+    it("should return API object with no public getUncachablePostUrl() method", function() {
+        expect(mgApiV1Container.get('MtGoxApi').getUncachablePostUrl).toBeUndefined();
+        expect(mgApiV2Container.get('MtGoxApi').getUncachablePostUrl).toBeUndefined();
     });
 
     embeddableTests.generators.HmacComputation = (function (getComposedMessage) {
@@ -128,21 +115,9 @@ describe("getMtGoxApi", function() {
     embeddableTests.v1.HmacComputation = embeddableTests.generators.HmacComputation(function (path, data) { return data; });
     embeddableTests.v2.HmacComputation = embeddableTests.generators.HmacComputation(function (path, data) { return path + '\0' + data; });
 
-    it("should return API object supporting computeMessageHmac() method", function() {
-        var v1RunCount = 0;
-        var v2RunCount = 0;
-        expect(mgApiV1Container.get('MtGoxApi').computeMessageHmac).isAFunction({withName:'computeMessageHmac'});
-        expect(mgApiV2Container.get('MtGoxApi').computeMessageHmac).isAFunction({withName:'computeMessageHmac'});
-        embeddableTests.v1.HmacComputation(function (path, dataSet, secret, expectedResult) {
-            v1RunCount++
-            expect(mgApiV1Container.get('MtGoxApi').computeMessageHmac(path, dataSet, secret)).toEqual(expectedResult);
-        });
-        embeddableTests.v2.HmacComputation(function (path, dataSet, secret, expectedResult) {
-            v2RunCount++
-            expect(mgApiV2Container.get('MtGoxApi').computeMessageHmac(path, dataSet, secret)).toEqual(expectedResult);
-        });
-        expect(v1RunCount).toEqual(16);
-        expect(v2RunCount).toEqual(16);
+    it("should return API object with no public computeMessageHmac() method", function() {
+        expect(mgApiV1Container.get('MtGoxApi').computeMessageHmac).toBeUndefined();
+        expect(mgApiV2Container.get('MtGoxApi').computeMessageHmac).toBeUndefined();
     });
 
     it("should return API object supporting getRequestSamplesUrl() method", function() {
@@ -274,7 +249,6 @@ describe("getMtGoxApi", function() {
     embeddableTests.v2.post = embeddableTests.generators.post(mgApiV2Container, embeddableTests.v2.HmacComputation, embeddableTests.v2.UncachablePostUrl);
 
     it("should return API object supporting post() method", function() {
-        expect(mgApiV1Container.get('MtGoxApi').post).toBe(mgApiV2Container.get('MtGoxApi').post);
         var protocolTesters = [ embeddableTests.v1.post, embeddableTests.v2.post ];
         var i;
         for (i = 0; i < protocolTesters.length; i++) {
@@ -406,4 +380,3 @@ describe("getMtGoxApi", function() {
         expect(mgApiV2Container.get('MtGoxApi').toString()).toEqual('MtGox API v2');
     });
 });
-

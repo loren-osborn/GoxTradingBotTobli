@@ -44,7 +44,7 @@
         return (this.actual) && toBeOfTypeMatcher.apply({actual: this.actual.constructor}, ['Function']) && (jasmine.getNameOfFunction(this.actual.constructor) == className);
     };
     var isAFunctionMatcher = function(parameterObject) {
-        // This is a hack I pulled from here: 
+        // This is a hack I pulled from here:
         // http://stackoverflow.com/questions/5999998/how-can-i-check-if-a-javascript-variable-is-function-type
         var retVal = (this.actual) && toBeOfTypeMatcher.apply(this, ['Function']);
         var fnName;
@@ -74,7 +74,7 @@
         });
         parameterObject = parameterObject || {};
         var cleanParamObj = {
-            withParentClass:        (parameterObject.withParentClass        || Object     ), 
+            withParentClass:        (parameterObject.withParentClass        || Object     ),
             whenCalledWith:         (parameterObject.whenCalledWith         || []         ),
             returningObjectOfClass: (parameterObject.returningObjectOfClass || this.actual),
             isFunctionParams:       (parameterObject.withName ? [{'withName': parameterObject.withName}] : [])
@@ -205,8 +205,8 @@
             var prameters, paramIndex, remainder;
             for (i = 0; i < dataSets.length; i++) {
                 assert(
-                        (dataSets[i].name !== null) && 
-                        ({}.toString.call(dataSets[i].name) == '[object String]') && 
+                        (dataSets[i].name !== null) &&
+                        ({}.toString.call(dataSets[i].name) == '[object String]') &&
                         (dataSets[i].name.length > 0),
                     'Dataset[' + i + '].name must be a non-empty string.');
                 for (j = 0; j < i; j++) {

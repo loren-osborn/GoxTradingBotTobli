@@ -48,7 +48,7 @@ describe("jasmine extensions", function() {
             expect(0).toEqual(1);
             expect(0).not.toEqual(0);
         }).toEqual([
-            'Expected 0 to equal 1.', 
+            'Expected 0 to equal 1.',
             'Expected 0 not to equal 0.'
         ]);
         var newAddMatcherResult = dummyExpectation.spec.addMatcherResult;
