@@ -11,7 +11,7 @@ table.top {
 }
 .outer {
 	padding:20px;
-	vertical-align:top;	
+	vertical-align:top;
 }
 td {
 	font-size:12px;
@@ -64,21 +64,21 @@ sup {
 <table border="0" style="width:100%;max-width:1120px">
 	<tr>
 		<td class="outer">
-			
+
 			<table cellpadding="3" cellspacing="0" class="top">
 				<form>
 					<tr>
-					 <td nowrap="nowrap" style="vertical-align:top;padding-top:5px;">MtGox API Key<sup> 1</sup></td>
-					 <td>
+						<td nowrap="nowrap" style="vertical-align:top;padding-top:5px;">MtGox API Key<sup> 1</sup></td>
+						<td>
 						<input type="text" size="36" id="apikey" class="mono maxwide">
-					 </td>
+						</td>
 					</tr>
-										
+
 					<tr>
-					 <td nowrap="nowrap" style="vertical-align:top;padding-top:5px;width:100px"><nobr>MtGox API Secret<sup> 1</sup>&nbsp;</nobr></td>
-					 <td>
+						<td nowrap="nowrap" style="vertical-align:top;padding-top:5px;width:100px"><nobr>MtGox API Secret<sup> 1</sup>&nbsp;</nobr></td>
+						<td>
 						<textarea id="apisec" cols="36" rows="3" class="mono maxwide"></textarea>
-					 </td>
+						</td>
 					</tr>
 
 					<tr>
@@ -93,7 +93,7 @@ sup {
 							<input type="checkbox" value="true" id="tradingDisabledOnStart"> (always start disabled to avoid instant/accidental trading)
 						</td>
 					</tr>
-					
+
 					<tr>
 						<td nowrap="nowrap" style="vertical-align:top;padding-top:5px;">Sample interval</td>
 						<td>
@@ -113,7 +113,7 @@ sup {
 						</td>
 					</tr>
 
-					
+
 					<tr>
 						<td nowrap="nowrap" style="vertical-align:top;padding-top:5px;">Show last</td>
 						<td>
@@ -161,7 +161,7 @@ sup {
 						<td class="EMASettingsCell" colspan="2">
 							<table width="400" cellpadding=0 cellspacing=0>
 								<tr>
-									<td width="50%">Buy after 
+									<td width="50%">Buy after
 										<select id="tickCountBuy" class="mono">
 											<option value="1">1 sample</option>
 											<option value="2">2 samples</option>
@@ -170,7 +170,7 @@ sup {
 											<option value="5">5 samples</option>
 										</select>
 									</td>
-									<td width="50%">Sell after 
+									<td width="50%">Sell after
 										<select id="tickCountSell" class="mono">
 											<option value="1">1 sample</option>
 											<option value="2">2 samples</option>
@@ -183,10 +183,10 @@ sup {
 							</table>
 						</td>
 					</tr>
-					
+
 					<tr>
 						<td class="experimentalRulesSettingsCell" colspan="2" style="background:inherit;padding-top:1px;">&nbsp;</td>
-					</tr>					
+					</tr>
 					<tr>
 						<td class="experimentalRulesSettingsCell" colspan="2">
 							Experimantal settings: <span style="display:inline-block;background:#FF0000;color:#FFF;padding:2px 5px; margin:0 5px">Use at your own risk!!</span>
@@ -200,7 +200,7 @@ sup {
 										Trade <b>only</b> on trend switches
 									</td>
 									<td class="experimentalRulesSettingsCell top" >
-										 <input type="checkbox" value="true" id="tradeOnlyAfterSwitch" style="margin-top:-3px">
+											<input type="checkbox" value="true" id="tradeOnlyAfterSwitch" style="margin-top:-3px">
 									</td>
 									<td class="experimentalRulesSettingsCell smallFont top" style="padding-top:0;padding-bottom:10px;">
 										Only trade after a trend switch. I.e. when turning on the bot, it will NOT start trading until the current trend turns (unless the very latest sample triggered a switch). This is actually more close to Goomboo's original strategy. If you find yourself in the wrong position between trend switches, you should wait until the next swing.
@@ -211,19 +211,19 @@ sup {
 										<nobr>Invert EMA-strategy</nobr>
 									</td>
 									<td class="experimentalRulesSettingsCell top" >
-										 <input type="checkbox" value="true" id="inverseEMA" style="margin-top:-3px">
+											<input type="checkbox" value="true" id="inverseEMA" style="margin-top:-3px">
 									</td>
 									<td class="experimentalRulesSettingsCell smallFont top" style="padding-top:0;padding-bottom:10px;">
 										A.k.a. "The Crazy Ivan"! When the EMA-strategy is reversed, the bot will buy when it's supposed to sell, and sell when it should buy! :) There are absolutely NO theories supporting this strategy, however, when the market is ranging and you feel that the bot is always 180 degrees out of phase with the swings, it might work. Maybe...
 									</td>
-								</tr>								
+								</tr>
 							</table>
 						</td>
 					</tr>
 <!--
 					<tr>
 						<td class="experimentalRulesSettingsCell" colspan="2">
-							These rules are 
+							These rules are
 							<select id="simpleRulesMode" class="mono">
 								<option value="0">disabled</option>
 								<option value="1">enabled, but only used when the EMA-indicator is right</option>
@@ -241,7 +241,7 @@ sup {
 							</table>
 						</td>
 					</tr>
--->					
+-->
 					<tr>
 						<td colspan="2" style="padding-top:1px;">&nbsp;</td>
 					</tr>
@@ -249,7 +249,7 @@ sup {
 						<td colspan="2">
 							<table width="400" height="20" cellpadding=0 cellspacing=0>
 								<tr>
-									<td width="50%">Fiat currency: 
+									<td width="50%">Fiat currency:
 										<select id="currencySelector" class="mono">
 											<option value="USD">USD</option>
 											<option value="AUD">AUD</option>
@@ -269,22 +269,22 @@ sup {
 											<option value="THB">THB</option>
 											<option value="NOK">NOK</option>
 											<option value="CZK">CZK</option>
-										</select>										
+										</select>
 									<td>Keep BTC: <input type="text" size="10" id="keepBTC" class="mono r"></td>
 									<!--<td>Keep Fiat: <input type="text" size="6" id="keepFiat" class="mono"></td>-->
 								</tr>
 							</table>
 						</td>
 					</tr>
-					
+
 					<tr>
 						<td colspan="2" style="padding-top:1px;">&nbsp;</td>
-					</tr>					
+					</tr>
 					<tr>
-					 <td colspan="2" align="center">
-					  <input type="button" style="width:200px;" id="butres" value="Reset to defaults">
-					  <input type="submit" style="width:200px;" id="butsav" value="Apply and save changes">
-					 </td>
+						<td colspan="2" align="center">
+						<input type="button" style="width:200px;" id="butres" value="Reset to defaults">
+						<input type="submit" style="width:200px;" id="butsav" value="Apply and save changes">
+						</td>
 					</tr>
 				</form>
 			</table>
@@ -311,7 +311,7 @@ sup {
 				Download the latest version at <a href="https://github.com/TobbeLino/GoxTradingBotTobli">https://github.com/TobbeLino/GoxTradingBotTobli</a><br><br>
 				If you like my modifications, please make a donation! :) <b>1LUqdAXvH9gbYemZKeiMrVJ5njhm6ZvKmF</b>
 			</div>
-		</td> 
+		</td>
 	</tr>
 </table>
 

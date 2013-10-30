@@ -52,7 +52,7 @@ var DependancyInjectionContainer = (function () {
 									expirationMap[resolvingList[j]].push(key);
 								}
 							}
-							funcArgValueList.push((function (c, k) { return (function () { return c.get(k); });})(this, funcArgKeyList[i]));
+							funcArgValueList.push((function (c, k) { return (function () { return c.get(k); }); })(this, funcArgKeyList[i]));
 							resolvingList.pop();
 						}
 					}
@@ -75,7 +75,8 @@ var DependancyInjectionContainer = (function () {
 		});
 	});
 	dic.wrap = (function wrap(input) {
-		return (function () {return input;});
+		return (function () { return input; });
 	});
 	return dic;
 })();
+
