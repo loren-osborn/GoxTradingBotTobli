@@ -18,7 +18,7 @@ var tradingIntervalMinutes = parseInt(localStorage.tradingIntervalMinutes || 60)
 var LogLines = parseInt(localStorage.LogLines || 0);
 var currency = localStorage.currency || 'USD'; // Fiat currency to trade with
 var keepBTC = parseFloat(localStorage.keepBTC || 0.0); // this amount in BTC will be untouched by trade - bot will play with the rest
-var keepBTCUnitIsPercentage = 0; //(localStorage.keepBTCUnitIsPercentage || 0);  // Does not work, so don't uncomment...
+var keepBTCUnitIsPercentage = 0; // (localStorage.keepBTCUnitIsPercentage || 0);  // Does not work, so don't uncomment...
 // var keepFiat = parseFloat(localStorage.keepFiat || 0.0); 	// this amount in Fiat currency will be untouched by trade - bot will play with the rest - does not work, so don't uncomment...
 
 // Parameteres for "EMA settings"
@@ -42,7 +42,7 @@ var tobliGoxBot = new DependancyInjectionContainer({
 	TobliDate: getTobliDateConstructor,
 	NativeDate: DependancyInjectionContainer.wrap(Date),
 	MtGoxApi: getMtGoxApi,
-	MtGoxApiVersion: (useAPIv2?2:1),
+	MtGoxApiVersion: (useAPIv2 ? 2 : 1),
 	MtGoxAPI2BaseURL: MtGoxAPI2BaseURL,
 	JsSha: DependancyInjectionContainer.wrap(jsSHA),
 	AjaxRequest: DependancyInjectionContainer.wrap(XMLHttpRequest)
@@ -75,7 +75,7 @@ function updateEMA(ema, N) {
 		if (ema.length == 0) {
 			ema.push(H1[0]);
 		} else {
-			ema.push(H1[ema.length]*k + ema[ema.length - 1]*(1 - k));
+			ema.push(H1[ema.length] * k + ema[ema.length - 1] * (1 - k));
 		}
 	}
 }
@@ -110,11 +110,11 @@ function updateInfo() {
 			try {
 				var rr = tobliGoxBot.get('MtGoxApi').getResponseData(d.currentTarget.responseText);
 				if (typeof(rr.Wallets) == 'undefined') {
-					log('Error fetching user info:'+ rr.error);
+					log('Error fetching user info:' + rr.error);
 					chrome.browserAction.setTitle({title: 'Error getting balance. MtGox problem?'});
 				} else {
-					BTC = (rr.Wallets['BTC']?parseFloat(rr.Wallets['BTC'].Balance.value):0);
-					fiat = (rr.Wallets[currency]?parseFloat(rr.Wallets[currency].Balance.value):0);
+					BTC = (rr.Wallets['BTC'] ? parseFloat(rr.Wallets['BTC'].Balance.value) : 0);
+					fiat = (rr.Wallets[currency] ? parseFloat(rr.Wallets[currency].Balance.value) : 0);
 					chrome.browserAction.setTitle({title: (BTC.toFixed(3) + ' BTC + ' + fiat.toFixed(2) + ' ' + currency)});
 					refreshPopup(true);
 				}
@@ -172,10 +172,10 @@ function checkThresholdsAt(idx, buy) {
 function getTrendAtIndex(i) {
 	// This function return the calculated trend at index i, with respect to EMA-values, thresholds and no of samples before triggering.
 	// Return values:
-	// 0		= no trend
-	// 1/-1	= weak trend up/down (below thresholds)
-	// 2/-2	= strong trend up/down (above thresholds)
-	// 3/-3	= strong trend up/down and enough samples has passed (according to settings "Buy/Sell after X samples")
+	// 0 = no trend
+	// 1/-1 = weak trend up/down (below thresholds)
+	// 2/-2 = strong trend up/down (above thresholds)
+	// 3/-3 = strong trend up/down and enough samples has passed (according to settings "Buy/Sell after X samples")
 
 	if ((H1.length < 5) || (i < 5) || (i >= H1.length)) {
 		// All data not available
@@ -201,19 +201,19 @@ function getTrendAtIndex(i) {
 			}
 		}
 	} else if (dif1 < 0) {
-		trend=-1;
-		if (dif1<-MinSellThreshold) {
-			trend=-2;
+		trend = -1;
+		if (dif1 < -MinSellThreshold) {
+			trend = -2;
 			var dif2 = getemadif(i - 1);
 			var dif3 = getemadif(i - 2);
 			var dif4 = getemadif(i - 3);
 			var dif5 = getemadif(i - 4);
 			if ((tickCountSell == 1) ||
-					(tickCountSell == 2 && (dif2<-MinSellThreshold)) ||
-					(tickCountSell == 3 && (dif2<-MinSellThreshold) && (dif3<-MinSellThreshold)) ||
-					(tickCountSell == 4 && (dif2<-MinSellThreshold) && (dif3<-MinSellThreshold) && (dif4<-MinSellThreshold)) ||
-					(tickCountSell == 5 && (dif2<-MinSellThreshold) && (dif3<-MinSellThreshold) && (dif4<-MinSellThreshold) && (dif5<-MinSellThreshold))) {
-				trend=-3;
+					(tickCountSell == 2 && (dif2 < -MinSellThreshold)) ||
+					(tickCountSell == 3 && (dif2 < -MinSellThreshold) && (dif3 < -MinSellThreshold)) ||
+					(tickCountSell == 4 && (dif2 < -MinSellThreshold) && (dif3 < -MinSellThreshold) && (dif4 < -MinSellThreshold)) ||
+					(tickCountSell == 5 && (dif2 < -MinSellThreshold) && (dif3 < -MinSellThreshold) && (dif4 < -MinSellThreshold) && (dif5 < -MinSellThreshold))) {
+				trend = -3;
 			}
 		}
 	}
@@ -283,23 +283,23 @@ function trade() {
 		} else {
 			console.log("Trend is up, but not for long enough (needs to be \"up\" for at least " + tickCountBuy + ' samples)');
 		}
-	} else if (currentTrend<-1) {
+	} else if (currentTrend < -1) {
 		// Trend is down
 		chrome.browserAction.setBadgeBackgroundColor({color:[128, 0, 0, 200]});
 
-		if (currentTrend==-3) {
+		if (currentTrend == -3) {
 			// Trend is down, also according to the "Sell after X samples"-setting
 
-			if ((tradeOnlyAfterSwitch == 1) && (latestSolidTrend==-3)) {
+			if ((tradeOnlyAfterSwitch == 1) && (latestSolidTrend == -3)) {
 				// tradeOnlyAfterSwitch == true but the trend has not switched: Don't trade
 				log('Trend has not switched (still down). The setting "tradeOnlyAfterSwitch==true", so do not trade...');
 				return;
 			}
-			latestSolidTrend=-3;
+			latestSolidTrend = -3;
 
 			if ((sellAmount > 0) || ((inverseEMA == 1) && (fiat > 0))) {
 				if ((tradingEnabled == 1) && (tobliGoxBot.get('MtGoxApi').isKeySet())) {
-					if (inverseEMA!=1) {
+					if (inverseEMA != 1) {
 						// Normal EMA-strategy
 						console.log('SELL ' + sellAmount + ' BTC! (keep ' + (keepBTC.toString() + (keepBTCUnitIsPercentage == 1 ? ' %' : ' BTC')) + ') EMA(' + EmaShortPar + ')/EMA(' + EmaLongPar + ')<-' + MinSellThreshold + '% for ' + tickCountSell + ' or more ticks');
 						tobliGoxBot.get('MtGoxApi').addSellOrder(currency, sellAmount, logOnErrorCallback, logOnLoadCallback);
@@ -310,7 +310,7 @@ function trade() {
 					}
 				} else {
 					// Simulation only
-					if (inverseEMA!=1)
+					if (inverseEMA != 1)
 						console.log('Simulated SELL ' + sellAmount + ' BTC! (keep ' + (keepBTC.toString() + (keepBTCUnitIsPercentage == 1 ? ' %' : ' BTC')) + ') EMA(' + EmaShortPar + ')/EMA(' + EmaLongPar + ')<-' + MinSellThreshold + '% for ' + tickCountSell + ' or more ticks (Simulation only: no trade was made)');
 					else
 						console.log('Simulted Crazy Ivan BUY! EMA(' + EmaShortPar + ')/EMA(' + EmaLongPar + ')<-' + MinSellThreshold + '% for ' + tickCountSell + ' or more ticks (Simulation only: no trade was made)');
@@ -530,7 +530,7 @@ function getSamplesFromCache(minute_fetch, minute_now) {
 		// log('Adding sample from local storage: sample.' + minute_fetch + ' = ' + localStorage.getItem('sample.' + minute_fetch));
 		addSample(minute_fetch, localStorage.getItem('sample.' + minute_fetch));
 		if (bootstrap) {
-			chrome.browserAction.setBadgeText({text: ('       |        ').substr((bootstrap++)%9, 6)});
+			chrome.browserAction.setBadgeText({text: ('       |        ').substr((bootstrap++) % 9, 6)});
 		}
 		minute_fetch = getNextMinuteFetch();
 		sample = localStorage.getItem('sample.' + minute_fetch);
@@ -710,7 +710,7 @@ function updateH1(reset) { // Added "reset" parameter to clear the H1 data - sho
 console.log('Using ' + tobliGoxBot.get('MtGoxApi').toString());
 chrome.browserAction.setBadgeBackgroundColor({color:[128, 128, 128, 50]});
 schedUpdateInfo(100);
-setTimeout(function(){ updateH1(false); }, 2 * 1000); 	// Delay first updateH1() to allow user info to be fetched first...
+setTimeout(function(){ updateH1(false); }, 2 * 1000); // Delay first updateH1() to allow user info to be fetched first...
 setInterval(function(){ updateH1(false); }, 60 * 1000); // Recheck every minute (should be a multiple of any trading interval)
 
 /*
