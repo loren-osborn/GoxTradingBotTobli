@@ -40,9 +40,9 @@ var simple_sell_above = (localStorage.simple_sell_above || 0);
 
 var tobliGoxBot = new DependancyInjectionContainer({
 	NativeDate: DependancyInjectionContainer.wrap(Date),
-	NativeLogFunc: DependancyInjectionContainer.wrap(window.console.log),
+	NativeLogFunc: DependancyInjectionContainer.wrap(window.console, window.console.log),
 	NativeError: DependancyInjectionContainer.wrap(Error),
-	AjaxRequest: DependancyInjectionContainer.wrap(XMLHttpRequest),
+	NativeAjaxRequest: DependancyInjectionContainer.wrap(XMLHttpRequest),
 	JsSha: DependancyInjectionContainer.wrap(jsSHA),
 	TobliDate: getTobliDateConstructor,
 	TobliLogger: getTobliLogger,

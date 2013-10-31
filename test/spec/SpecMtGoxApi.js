@@ -217,7 +217,7 @@ describe("getMtGoxApi", function() {
 							fakeAjaxRequest.send.callCount = 0;
 							fakeAjaxRequest.setRequestHeader.callCount = 0;
 							fakeAjaxRequestConstructor = (function () { return fakeAjaxRequest; });
-							container.set('AjaxRequest', DependancyInjectionContainer.wrap(fakeAjaxRequestConstructor));
+							container.set('NativeAjaxRequest', DependancyInjectionContainer.wrap(fakeAjaxRequestConstructor));
 							container.get('MtGoxApi').setKey(apiKey);
 							container.get('MtGoxApi').setSecret(hmacSecret);
 							testCallback({
