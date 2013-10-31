@@ -77,11 +77,25 @@ describe("DependancyInjectionContainer", function() {
 		expect(testContainer.get('Greeter').getGreeting()).toEqual('Hello Betty. I am Fred. Welcome to my cave.');
 	});
 
-	it("should create have a class method wrap() that returns a function returning it's argument", function() {
+	it("should have a class method wrap() that returns a function returning its single argument, if only one is given", function() {
 		var testObj = {desc:'mine'};
 		expect(DependancyInjectionContainer.wrap).isAFunction({withName:'wrap'});
 		expect(DependancyInjectionContainer.wrap(testObj)).isAFunction();
 		expect((DependancyInjectionContainer.wrap(testObj))()).toEqual(testObj);
+	});
+
+	it("should have a class method wrap() that returns a function returning a binding of its second argument (a function) to its first, if two arguments are given", function() {
+		var testObj = {desc:'other mine'};
+		var method = jasmine.createSpy("method to test");
+		expect(DependancyInjectionContainer.wrap).isAFunction({withName:'wrap'});
+		expect(DependancyInjectionContainer.wrap(testObj, method)).isAFunction();
+		expect((DependancyInjectionContainer.wrap(testObj, method))()).isAFunction();
+		expect((DependancyInjectionContainer.wrap(testObj, method))()).not.toBe(method);
+		expect((DependancyInjectionContainer.wrap(testObj, method))()).not.toBe(testObj);
+		((DependancyInjectionContainer.wrap(testObj, method))())(1, 2, 3, 'a', 'b', 'c');
+		expect(method.callCount).toEqual(1);
+	    expect(method.calls[0].args).toEqual([1, 2, 3, 'a', 'b', 'c']);
+	    expect(method.calls[0].object).toEqual(testObj);
 	});
 });
 

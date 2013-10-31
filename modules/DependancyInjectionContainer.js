@@ -75,7 +75,17 @@ var DependancyInjectionContainer = (function () {
 		});
 	});
 	dic.wrap = (function wrap(input) {
-		return (function () { return input; });
+		var valToReturn = input;
+		var methodToCall, objectToCallFrom;
+		if (arguments.length == 2) {
+			methodToCall = arguments[1];
+			objectToCallFrom = arguments[0];
+			valToReturn = (function () {
+				var args = [].slice.call(arguments, 0);
+				return methodToCall.apply(objectToCallFrom, args);
+			});
+		}
+		return (function () { return valToReturn; });
 	});
 	return dic;
 })();

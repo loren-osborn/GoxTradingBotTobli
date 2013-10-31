@@ -221,7 +221,7 @@ function save() {
 		}
 
 	} catch(e) {
-		bkgdPg.log('Exception in save(): ' + e.stack);
+		bkgdPg.tobliGoxBot.get('TobliLogger').log('Exception in save(): ' + e.stack);
 	}
 	bkgdPg.refreshPopup(true);
 }
