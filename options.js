@@ -165,7 +165,7 @@ function save() {
 	}
 	localStorage.tradingDisabledOnStart = bkgdPg.tradingDisabledOnStart = (document.getElementById('tradingDisabledOnStart').checked ? 1 : 0);
 
-	// console.log('localStorage.tradingEnabled=' + localStorage.tradingEnabled);
+	// (bkgdPg.tobliGoxBot.get('NativeLogFunc'))('localStorage.tradingEnabled=' + localStorage.tradingEnabled);
 
 	var resetH1 = false;
 
@@ -242,7 +242,7 @@ function setfields() {
 	document.getElementById('tradingEnabled').checked = (bkgdPg.tradingEnabled == 1);
 	document.getElementById('tradingDisabledOnStart').checked = (bkgdPg.tradingDisabledOnStart == 1);
 
-	// console.log('bkgdPg.tradingEnabled=' + bkgdPg.tradingEnabled);
+	// (bkgdPg.tobliGoxBot.get('NativeLogFunc'))('bkgdPg.tradingEnabled=' + bkgdPg.tradingEnabled);
 
 	// document.getElementById('keepFiat').value = bkgdPg.keepFiat.toString();
 
