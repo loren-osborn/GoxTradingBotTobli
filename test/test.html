@@ -25,6 +25,23 @@
 
 	<script type="text/javascript">
 	(function() {
+		describe("All specs included", function() {
+			it("Ensure no suites are ommitted due to syntax errors", function() {
+				var i, suiteNames = [];
+				var suites = jasmine.getEnv().currentRunner().suites();
+				for (i = 0; i < suites.length; i++) {
+					suiteNames.push(suites[i].description);
+				}
+				expect(suites.length).toEqual(6);
+				expect('jasmine extensions').toEqualOneOf(suiteNames);
+				expect('getTobliDateConstructor').toEqualOneOf(suiteNames);
+				expect('getTobliLogger').toEqualOneOf(suiteNames);
+				expect('DependancyInjectionContainer').toEqualOneOf(suiteNames);
+				expect('getMtGoxApi').toEqualOneOf(suiteNames);
+				expect('All specs included').toEqualOneOf(suiteNames);
+			});
+		});
+
 		var jasmineEnv = jasmine.getEnv();
 		jasmineEnv.updateInterval = 1000;
 
