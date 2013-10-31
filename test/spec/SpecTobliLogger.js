@@ -1,5 +1,7 @@
 describe('getTobliLogger', function() {
 	// Sample backtrace from Google Chrome 30.0.1599.101
+	// *FIXME* backtrace parser is broken
+	// Test against real Error constructor to ensure forward compatibility
 	var sampleBackTrace =
 		"Error\n" +
 		" at Object.log (file:///Users/linux_dr/src/bitcoin/GoxTradingBotTobli/modules/TobliLogger.js:10:17)\n" +
@@ -29,7 +31,7 @@ describe('getTobliLogger', function() {
 					{trace: sampleBackTrace, file: 'Users', line: undefined},
 					{trace: "line 1\nline 2\nline 3/after 1st slash/after 2nd slash/after 3rd slash before colon:after 1st colon:after 2nd colon/after 4th slash\nline 4", file: 'after 3rd slash before colon', line: 'after 1st colon'},
 					{trace: "line 1//:/:\nline 2//:/:\nline 3/after 1st ::slash/after ::2nd slash/after 3rd slash before colon:after 1st colon:after 2nd colon/after 4th slash::://::\nline 4//:/:", file: 'after 3rd slash before colon', line: 'after 1st colon'}]},
-				{name: 'callerArgs', data: [[], [1, 2, 3], ['a', 'b', 'c']]}],
+				{name: 'callerArgs', data: [[], [1, 2, 3], ['a'], ['b', 'c', 'de', 'f']]}],
 			null,
 			(function (formattedDate, traceData, callerArgs) {
 				var fakeDate = {FIXME_formatUtcDateWithLocalTimeWithSeconds: (function() { return formattedDate; })};

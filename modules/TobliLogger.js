@@ -12,15 +12,13 @@ getTobliLogger = (function () {
 		return {log: (function log() {
 			var args = [].slice.call(arguments,0);
 			var now = new (getTobliDate())();
-			var file = '';
-			var line = '';
 			var backtrace;
 			try {
 				backtrace = (new (getNativeError())()).stack;
 			} catch (e) {}
 			args.unshift(FIXME_parseBacktrace(backtrace));
 			args.unshift(now.FIXME_formatUtcDateWithLocalTimeWithSeconds());
-			(getNativeLogFunc()).apply(window.console, args);
+			(getNativeLogFunc()).apply(null, args);
 		})};
 	});
 })();
