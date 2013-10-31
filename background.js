@@ -372,11 +372,11 @@ function refreshEMA(reset) {
 
 var origLog = console.log;
 var log = console.log = function() {
-		var t = new (tobliGoxBot.get('TobliDate'))();
-		var file = '';
-		var line = '';
-		try {
-			var stack = new Error().stack;
+	var t = new (tobliGoxBot.get('TobliDate'))();
+	var file = '';
+	var line = '';
+	try {
+		var stack = new Error().stack;
 		file = stack.split('\n')[2].split('/')[3].split(':')[0];
 		line = stack.split('\n')[2].split('/')[3].split(':')[1];
 	} catch (e) {}
