@@ -23,6 +23,7 @@ describe("getMtGoxApi", function() {
 	});
 	var mgApiV1Container = new DependancyInjectionContainer({
 		TobliDate: DependancyInjectionContainer.wrap(FakeDateConstructor),
+		TobliLogger: {},
 		MtGoxApi: getMtGoxApi,
 		MtGoxApiVersion: 1,
 		MtGoxAPI2BaseURL: 'https://fake.mtgox.hostname/fake/api/path/',
@@ -30,6 +31,7 @@ describe("getMtGoxApi", function() {
 	});
 	var mgApiV2Container = new DependancyInjectionContainer({
 		TobliDate: DependancyInjectionContainer.wrap(FakeDateConstructor),
+		TobliLogger: {},
 		MtGoxApi: getMtGoxApi,
 		MtGoxApiVersion: 2,
 		MtGoxAPI2BaseURL: 'https://fake.mtgox.hostname/fake/api/path/',
@@ -182,8 +184,8 @@ describe("getMtGoxApi", function() {
 					{name: 'dateStamps', data: [946684800000, 946684800333]},
 					{name: 'secrets', data: ['STRONG SECRET', 'weak secret']},
 					{name: 'testHashes', data: ['hash1', 'hash2']},
-					{name: 'testErrorCallback', data: [defaultErrorCallback]},
-					{name: 'testSucessCallback', data: [defaultSucessCallback]}],
+					{name: 'testErrorCallbacks', data: [defaultErrorCallback]},
+					{name: 'testSucessCallbacks', data: [defaultSucessCallback]}],
 				testData,
 				(function (paramSet, apiKey, inputPath, v2BaseUrl, dateStamp, apiSecret, testHash, errorCallback, sucessCallback) {
 					var usingDefaultErrorCallback = (errorCallback === defaultErrorCallback);
@@ -281,8 +283,8 @@ describe("getMtGoxApi", function() {
 					{name: 'dateStamps', data: [946684800000, 946684800333]},
 					{name: 'secrets', data: ['STRONG SECRET', 'weak secret']},
 					{name: 'testHashes', data: ['hash1', 'hash2']},
-					{name: 'testErrorCallback', data: ['DEFAULT']},
-					{name: 'testSucessCallback', data: ['DEFAULT']}],
+					{name: 'testErrorCallbacks', data: ['DEFAULT']},
+					{name: 'testSucessCallbacks', data: ['DEFAULT']}],
 				testData,
 				(function (currency, amount, apiKey, v2BaseUrl, dateStamp, apiSecret, testHash, errorCallback, sucessCallback) {
 					var dataAndPath = convertCurrencyAndAmountToDataAndPath(currency, amount);
@@ -386,5 +388,69 @@ describe("getMtGoxApi", function() {
 		expect(mgApiV1Container.get('MtGoxApi').toString()).toEqual('MtGox API v0');
 		expect(mgApiV2Container.get('MtGoxApi').toString).isAFunction({withName:'toString'});
 		expect(mgApiV2Container.get('MtGoxApi').toString()).toEqual('MtGox API v2');
+	});
+
+	embeddableTests.generators.getByUrl = (function (container) {
+		var getRequestTestingGetByUrl = (function getRequestTestingGetByUrl(url, request) {
+			var retVal = request || {};
+			var embeddedOpenMethod = retVal.open || (function () {});
+			var embeddedSendMethod  = retVal.send || (function () {});
+			var fakeSendMethod = (function () {
+				expect(this).toBe(retVal);
+				expect(this.open.calls.length).toEqual(1);
+				expect(this.open.calls[0].object).toBe(this);
+				expect(this.open.calls[0].args).toEqual(['GET', url]);
+				return embeddedSendMethod.apply(this, [].slice.call(arguments, 0));
+			});
+			retVal.open = jasmine.createSpy("open request event").andCallFake(embeddedOpenMethod);
+			retVal.send = jasmine.createSpy("send request event").andCallFake(fakeSendMethod);
+			retVal.ensureRequestSentProperly = (function () {
+				expect(retVal.send.calls.length).toEqual(1);
+				expect(retVal.send.calls[0].object).toBe(retVal);
+				expect(retVal.send.calls[0].args).toEqual([]);
+			});
+			return retVal;
+		});
+
+		return (function testUncachablePostUrl(testCallback, testData) {
+			jasmine.iterateOverTestDataSets([
+					{name: 'urls', data: ['https://data.mtgox.com/api/2/info.php', 'https://fake.mtgox.hostname/fake/api/path/BTCSimolions/money/info']},
+					{name: 'requests', data: [null]}],
+				testData,
+				(function (url, request) {
+					var requestToTest = getRequestTestingGetByUrl(url, request);
+					var testLogger = container.get('TobliLogger');
+					var originalLogLevelMethod = testLogger.logLevel;
+					testLogger.logLevel = jasmine.createSpy("log level").andCallFake(function (requestedLevel) {
+						expect(this).toBe(testLogger);
+						expect(arguments.length).toEqual(1);
+						expect(requestedLevel).toBe('DEBUG');
+						var retVal = {};
+						retVal.logNative = jasmine.createSpy("log level").andCallFake(function (message) {
+							expect(this).toBe(retVal);
+							expect(arguments.length).toEqual(1);
+							// *FIXME*: function name changed to getByUrl()
+							expect(message).toEqual('get_url(): ' + url);
+						});
+						return retVal;
+					});
+					testCallback(requestToTest, url, container);
+					expect(testLogger.logLevel.callCount).toEqual(1);
+					requestToTest.ensureRequestSentProperly();
+					testLogger.logLevel = originalLogLevelMethod;
+				})
+			);
+		});
+	});
+
+	embeddableTests.v1.getByUrl = embeddableTests.generators.getByUrl(mgApiV1Container);
+	embeddableTests.v2.getByUrl = embeddableTests.generators.getByUrl(mgApiV2Container);
+
+	it("should return API object supporting getByUrl() method", function() {
+		var simpleTest = (function (requestToTest, url, container) {
+			expect(container.get('MtGoxApi').getByUrl(requestToTest, url)).toBeUndefined();
+		});
+		embeddableTests.v1.getByUrl(simpleTest);
+		embeddableTests.v2.getByUrl(simpleTest);
 	});
 });

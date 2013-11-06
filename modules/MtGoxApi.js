@@ -1,5 +1,5 @@
 getMtGoxApi = (function () {
-	return (function getMtGoxApi(getMtGoxApiVersion, getMtGoxAPI2BaseURL, getTobliDate, getJsSha, getNativeAjaxRequest) {
+	return (function getMtGoxApi(getMtGoxApiVersion, getMtGoxAPI2BaseURL, getTobliDate, getJsSha, getNativeAjaxRequest, getTobliLogger) {
 		var computeHmac512 = (function computeHmac512(message, secret) {
 			var shaObj = new (getJsSha())(message, "TEXT");
 			var hmac = shaObj.getHMAC(secret, "B64", "SHA-512", "B64");
@@ -29,6 +29,12 @@ getMtGoxApi = (function () {
 				request.setRequestHeader('Rest-Sign', protectedMethods.computeMessageHmac(path, data, this.getSecret()));
 				request.send(data);
 			});
+		});
+		MtGoxApiCommon.prototype.getByUrl = (function getByUrl(request, url) {
+			// *FIXME*: function name changed to getByUrl()
+			getTobliLogger().logLevel('DEBUG').logNative('get_url(): ' + url);
+			request.open('GET', url);
+			request.send();
 		});
 		var MtGoxApiV1 = (function MtGoxApiV1() {
 			var protectedMethods = {};

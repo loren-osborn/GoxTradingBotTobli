@@ -140,13 +140,6 @@ function logOnLoadCallback(d) {
 	schedUpdateInfo(2500);
 }
 
-function get_url(req, url) {
-	tobliGoxBot.get('TobliLogger').logLevel('DEBUG').logNative('get_url(): ' + url);
-	req.open('GET', url);
-	req.send();
-}
-
-
 function getemadif(idx) {
 	var cel = emaLong[idx];
 	var ces = emaShort[idx];
@@ -485,7 +478,7 @@ function addSample(minuteFetch, price, nocache) {
 function getSampleFromMtGox(req, minute_fetch) {
 	var since = new (tobliGoxBot.get('TobliDate'))();
 	since.setMinuteId(minute_fetch);
-	get_url(req, tobliGoxBot.get('MtGoxApi').getRequestSamplesUrl(currency, since));
+	tobliGoxBot.get('MtGoxApi').getByUrl(req, tobliGoxBot.get('MtGoxApi').getRequestSamplesUrl(currency, since));
 }
 
 function refreshPopup(fullRefresh) {
@@ -589,7 +582,7 @@ function updateH1(reset) { // Added "reset" parameter to clear the H1 data - sho
 			}
 			tobliGoxBot.get('TobliLogger').logNative('getTrades error', e, '-repeat');
 			// lastUpdateStartTime = (new Date()).getTime();
-			get_url(req, url);
+			tobliGoxBot.get('MtGoxApi').getByUrl(req, url);
 		}
 
 		req.onload = function() {
