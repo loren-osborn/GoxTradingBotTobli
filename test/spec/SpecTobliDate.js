@@ -338,7 +338,7 @@ describe("getTobliDateConstructor", function() {
 		}
 	});
 
-	it("returns a constructor with working getters and setters for MinuteId, UnixTime, and MicroTime comparable to getTime and setTime methods", function() {
+	it("returns a constructor with working getters and setters for MinuteId, UnixTime, and MicroTime comparable to getTime and setTime methods as well as createFrom... class methods", function() {
 		var TobliDate = getTobliDateConstructor(DependancyInjectionContainer.wrap(Date));
 		var dateObj = new TobliDate();
 		expect(TobliDate.createFromTime).toBeUndefined();
