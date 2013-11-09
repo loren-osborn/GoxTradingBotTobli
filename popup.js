@@ -66,7 +66,7 @@ function refreshtable() {
 			var perc = 100 * (es - el) / ((es + el) / 2);
 			var r = tab.insertRow(4);
 			// var ti = new Date(bkgdPg.tim[i] * 3600 * 1000);
-			var d = new (bkgdPg.tobliGoxBot.get('TobliDate'))();
+			var d = bkgdPg.tobliGoxBot.createNewTobliDate();
 			d.setMinuteId(bkgdPg.tim[i]);
 			r.title = d.getWeekdayName();
 			// r.style.backgroundColor = backgroundColors[((bkgdPg.tim[i] + 1) / 24)&1]
@@ -352,7 +352,7 @@ function formatPriceTooltip(sp, options, fields){
 }
 
 function assembleTooltip(tim) {
-	var d = new (bkgdPg.tobliGoxBot.get('TobliDate'))();
+	var d = bkgdPg.tobliGoxBot.createNewTobliDate();
 	d.setMinuteId(tim);
 	var t = d.formatDateAndTimeWithLabeledTodayDate();
 	var tooltip = '<div align="center">'+t+

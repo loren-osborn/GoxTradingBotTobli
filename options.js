@@ -153,8 +153,8 @@ function save() {
 		if (!confirm('Applying different Trading interval/EMA/Threshold values may case an instant trigger to execute a trade.')) return;
 	}
 
-	bkgdPg.tobliGoxBot.get('MtGoxApi').setKey(localStorage.ApiKey = document.getElementById('apikey').value);
-	bkgdPg.tobliGoxBot.get('MtGoxApi').setSecret(localStorage.ApiSec = document.getElementById('apisec').value);
+	bkgdPg.tobliGoxBot.getMtGoxApi().setKey(localStorage.ApiKey = document.getElementById('apikey').value);
+	bkgdPg.tobliGoxBot.getMtGoxApi().setSecret(localStorage.ApiSec = document.getElementById('apisec').value);
 	bkgdPg.schedUpdateInfo(10);
 
 	localStorage.tradingEnabled = bkgdPg.tradingEnabled = (document.getElementById('tradingEnabled').checked?1:0);
@@ -165,7 +165,7 @@ function save() {
 	}
 	localStorage.tradingDisabledOnStart = bkgdPg.tradingDisabledOnStart = (document.getElementById('tradingDisabledOnStart').checked ? 1 : 0);
 
-	bkgdPg.tobliGoxBot.get('TobliLogger').logLevel('DEBUG').logNative('localStorage.tradingEnabled=' + localStorage.tradingEnabled);
+	bkgdPg.tobliGoxBot.getTobliLogger().logLevel('DEBUG').logNative('localStorage.tradingEnabled=' + localStorage.tradingEnabled);
 
 	var resetH1 = false;
 
@@ -221,14 +221,14 @@ function save() {
 		}
 
 	} catch(e) {
-		bkgdPg.tobliGoxBot.get('TobliLogger').log('Exception in save(): ' + e.stack);
+		bkgdPg.tobliGoxBot.getTobliLogger().log('Exception in save(): ' + e.stack);
 	}
 	bkgdPg.refreshPopup(true);
 }
 
 function setfields() {
-	document.getElementById('apikey').value = bkgdPg.tobliGoxBot.get('MtGoxApi').getKey();
-	document.getElementById('apisec').value = bkgdPg.tobliGoxBot.get('MtGoxApi').getSecret();
+	document.getElementById('apikey').value = bkgdPg.tobliGoxBot.getMtGoxApi().getKey();
+	document.getElementById('apisec').value = bkgdPg.tobliGoxBot.getMtGoxApi().getSecret();
 	document.getElementById('emas').value = bkgdPg.EmaShortPar.toString();
 	document.getElementById('emal').value = bkgdPg.EmaLongPar.toString();
 	// document.getElementById('tras').value = bkgdPg.MinThreshold.toFixed(2);
@@ -242,7 +242,7 @@ function setfields() {
 	document.getElementById('tradingEnabled').checked = (bkgdPg.tradingEnabled == 1);
 	document.getElementById('tradingDisabledOnStart').checked = (bkgdPg.tradingDisabledOnStart == 1);
 
-	bkgdPg.tobliGoxBot.get('TobliLogger').logLevel('DEBUG').logNative('bkgdPg.tradingEnabled=' + bkgdPg.tradingEnabled);
+	bkgdPg.tobliGoxBot.getTobliLogger().logLevel('DEBUG').logNative('bkgdPg.tradingEnabled=' + bkgdPg.tradingEnabled);
 
 	// document.getElementById('keepFiat').value = bkgdPg.keepFiat.toString();
 

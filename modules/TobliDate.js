@@ -69,7 +69,7 @@ function getTobliDateConstructor(getNativeDate) {
 	var dateTimeFormatGenerator = (function dateTimeFormatGenerator(todayLabel, dateFormater) {
 		return (function formatWithConditionalDate() {
 			var timePrefix = '';
-			if (!(this.isSameDate(new (TobliDate)()))) {
+			if (!(this.isSameDate(new TobliDate()))) {
 				timePrefix = dateFormater(this) + ' ';
 			} else {
 				timePrefix = todayLabel;
