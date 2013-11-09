@@ -194,7 +194,7 @@ function checkThresholdsAt(idx, buy) {
 	} else {
 		for (var i = 0; i < tickCountSell; i++) {
 			var dif = getemadif(idx - i);
-			if (dif>=-MinSellThreshold)
+			if (dif >= -MinSellThreshold)
 				return false;
 		}
 		return true;
@@ -715,7 +715,7 @@ function updateH1(reset) { // Added "reset" parameter to clear the H1 data - sho
 					getSampleFromMtGox(req, minute_fetch);
 					done = false;
 					if (bootstrap) {
-						chrome.browserAction.setBadgeText({text: ("       |        ").substr((bootstrap++)%9, 6)});
+						chrome.browserAction.setBadgeText({text: ("       |        ").substr((bootstrap++) % 9, 6)});
 					}
 				} else {
 					log("Got new samples from MtGox " + H1.length + " " + MaxSamplesToKeep);
@@ -724,7 +724,7 @@ function updateH1(reset) { // Added "reset" parameter to clear the H1 data - sho
 				}
 			} catch (e) {
 				var error = req.responseText;
-				if (error.indexOf("Website is currently unreachable")!=-1) {
+				if (error.indexOf("Website is currently unreachable") != -1) {
 					error = "MtGox says: Website is currently unreachable";
 				}
 				log("getTrades JSON error", e, error);
