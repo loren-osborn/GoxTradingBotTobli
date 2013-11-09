@@ -97,5 +97,25 @@ describe("DependancyInjectionContainer", function() {
 	    expect(method.calls[0].args).toEqual([1, 2, 3, 'a', 'b', 'c']);
 	    expect(method.calls[0].object).toEqual(testObj);
 	});
+
+	it("should create objects with getName() and createNewName() methods for each Nameed value in spec", function() {
+		var returnObject = (function () { return {customTestProperty:'all mine'}; });
+		var testContainer = new DependancyInjectionContainer({Special:returnObject, NativeDate: DependancyInjectionContainer.wrap(Date)});
+		expect(testContainer.getSpecial().customTestProperty).toEqual('all mine');
+		expect(testContainer.getSpecial()).toBe(testContainer.get('Special'));
+		expect(testContainer.createNewSpecial).toThrow('Special is not a function');
+		expect(testContainer.getNativeDate()).toBe(Date);
+		expect(testContainer.createNewNativeDate().constructor).toBe(Date);
+		expect(testContainer.getGuest).toBeUndefined();
+		expect(testContainer.createNewGuest).toBeUndefined();
+		expect(testContainer.set('Guest', 'Betty')).toBeUndefined();
+		expect(testContainer.getGuest()).toBe(testContainer.get('Guest'));
+		expect(testContainer.createNewGuest).toThrow('Guest is not a function');
+		expect(testContainer.getFriday).toBeUndefined();
+		expect(testContainer.createNewFriday).toBeUndefined();
+		expect(testContainer.set('Friday', DependancyInjectionContainer.wrap(Array))).toBeUndefined();
+		expect(testContainer.getFriday()).toBe(Array);
+		expect(testContainer.createNewFriday().constructor).toBe(Array);
+	});
 });
 

@@ -1,4 +1,16 @@
 var DependancyInjectionContainer = (function () {
+	var addConvenienceFunctions = (function addConvenienceFunctions(dicInstance, name) {
+		dicInstance['get' + name] = (function getByName() {
+			return dicInstance.get(name);
+		});
+		dicInstance['createNew' + name] = (function createNewByName() {
+			var constructor = dicInstance.get(name);
+			if ({}.toString.call(constructor) != '[object Function]') {
+				throw name + ' is not a function';
+			}
+			return new constructor();
+		});
+	});
 	var dic = (function DependancyInjectionContainer(specObject) {
 		var key;
 		var keyCount;
@@ -15,6 +27,7 @@ var DependancyInjectionContainer = (function () {
 		keyCount = 0;
 		for (key in specObject) {
 			keyCount++;
+			addConvenienceFunctions(this, key);
 		}
 		if (keyCount == 0) {
 			throw 'argument must be non-empty Object';
@@ -72,6 +85,7 @@ var DependancyInjectionContainer = (function () {
 					valueCache[expirationMap[key][i]] = undefined;
 				}
 			}
+			addConvenienceFunctions(this, key);
 		});
 	});
 	dic.wrap = (function wrap(input) {
