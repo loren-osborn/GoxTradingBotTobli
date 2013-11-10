@@ -7,12 +7,12 @@ var currencySelector = document.getElementById("currencySelector");
 var simpleRulesModeSelector = document.getElementById("simpleRulesMode");
 
 if (!String.prototype.endsWith) {
-	String.prototype.endsWith = function(suffix) {
+	String.prototype.endsWith = function (suffix) {
 		return this.indexOf(suffix, this.length - suffix.length) !== -1;
 	};
 }
 if (!String.prototype.trim) {
-	String.prototype.trim = function() {
+	String.prototype.trim = function () {
 		return this.replace(/^\s+|\s+$/g,'');
 	};
 }
@@ -334,21 +334,21 @@ function currencyChanged() {
 	// document.getElementById("simple_sell_above").value = "";
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-	butres.addEventListener('click', function(){ rese() });
-	butsav.addEventListener('click', function(){ save() });
-	tradingIntervalMinutes.addEventListener('change', function(){ intervalChanged() });
-	currencySelector.addEventListener('change', function(){ currencyChanged() });
+document.addEventListener('DOMContentLoaded', function () {
+	butres.addEventListener('click', function () { rese() });
+	butsav.addEventListener('click', function () { save() });
+	tradingIntervalMinutes.addEventListener('change', function () { intervalChanged() });
+	currencySelector.addEventListener('change', function () { currencyChanged() });
 	setfields();
 
 /*
 	setcontrols();
 	setInterval(col, 300);
 
-	spyes.addEventListener('change', function(){sp.readOnly=!spyes.checked})
-	butres.addEventListener('click', function(){reset()})
-	butsav.addEventListener('click', function(){save()})
-	allcur.addEventListener('click', function(){cf.value = ''})
-	swtchlog.addEventListener('click', function(){chlog.style.display = chlog.style.display == 'none'?'block':'none'})
+	spyes.addEventListener('change', function () { sp.readOnly = !spyes.checked })
+	butres.addEventListener('click', function () { reset() })
+	butsav.addEventListener('click', function () { save() })
+	allcur.addEventListener('click', function () { cf.value = '' })
+	swtchlog.addEventListener('click', function () { chlog.style.display = chlog.style.display == 'none' ? 'block' : 'none' })
 */
 })

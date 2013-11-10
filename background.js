@@ -96,12 +96,12 @@ function updateInfo() {
 		path = "info.php";
 
 	mtgoxpost(path, [],
-		function(e) {
+		function (e) {
 			console.log("info error", e);
 			chrome.browserAction.setTitle({title: "Error getting user info. MtGox problem?"});
 			schedUpdateInfo(60 * 1000); // retry after 1 minute
 		},
-		function(d) {
+		function (d) {
 			// console.log("info.php", d.currentTarget.responseText)
 			try {
 				var rr = JSON.parse(d.currentTarget.responseText);
@@ -415,7 +415,7 @@ function refreshEMA(reset) {
 }
 
 var origLog = console.log;
-var log = console.log = function() {
+var log = console.log = function () {
 		var t = new Date();
 		var file = "";
 		var line = "";
@@ -436,7 +436,7 @@ var log = console.log = function() {
 	origLog.apply(window.console, args);
 }
 
-Object.size = function(obj) {
+Object.size = function (obj) {
 	var size = 0, key;
 	for (key in obj)
 		if (obj.hasOwnProperty(key))
@@ -645,7 +645,7 @@ function updateH1(reset) { // Added "reset" parameter to clear the H1 data - sho
 		req = new XMLHttpRequest();
 		var url, since;
 
-		req.onerror = function(e) {
+		req.onerror = function (e) {
 			if (abortUpdateAndRedo) {
 				updateInProgress = false;
 				lastUpdateStartTime = 0;
@@ -657,7 +657,7 @@ function updateH1(reset) { // Added "reset" parameter to clear the H1 data - sho
 			get_url(req, url);
 		}
 
-		req.onload = function() {
+		req.onload = function () {
 			if (abortUpdateAndRedo) {
 				updateInProgress = false;
 				lastUpdateStartTime = 0;
@@ -758,8 +758,8 @@ function updateH1(reset) { // Added "reset" parameter to clear the H1 data - sho
 console.log("Using MtGox API v"+(useAPIv2 ? "2" : "0"));
 chrome.browserAction.setBadgeBackgroundColor({color:[128, 128, 128, 50]});
 schedUpdateInfo(100);
-setTimeout(function(){ updateH1(false); }, 2 * 1000); // Delay first updateH1() to allow user info to be fetched first...
-setInterval(function(){ updateH1(false); }, 60 * 1000); // Recheck every minute (should be a multiple of any trading interval)
+setTimeout(function () { updateH1(false); }, 2 * 1000); // Delay first updateH1() to allow user info to be fetched first...
+setInterval(function () { updateH1(false); }, 60 * 1000); // Recheck every minute (should be a multiple of any trading interval)
 
 /*
 function onErr(e) {
@@ -768,7 +768,7 @@ function onErr(e) {
 function onLod(d) {
 	log("getTrades post ok", d.currentTarget.responseText);
 }
-setTimeout(function(){
+setTimeout(function (){
 	mtgoxpost("money/wallet/history", ['currency=USD'], onErr, onLod);
 	mtgoxpost("BTCUSD/money/info", [], onErr, onLod);
 }, 1000);

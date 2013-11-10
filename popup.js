@@ -431,30 +431,30 @@ refreshtable();
 bp.popupRefresh = refreshtable;
 bp.popupUpdateCounter = popupUpdateCounter;
 
-document.addEventListener('DOMContentLoaded', function() {
-	chartLink.addEventListener('click', function() { toggleChart() });
-	enableTrading.addEventListener('click', function() {
+document.addEventListener('DOMContentLoaded', function () {
+	chartLink.addEventListener('click', function () { toggleChart() });
+	enableTrading.addEventListener('click', function () {
 		localStorage.tradingEnabled = bp.tradingEnabled = 1;
 		bp.chrome.browserAction.setIcon({path: 'robot_trading_on.png'});
 		refreshtable();
 	});
-	disableTrading.addEventListener('click', function() {
+	disableTrading.addEventListener('click', function () {
 		localStorage.tradingEnabled = bp.tradingEnabled = 0;
 		bp.chrome.browserAction.setIcon({path: 'robot_trading_off.png'});
 		refreshtable();
 	});
-	zoomIn.addEventListener('click', function(e){
+	zoomIn.addEventListener('click', function (e) {
 		zoomChart(true);
 		return false;
 	});
-	zoomOut.addEventListener('click', function(e){
+	zoomOut.addEventListener('click', function (e) {
 		zoomChart(false);
 		return false;
 	});
 
 	visibleChartSamples = bp.LogLines;
 
-	document.getElementById("EMAChart").addEventListener("mousewheel", function(e) {
+	document.getElementById("EMAChart").addEventListener("mousewheel", function (e) {
 		var delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));
 		zoomChart(delta > 0);
 		return false;
