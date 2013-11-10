@@ -1,6 +1,6 @@
 (function (jasmine) {
 	var oneOfGenerator = function oneOfGenerator(name, comparison) {
-		return (function(possibleValues) {
+		return (function (possibleValues) {
 			var retVal = false;
 			var i, setName, last, nonLast;
 			if (toBeOfTypeMatcher.call({actual: possibleValues}, 'Array')) {
@@ -37,13 +37,13 @@
 	var toBeOneOfMatcher = oneOfGenerator('be', (function (a, b) { return (a === b); }));
 	var toEqualOneOfMatcher = oneOfGenerator('equal', (function (a, b) { return jasmine.getEnv().equals_(a, b); }));
 
-	var toBeOfTypeMatcher = function(typeName) {
+	var toBeOfTypeMatcher = function (typeName) {
 		return (this.actual) && (({}).toString.call(this.actual) === ('[object ' + typeName + ']'));
 	};
-	var toBeOfClassMatcher = function(className) {
+	var toBeOfClassMatcher = function (className) {
 		return (this.actual) && toBeOfTypeMatcher.apply({actual: this.actual.constructor}, ['Function']) && (jasmine.getNameOfFunction(this.actual.constructor) == className);
 	};
-	var isAFunctionMatcher = function(parameterObject) {
+	var isAFunctionMatcher = function (parameterObject) {
 		// This is a hack I pulled from here:
 		// http://stackoverflow.com/questions/5999998/how-can-i-check-if-a-javascript-variable-is-function-type
 		var retVal = (this.actual) && toBeOfTypeMatcher.apply(this, ['Function']);
@@ -51,14 +51,14 @@
 		if (retVal && parameterObject && parameterObject.withName) {
 			fnName = jasmine.getNameOfFunction(this.actual);
 			retVal = (fnName == parameterObject.withName);
-			this.message = function() {
+			this.message = function () {
 				return [
 					this.actual.toString().replace(/^f/, 'F') + " isn't named " + parameterObject.withName + '.',
 					this.actual.toString().replace(/^f/, 'F') + ' is named ' + parameterObject.withName + '.'
 				];
 			};
 		} else {
-			this.message = function() {
+			this.message = function () {
 				return [
 					'Expected ' + jasmine.pp(this.actual) + ' to be a function.',
 					'Expected ' + (this.actual ? this.actual.toString() : 'false') + ' not to be a function.'
@@ -67,7 +67,7 @@
 		}
 		return retVal;
 	};
-	var toBeAWellBehavedConstructorMatcher = function(parameterObject) {
+	var toBeAWellBehavedConstructorMatcher = function (parameterObject) {
 		var getNameOfFunction = (function getNameOfFunction(func) {
 			var result = jasmine.getNameOfFunction(func);
 			return ((result == null) ? '(anonymous)' : result);
@@ -160,7 +160,7 @@
 				}
 			}
 		}
-		this.message = (function() {
+		this.message = (function () {
 			return [
 				('Expected ' + actualStr + actualSuffix + affirmation + messageEnding + affirmationSuffix),
 				('Expected ' + actualStr + actualSuffix + negation + messageEnding + negationSuffix)
@@ -168,7 +168,7 @@
 		});
 		return retVal;
 	};
-	beforeEach(function() {
+	beforeEach(function () {
 		this.addMatchers({
 			toBeOneOf: toBeOneOfMatcher,
 			toEqualOneOf: toEqualOneOfMatcher,

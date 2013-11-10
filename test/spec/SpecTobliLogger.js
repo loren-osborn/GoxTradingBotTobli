@@ -1,4 +1,4 @@
-describe('getTobliLogger', function() {
+describe('getTobliLogger', function () {
 	// Sample backtrace from Google Chrome 30.0.1599.101
 	// *FIXME* backtrace parser is broken
 	// Test against real Error constructor to ensure forward compatibility
@@ -25,7 +25,7 @@ describe('getTobliLogger', function() {
 		'DEBUG',
 		'TRACE'];
 
-	it('should be a function', function() {
+	it('should be a function', function () {
 		expect(getTobliLogger).isAFunction({withName:'getTobliLogger'});
 	});
 
@@ -45,7 +45,7 @@ describe('getTobliLogger', function() {
 		expect(fakeLogFunc.wasCalled).toEqual(false);
 	});
 
-	it('should return an object with a log() method that calls the expected methods on container objects', function() {
+	it('should return an object with a log() method that calls the expected methods on container objects', function () {
 		jasmine.iterateOverTestDataSets([
 				{name: 'formattedDates', data: ['yesterday', 'a long time ago', '2000-01-01 11:12:13']},
 				{name: 'traceData', data: [
@@ -55,12 +55,12 @@ describe('getTobliLogger', function() {
 				{name: 'callerArgs', data: [[], [1, 2, 3], ['a'], ['b', 'c', 'de', 'f']]}],
 			null,
 			(function (formattedDate, traceData, callerArgs) {
-				var fakeDate = {FIXME_formatUtcDateWithLocalTimeWithSeconds: (function() { return formattedDate; })};
-				var fakeDateConstructor = (function() {
+				var fakeDate = {FIXME_formatUtcDateWithLocalTimeWithSeconds: (function () { return formattedDate; })};
+				var fakeDateConstructor = (function () {
 					expect(arguments.length).toEqual(0);
 					return fakeDate;
 				});
-				var fakeErrorConstructor = (function() {
+				var fakeErrorConstructor = (function () {
 					expect(arguments.length).toEqual(0);
 					return {stack: traceData.trace};
 				});
@@ -93,7 +93,7 @@ describe('getTobliLogger', function() {
 		);
 	});
 
-	it('should return an object with a logNative() method that calls the expected methods on container objects', function() {
+	it('should return an object with a logNative() method that calls the expected methods on container objects', function () {
 		jasmine.iterateOverTestDataSets([
 				{name: 'callerArgs', data: [[], [1, 2, 3], ['a'], ['b', 'c', 'de', 'f']]}],
 			null,
@@ -123,7 +123,7 @@ describe('getTobliLogger', function() {
 		);
 	});
 
-	it('should return an object with a logLevel() method that responds to correct values', function() {
+	it('should return an object with a logLevel() method that responds to correct values', function () {
 		jasmine.iterateOverTestDataSets([
 				{name: 'invalidArgs', data: [[], [1, 2, 3], ['a'], [[]], ['DEBUG','foo'], [{}], ['foo'], ['bar'], ['baz']]}],
 			null,
@@ -154,7 +154,7 @@ describe('getTobliLogger', function() {
 		);
 	});
 
-	it('should return an object with a logLevel() method that properly augments log() method', function() {
+	it('should return an object with a logLevel() method that properly augments log() method', function () {
 		jasmine.iterateOverTestDataSets([
 				{name: 'formattedDates', data: ['yesterday', 'a long time ago', '2000-01-01 11:12:13']},
 				{name: 'traceData', data: [
@@ -164,12 +164,12 @@ describe('getTobliLogger', function() {
 				{name: 'callerArgs', data: [[], [1, 2, 3], ['a'], ['b', 'c', 'de', 'f']]}],
 			null,
 			(function (formattedDate, traceData, callerArgs) {
-				var fakeDate = {FIXME_formatUtcDateWithLocalTimeWithSeconds: (function() { return formattedDate; })};
-				var fakeDateConstructor = (function() {
+				var fakeDate = {FIXME_formatUtcDateWithLocalTimeWithSeconds: (function () { return formattedDate; })};
+				var fakeDateConstructor = (function () {
 					expect(arguments.length).toEqual(0);
 					return fakeDate;
 				});
-				var fakeErrorConstructor = (function() {
+				var fakeErrorConstructor = (function () {
 					expect(arguments.length).toEqual(0);
 					return {stack: traceData.trace};
 				});
@@ -228,7 +228,7 @@ describe('getTobliLogger', function() {
 		);
 	});
 
-	it('should return an object with a logLevel() method that properly augments logNative() method', function() {
+	it('should return an object with a logLevel() method that properly augments logNative() method', function () {
 		jasmine.iterateOverTestDataSets([
 				{name: 'callerArgs', data: [[], [1, 2, 3], ['a'], ['b', 'c', 'de', 'f']]}],
 			null,

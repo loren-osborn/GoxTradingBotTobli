@@ -85,8 +85,9 @@ function updateEMA(ema, N) {
 
 var updateInfoTimer = null;
 function schedUpdateInfo(t) {
-	if (updateInfoTimer)
+	if (updateInfoTimer) {
 		clearTimeout(updateInfoTimer);
+	}
 	updateInfoTimer = setTimeout(updateInfo, t);
 }
 
@@ -103,12 +104,12 @@ function updateInfo() {
 	var path = tobliGoxBot.getMtGoxApi().getAccountBalancePath({currency:currency});
 
 	tobliGoxBot.getMtGoxApi().post(path, [],
-		function(e) {
+		function (e) {
 			tobliGoxBot.getTobliLogger().logNative('info error', e);
 			chrome.browserAction.setTitle({title: 'Error getting user info. MtGox problem?'});
 			schedUpdateInfo(60 * 1000); // retry after 1 minute
 		},
-		function(d) {
+		function (d) {
 			tobliGoxBot.getTobliLogger().logLevel('DEBUG').logNative('info.php', d.currentTarget.responseText)
 			try {
 				var rr = tobliGoxBot.getMtGoxApi().getResponseData(d.currentTarget.responseText);
@@ -366,7 +367,7 @@ function refreshEMA(reset) {
 	trade();
 }
 
-Object.size = function(obj) {
+Object.size = function (obj) {
 	var size = 0, key;
 	for (key in obj)
 		if (obj.hasOwnProperty(key))
@@ -573,7 +574,7 @@ function updateH1(reset) { // Added "reset" parameter to clear the H1 data - sho
 		var req = new XMLHttpRequest();
 		var url, since;
 
-		req.onerror = function(e) {
+		req.onerror = function (e) {
 			if (abortUpdateAndRedo) {
 				updateInProgress = false;
 				lastUpdateStartTime = 0;
@@ -585,7 +586,7 @@ function updateH1(reset) { // Added "reset" parameter to clear the H1 data - sho
 			tobliGoxBot.getMtGoxApi().getByUrl(req, url);
 		}
 
-		req.onload = function() {
+		req.onload = function () {
 			if (abortUpdateAndRedo) {
 				updateInProgress = false;
 				lastUpdateStartTime = 0;
@@ -684,8 +685,8 @@ function updateH1(reset) { // Added "reset" parameter to clear the H1 data - sho
 tobliGoxBot.getTobliLogger().logNative('Using ' + tobliGoxBot.getMtGoxApi().toString());
 chrome.browserAction.setBadgeBackgroundColor({color:[128, 128, 128, 50]});
 schedUpdateInfo(100);
-setTimeout(function(){ updateH1(false); }, 2 * 1000); // Delay first updateH1() to allow user info to be fetched first...
-setInterval(function(){ updateH1(false); }, 60 * 1000); // Recheck every minute (should be a multiple of any trading interval)
+setTimeout(function () { updateH1(false); }, 2 * 1000); // Delay first updateH1() to allow user info to be fetched first...
+setInterval(function () { updateH1(false); }, 60 * 1000); // Recheck every minute (should be a multiple of any trading interval)
 
 /*
 function onErr(e) {
@@ -694,7 +695,7 @@ function onErr(e) {
 function onLod(d) {
 	tobliGoxBot.getTobliLogger().log('getTrades post ok', d.currentTarget.responseText);
 }
-setTimeout(function(){
+setTimeout(function () {
 	tobliGoxBot.getMtGoxApi().post('money/wallet/history', ['currency=USD'], onErr, onLod);
 	tobliGoxBot.getMtGoxApi().post('BTCUSD/money/info', [], onErr, onLod);
 }, 1000);

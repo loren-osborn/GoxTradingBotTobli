@@ -1,4 +1,4 @@
-describe("getMtGoxApi", function() {
+describe("getMtGoxApi", function () {
 	var embeddableTests = { v1: {}, v2: {}, common: {}, generators: {}};
 	var testTimeStamp = 946684800000;
 	var FakeDateConstructor = (function FakeDateConstructor() {
@@ -38,25 +38,25 @@ describe("getMtGoxApi", function() {
 		JsSha: DependancyInjectionContainer.wrap(FakeJsSha)
 	});
 
-	it("should be a function", function() {
+	it("should be a function", function () {
 		expect(getMtGoxApi).isAFunction({withName:'getMtGoxApi'});
 	});
-	it("should return v1 API object", function() {
+	it("should return v1 API object", function () {
 		expect(mgApiV1Container.get('MtGoxApi')).toBeDefined();
 		expect(mgApiV1Container.get('MtGoxApi')).not.toBeNull();
 		expect(mgApiV1Container.get('MtGoxApi').constructor).toBeAWellBehavedConstructor({withName:'MtGoxApiV1', returningObjectOfClass: mgApiV1Container.get('MtGoxApi').constructor, withArbitrary: 'parentClass'});
 	});
-	it("should return v2 API object", function() {
+	it("should return v2 API object", function () {
 		expect(mgApiV2Container.get('MtGoxApi')).toBeDefined();
 		expect(mgApiV2Container.get('MtGoxApi')).not.toBeNull();
 		expect(mgApiV2Container.get('MtGoxApi').constructor).toBeAWellBehavedConstructor({withName:'MtGoxApiV2', returningObjectOfClass: mgApiV2Container.get('MtGoxApi').constructor, withArbitrary: 'parentClass'});
 	});
-	it("should require valid params", function() {
+	it("should require valid params", function () {
 		expect(getMtGoxApi).toThrow("Unrecognized API version: [undefined]");
 		expect((function () { getMtGoxApi(DependancyInjectionContainer.wrap(0.5)); })).toThrow("Unrecognized API version: 0.5");
 	});
 
-	it("should return API object supporting getAccountBalancePath() method", function() {
+	it("should return API object supporting getAccountBalancePath() method", function () {
 		expect(mgApiV1Container.get('MtGoxApi').getAccountBalancePath).isAFunction({withName:'getAccountBalancePath'});
 		expect(mgApiV1Container.get('MtGoxApi').getAccountBalancePath({currency:'USD'})).toEqual('info.php');
 		expect(mgApiV1Container.get('MtGoxApi').getAccountBalancePath({currency:'Simolions'})).toEqual('info.php');
@@ -65,7 +65,7 @@ describe("getMtGoxApi", function() {
 		expect(mgApiV2Container.get('MtGoxApi').getAccountBalancePath({currency:'Simolions'})).toEqual('BTCSimolions/money/info');
 	});
 
-	it("should return API object supporting getResponseData() method", function() {
+	it("should return API object supporting getResponseData() method", function () {
 		expect(mgApiV1Container.get('MtGoxApi').getResponseData).isAFunction({withName:'getResponseData'});
 		expect(mgApiV1Container.get('MtGoxApi').getResponseData('"My Dog Has Fleas"')).toEqual('My Dog Has Fleas');
 		expect(mgApiV2Container.get('MtGoxApi').getResponseData).isAFunction({withName:'getResponseData'});
@@ -91,7 +91,7 @@ describe("getMtGoxApi", function() {
 	embeddableTests.v1.UncachablePostUrl = embeddableTests.generators.UncachablePostUrl(mgApiV1Container, function (v2BaseUrl) { return 'https://mtgox.com/api/0/'; });
 	embeddableTests.v2.UncachablePostUrl = embeddableTests.generators.UncachablePostUrl(mgApiV2Container, function (v2BaseUrl) { return v2BaseUrl; });
 
-	it("should return API object with no public getUncachablePostUrl() method", function() {
+	it("should return API object with no public getUncachablePostUrl() method", function () {
 		expect(mgApiV1Container.get('MtGoxApi').getUncachablePostUrl).toBeUndefined();
 		expect(mgApiV2Container.get('MtGoxApi').getUncachablePostUrl).toBeUndefined();
 	});
@@ -117,12 +117,12 @@ describe("getMtGoxApi", function() {
 	embeddableTests.v1.HmacComputation = embeddableTests.generators.HmacComputation(function (path, data) { return data; });
 	embeddableTests.v2.HmacComputation = embeddableTests.generators.HmacComputation(function (path, data) { return path + '\0' + data; });
 
-	it("should return API object with no public computeMessageHmac() method", function() {
+	it("should return API object with no public computeMessageHmac() method", function () {
 		expect(mgApiV1Container.get('MtGoxApi').computeMessageHmac).toBeUndefined();
 		expect(mgApiV2Container.get('MtGoxApi').computeMessageHmac).toBeUndefined();
 	});
 
-	it("should return API object supporting getRequestSamplesUrl() method", function() {
+	it("should return API object supporting getRequestSamplesUrl() method", function () {
 		var testBaseUrls = ['https://data.mtgox.com/api/2/', 'https://fake.mtgox.hostname/fake/api/path/'];
 		var testCurrencies = ['USD', 'Simoleons'];
 		var testSinceStamps = [946674800000000, 946674800333000];
@@ -148,7 +148,7 @@ describe("getMtGoxApi", function() {
 		}
 	});
 
-	it("should return API object supporting toString() method", function() {
+	it("should return API object supporting toString() method", function () {
 		expect(mgApiV1Container.get('MtGoxApi').toString).isAFunction({withName:'toString'});
 		expect(mgApiV1Container.get('MtGoxApi').toString()).toEqual('MtGox API v0');
 		expect(mgApiV2Container.get('MtGoxApi').toString).isAFunction({withName:'toString'});
@@ -258,7 +258,7 @@ describe("getMtGoxApi", function() {
 	embeddableTests.v1.post = embeddableTests.generators.post(mgApiV1Container, embeddableTests.v1.HmacComputation, embeddableTests.v1.UncachablePostUrl);
 	embeddableTests.v2.post = embeddableTests.generators.post(mgApiV2Container, embeddableTests.v2.HmacComputation, embeddableTests.v2.UncachablePostUrl);
 
-	it("should return API object supporting post() method", function() {
+	it("should return API object supporting post() method", function () {
 		var protocolTesters = [ embeddableTests.v1.post, embeddableTests.v2.post ];
 		var i;
 		for (i = 0; i < protocolTesters.length; i++) {
@@ -338,7 +338,7 @@ describe("getMtGoxApi", function() {
 		return {data: {data: ['NOT_USED'], string: '&type=ask&amount_int=' + (amount * 100000000).toString()}, path: 'BTC' + currency.raw + '/money/order/add'};
 	}));
 
-	it("should return API object supporting addBuyOrder() method", function() {
+	it("should return API object supporting addBuyOrder() method", function () {
 		expect(mgApiV1Container.get('MtGoxApi').addBuyOrder).isAFunction({withName:'addOrder'});
 		embeddableTests.v1.addBuyOrder((function (dataHash) {
 			expect(dataHash.container.get('MtGoxApi').addBuyOrder(dataHash.currency.raw, dataHash.amount, dataHash.errorCallback, dataHash.sucessCallback)).not.toBeDefined();
@@ -349,7 +349,7 @@ describe("getMtGoxApi", function() {
 		}));
 	});
 
-	it("should return API object supporting addSellOrder() method", function() {
+	it("should return API object supporting addSellOrder() method", function () {
 		expect(mgApiV1Container.get('MtGoxApi').addSellOrder).isAFunction({withName:'addOrder'});
 		embeddableTests.v1.addSellOrder((function (dataHash) {
 			expect(dataHash.container.get('MtGoxApi').addSellOrder(dataHash.currency.raw, dataHash.amount, dataHash.errorCallback, dataHash.sucessCallback)).not.toBeDefined();
@@ -371,7 +371,7 @@ describe("getMtGoxApi", function() {
 		);
 	});
 
-	it("should return API object supporting key and secret accessor methods", function() {
+	it("should return API object supporting key and secret accessor methods", function () {
 		embeddableTests.common.accessors(function (key, secret, isKeySet) {
 			mgApiV1Container.get('MtGoxApi').setKey(key);
 			mgApiV1Container.get('MtGoxApi').setSecret(secret);
@@ -446,7 +446,7 @@ describe("getMtGoxApi", function() {
 	embeddableTests.v1.getByUrl = embeddableTests.generators.getByUrl(mgApiV1Container);
 	embeddableTests.v2.getByUrl = embeddableTests.generators.getByUrl(mgApiV2Container);
 
-	it("should return API object supporting getByUrl() method", function() {
+	it("should return API object supporting getByUrl() method", function () {
 		var simpleTest = (function (requestToTest, url, container) {
 			expect(container.get('MtGoxApi').getByUrl(requestToTest, url)).toBeUndefined();
 		});

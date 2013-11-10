@@ -1,4 +1,4 @@
-describe("getTobliDateConstructor", function() {
+describe("getTobliDateConstructor", function () {
 	var OneArgDateWithFakeCurrentTime = (function OneArgDateWithFakeCurrentTime(initalDateSpec) {
 		initalDateSpec = (initalDateSpec || (OneArgDateWithFakeCurrentTime.fakeCurrentTimeString));
 		return new Date(initalDateSpec);
@@ -44,12 +44,12 @@ describe("getTobliDateConstructor", function() {
 	DummyDate.minutes = 0;
 	DummyDate.seconds = 0;
 
-	it("should be a function that returns a well behaved constructor", function() {
+	it("should be a function that returns a well behaved constructor", function () {
 		expect(getTobliDateConstructor).isAFunction({withName:'getTobliDateConstructor'});
 		expect(getTobliDateConstructor(DependancyInjectionContainer.wrap(Date))).toBeAWellBehavedConstructor({withName:'TobliDate', returningObjectOfClass: Date});
 	});
 
-	it("returns a constructor with expected methods", function() {
+	it("returns a constructor with expected methods", function () {
 		var expectedMethods = [
 			// 'formatTimeAndDate',
 			'formatDateAndTimeWithLabeledTodayDate',
@@ -71,7 +71,7 @@ describe("getTobliDateConstructor", function() {
 		}
 	});
 
-	it("returns a constructor for a Date with expected default value", function() {
+	it("returns a constructor for a Date with expected default value", function () {
 		var newObj = new (getTobliDateConstructor(DependancyInjectionContainer.wrap(Date)))();
 		var stockDate = new Date();
 		expect(typeof newObj).toEqual(typeof stockDate);
@@ -80,7 +80,7 @@ describe("getTobliDateConstructor", function() {
 		expect(newObj.getTime()).toBeCloseTo(stockDate.getTime(), -1);
 	});
 
-	it("returns a constructor for a custom constructor passing correct number of args through", function() {
+	it("returns a constructor for a custom constructor passing correct number of args through", function () {
 		var SingleArgDate = jasmine.createSpy("SingleArgDate spy");
 		var singleArgDateObj = new (getTobliDateConstructor(DependancyInjectionContainer.wrap(SingleArgDate)))(1);
 		expect(SingleArgDate).toHaveBeenCalledWith(1);
@@ -96,14 +96,14 @@ describe("getTobliDateConstructor", function() {
 		expect(TrippleArgDate).toHaveBeenCalledWith(3, '.14', 159);
 	});
 
-	it("returns a constructor that throws an exception when given too many arguments", function() {
+	it("returns a constructor that throws an exception when given too many arguments", function () {
 		expect(function () {
 			new (getTobliDateConstructor(DependancyInjectionContainer.wrap(Date)))(1, 2, 3, 4, 5, 6, 7, 8);
 		}).toThrow('Too many variadic constructor arguments without eval support (disabled in Chrome plugins)');
 	});
 
 	/*
-	it("returns a constructor with working formatTimeAndDate() method (when not commented out)", function() {
+	it("returns a constructor with working formatTimeAndDate() method (when not commented out)", function () {
 		var DummyTobliDate = getTobliDateConstructor(DependancyInjectionContainer.wrap(DummyDate));
 		var testCount = 0;
 		var testYear = (function testYear(year) {
@@ -144,7 +144,7 @@ describe("getTobliDateConstructor", function() {
 	});
 	*/
 
-	it("returns a constructor with working formatDateAndTimeWithLabeledTodayDate() method", function() {
+	it("returns a constructor with working formatDateAndTimeWithLabeledTodayDate() method", function () {
 		var DummyTobliDate = getTobliDateConstructor(DependancyInjectionContainer.wrap(DummyDate));
 		var testCount = 0;
 		var testYear = (function testYear(year) {
@@ -198,7 +198,7 @@ describe("getTobliDateConstructor", function() {
 		expect(testCount).toEqual(2 * 4 * 4 * 5 * 5);
 	});
 
-	it("returns a constructor with working FIXME_formatDayMonthAndTimeWithImplicitTodayDate() method", function() {
+	it("returns a constructor with working FIXME_formatDayMonthAndTimeWithImplicitTodayDate() method", function () {
 		var DummyTobliDate = getTobliDateConstructor(DependancyInjectionContainer.wrap(DummyDate));
 		var testCount = 0;
 		var testDayMonth = (function testDayMonth(day, month) {
@@ -238,7 +238,7 @@ describe("getTobliDateConstructor", function() {
 		expect(testCount).toEqual(4 * 5 * 5);
 	});
 
-	it("returns a constructor with working FIXME_formatUtcDateWithLocalTimeWithSeconds() method", function() {
+	it("returns a constructor with working FIXME_formatUtcDateWithLocalTimeWithSeconds() method", function () {
 		var DummyTobliDate = getTobliDateConstructor(DependancyInjectionContainer.wrap(DummyDate));
 		var testCount = 0;
 		var testYear = (function testYear(year) {
@@ -283,7 +283,7 @@ describe("getTobliDateConstructor", function() {
 		expect(testCount).toEqual(2 * 4 * 4 * 5 * 5 * 5);
 	});
 
-	it("returns a constructor with working isSameDate() method", function() {
+	it("returns a constructor with working isSameDate() method", function () {
 		var sampleYears = [2000, 2001, 2002];
 		var sampleMonths = ['Jan', 'Feb', 'Mar'];
 		var i, j, k;
@@ -323,7 +323,7 @@ describe("getTobliDateConstructor", function() {
 		expect(matchCount).toEqual(1);
 	});
 
-	it("returns a constructor with working getWeekdayName() method", function() {
+	it("returns a constructor with working getWeekdayName() method", function () {
 		// Jan 1, 2000 is a Saturday:
 		var expectedDayNames = [null, "Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 		var i;
@@ -338,7 +338,7 @@ describe("getTobliDateConstructor", function() {
 		}
 	});
 
-	it("returns a constructor with working getters and setters for MinuteId, UnixTime, and MicroTime comparable to getTime and setTime methods as well as createFrom... class methods", function() {
+	it("returns a constructor with working getters and setters for MinuteId, UnixTime, and MicroTime comparable to getTime and setTime methods as well as createFrom... class methods", function () {
 		var TobliDate = getTobliDateConstructor(DependancyInjectionContainer.wrap(Date));
 		var dateObj = new TobliDate();
 		expect(TobliDate.createFromTime).toBeUndefined();

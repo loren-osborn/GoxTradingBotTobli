@@ -1,14 +1,14 @@
-describe("jasmine extensions", function() {
-	it("add jasmine.getNameOfFunction() method", function() {
+describe("jasmine extensions", function () {
+	it("add jasmine.getNameOfFunction() method", function () {
 		expect(jasmine.getNameOfFunction).not.toBeUndefined();
-		expect(function() { jasmine.getNameOfFunction(null); }).toThrow('Expected null to be a function.');
-		expect(function() { jasmine.getNameOfFunction({}); }).toThrow('Expected {  } to be a function.');
+		expect(function () { jasmine.getNameOfFunction(null); }).toThrow('Expected null to be a function.');
+		expect(function () { jasmine.getNameOfFunction({}); }).toThrow('Expected {  } to be a function.');
 		expect(jasmine.getNameOfFunction(function () {})).toBeNull();
 		expect(jasmine.getNameOfFunction(function doSomethingCool() {})).toEqual('doSomethingCool');
 		expect(jasmine.getNameOfFunction(function callMe() {})).toEqual('callMe');
 	});
 
-	it("add expect.messageWhenExpecting() method", function() {
+	it("add expect.messageWhenExpecting() method", function () {
 		var dummyExpectation = expect('dummy');
 		var originalAddMatcherResult = dummyExpectation.spec.addMatcherResult;
 		expect.messageWhenExpecting(0).toEqual(1).toEqual('Expected 0 to equal 1.');
@@ -41,10 +41,10 @@ describe("jasmine extensions", function() {
 		expect(newAddMatcherResult).toBe(originalAddMatcherResult);
 	});
 
-	it("add expect.expectationFailuresWhenCalling() method", function() {
+	it("add expect.expectationFailuresWhenCalling() method", function () {
 		var dummyExpectation = expect('dummy');
 		var originalAddMatcherResult = dummyExpectation.spec.addMatcherResult;
-		expect.expectationFailuresWhenCalling( function() {
+		expect.expectationFailuresWhenCalling( function () {
 			expect(0).toEqual(1);
 			expect(0).not.toEqual(0);
 		}).toEqual([
@@ -54,7 +54,7 @@ describe("jasmine extensions", function() {
 		var newAddMatcherResult = dummyExpectation.spec.addMatcherResult;
 		dummyExpectation.spec.addMatcherResult = originalAddMatcherResult;
 		expect(newAddMatcherResult).toBe(originalAddMatcherResult);
-		expect.expectationFailuresWhenCalling( function() {
+		expect.expectationFailuresWhenCalling( function () {
 			expect(0).not.toEqual(0);
 			expect(0).toEqual(0);
 			expect(0).toEqual(1);
@@ -66,7 +66,7 @@ describe("jasmine extensions", function() {
 		var newAddMatcherResult = dummyExpectation.spec.addMatcherResult;
 		dummyExpectation.spec.addMatcherResult = originalAddMatcherResult;
 		expect(newAddMatcherResult).toBe(originalAddMatcherResult);
-		expect.expectationFailuresWhenCalling( function() {
+		expect.expectationFailuresWhenCalling( function () {
 			expect(0).toEqual(0);
 			expect(0).toEqual(1);
 			expect(0).not.toEqual(0);
@@ -79,8 +79,8 @@ describe("jasmine extensions", function() {
 		var newAddMatcherResult = dummyExpectation.spec.addMatcherResult;
 		dummyExpectation.spec.addMatcherResult = originalAddMatcherResult;
 		expect(newAddMatcherResult).toBe(originalAddMatcherResult);
-		expect.expectationFailuresWhenCalling( function() {
-			expect.expectationFailuresWhenCalling( function() {
+		expect.expectationFailuresWhenCalling( function () {
+			expect.expectationFailuresWhenCalling( function () {
 				expect(0).toEqual(0);
 				expect(0).not.toEqual(2);
 				expect(0).not.toEqual(0);
@@ -97,7 +97,7 @@ describe("jasmine extensions", function() {
 		expect(newAddMatcherResult).toBe(originalAddMatcherResult);
 	});
 
-	it("add jasmine.iterateOverTestDataSets() method", function() {
+	it("add jasmine.iterateOverTestDataSets() method", function () {
 		var ensureArgsAreNotModified = (function ensureArgsAreNotModified(dataSetSpec, specOverride, func) {
 			var dataSetSpecJson = JSON.stringify(dataSetSpec);
 			var specOverrideJson = JSON.stringify(specOverride);
@@ -196,7 +196,7 @@ describe("jasmine extensions", function() {
 		expect(callback.calls[17].args).toEqual([3, 's', 'd']);
 	});
 
-	it("adds toBeOneOf() matcher", function() {
+	it("adds toBeOneOf() matcher", function () {
 		var a = {}, b = {}, c = {}, d = {}, e = {}, f = {};
 		expect.messageWhenExpecting(3).not.toBeOneOf([1, 3, 5, 7]).toEqual('Expected 3 not to be one of 1, 3, 5 or 7.');
 		expect.messageWhenExpecting(3).toBeOneOf([]).toEqual('Expected 3 to be in the empty set.');
@@ -210,7 +210,7 @@ describe("jasmine extensions", function() {
 		expect(e).not.toBeOneOf([a, b, c, d]);
 	});
 
-	it("adds toEqualOneOf() matcher", function() {
+	it("adds toEqualOneOf() matcher", function () {
 		var a = {name:'Fred'}, b = {name:'Wilma'}, c = {name:'Barney'}, d = {name:'Betty'}, e = {name:'Fred'}, f = {name:'Bam Bam'};
 		expect.messageWhenExpecting(3).not.toEqualOneOf([1, 3, 5, 7]).toEqual('Expected 3 not to equal one of 1, 3, 5 or 7.');
 		expect.messageWhenExpecting(3).toEqualOneOf([]).toEqual('Expected 3 to be in the empty set.');
@@ -225,7 +225,7 @@ describe("jasmine extensions", function() {
 		expect(f).not.toEqualOneOf([a, b, c, d]);
 	});
 
-	it("adds toBeOfType() matcher", function() {
+	it("adds toBeOfType() matcher", function () {
 		expect.messageWhenExpecting(3).not.toBeOfType('Number').toEqual('Expected 3 not to be of type \'Number\'.');
 		expect.messageWhenExpecting('3').toBeOfType('Number').toEqual('Expected \'3\' to be of type \'Number\'.');
 		expect('3').toBeOfType('String');
@@ -237,7 +237,7 @@ describe("jasmine extensions", function() {
 		expect(jasmine.getNameOfFunction(tv.constructor)).toEqual('Television');
 	});
 
-	it("adds toBeOfClass() matcher", function() {
+	it("adds toBeOfClass() matcher", function () {
 		expect.messageWhenExpecting(3).not.toBeOfClass('Number').toEqual('Expected 3 not to be of class \'Number\'.');
 		expect.messageWhenExpecting('3').toBeOfClass('Number').toEqual('Expected \'3\' to be of class \'Number\'.');
 		expect(3).toBeOfClass('Number');
@@ -250,7 +250,7 @@ describe("jasmine extensions", function() {
 		expect(tv).toBeOfClass('Television');
 	});
 
-	it("add isAFunction() matcher", function() {
+	it("add isAFunction() matcher", function () {
 		var anonymousFunc = (function () {});
 		var doSomethingCool = (function doSomethingCool() {});
 		var callMe = (function callMe() {});
@@ -267,7 +267,7 @@ describe("jasmine extensions", function() {
 		expect(callMe).not.isAFunction({withName: 'doSomethingCool'});
 	});
 
-	it("add toBeAWellBehavedConstructor() matcher", function() {
+	it("add toBeAWellBehavedConstructor() matcher", function () {
 		var anonymousConstructor = (function () {});
 		var Apple = (function Apple() {});
 		var Banana = (function Banana() {});
