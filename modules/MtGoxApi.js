@@ -29,6 +29,9 @@ getMtGoxApi = (function () {
 				request.setRequestHeader('Rest-Sign', protectedMethods.computeMessageHmac(path, data, this.getSecret()));
 				request.send(data);
 			});
+			this.getSample = (function getSample(request, minuteIdToFetch, currency) {
+				this.getByUrl(request, protectedMethods.getRequestSamplesUrl(currency, getTobliDate().createFromMinuteId(minuteIdToFetch)));
+			});
 		});
 		MtGoxApiCommon.prototype.getByUrl = (function getByUrl(request, url) {
 			// *FIXME*: function name changed to getByUrl()
@@ -43,6 +46,10 @@ getMtGoxApi = (function () {
 				return ('https://mtgox.com/api/0/' + path + '?t=' + curTime.getTime()); // Extra cache-busting...
 			};
 			protectedMethods.computeMessageHmac = (function computeMessageHmac(path, data, key) { return computeHmac512(data, key); });
+			protectedMethods.getRequestSamplesUrl = function getRequestSamplesUrl(currency, since) {
+				var curTime = new (getTobliDate())();
+				return 'https://data.mtgox.com/api/0/data/getTrades.php?Currency=' + currency + '&since=' + (since.getMicroTime()) + '&nonce=' + (curTime.getMicroTime());
+			};
 			MtGoxApiCommon.call(this, protectedMethods);
 		});
 		MtGoxApiV1.prototype = Object.create(MtGoxApiCommon.prototype);
@@ -54,10 +61,6 @@ getMtGoxApi = (function () {
 		}); });
 		MtGoxApiV1.prototype.addBuyOrder = getV1AddOrderMethod('buy');
 		MtGoxApiV1.prototype.addSellOrder = getV1AddOrderMethod('sell');
-		MtGoxApiV1.prototype.getRequestSamplesUrl = function getRequestSamplesUrl(currency, since) {
-			var curTime = new (getTobliDate())();
-			return 'https://data.mtgox.com/api/0/data/getTrades.php?Currency=' + currency + '&since=' + (since.getMicroTime()) + '&nonce=' + (curTime.getMicroTime());
-		};
 		MtGoxApiV1.prototype.toString = (function toString() { return 'MtGox API v0'; });
 		var MtGoxApiV2 = (function MtGoxApiV2() {
 			var protectedMethods = {};
@@ -66,6 +69,10 @@ getMtGoxApi = (function () {
 				return (getMtGoxAPI2BaseURL() + path + '?t=' + curTime.getTime()); // Extra cache-busting...
 			};
 			protectedMethods.computeMessageHmac = (function computeMessageHmac(path, data, key) { return computeHmac512(path + '\0' + data, key); });
+			protectedMethods.getRequestSamplesUrl = function getRequestSamplesUrl(currency, since) {
+				var curTime = new (getTobliDate())();
+				return getMtGoxAPI2BaseURL() + 'BTC' + currency + '/money/trades/fetch?since=' + (since.getMicroTime()) + '&nonce=' + (curTime.getMicroTime());
+			};
 			MtGoxApiCommon.call(this, protectedMethods);
 		});
 		MtGoxApiV2.prototype = Object.create(MtGoxApiCommon.prototype);
@@ -77,10 +84,6 @@ getMtGoxApi = (function () {
 		}); });
 		MtGoxApiV2.prototype.addBuyOrder = getV2AddOrderMethod('bid');
 		MtGoxApiV2.prototype.addSellOrder = getV2AddOrderMethod('ask');
-		MtGoxApiV2.prototype.getRequestSamplesUrl = function getRequestSamplesUrl(currency, since) {
-			var curTime = new (getTobliDate())();
-			return getMtGoxAPI2BaseURL() + 'BTC' + currency + '/money/trades/fetch?since=' + (since.getMicroTime()) + '&nonce=' + (curTime.getMicroTime());
-		};
 		MtGoxApiV2.prototype.toString = (function toString() { return 'MtGox API v2'; });
 		getMtGoxApiVersion = getMtGoxApiVersion || (function () { return '[undefined]'; });
 		switch (getMtGoxApiVersion()) {

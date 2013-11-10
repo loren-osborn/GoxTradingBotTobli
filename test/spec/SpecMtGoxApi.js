@@ -122,30 +122,36 @@ describe("getMtGoxApi", function () {
 		expect(mgApiV2Container.get('MtGoxApi').computeMessageHmac).toBeUndefined();
 	});
 
-	it("should return API object supporting getRequestSamplesUrl() method", function () {
-		var testBaseUrls = ['https://data.mtgox.com/api/2/', 'https://fake.mtgox.hostname/fake/api/path/'];
-		var testCurrencies = ['USD', 'Simoleons'];
-		var testSinceStamps = [946674800000000, 946674800333000];
-		var testNowStamps = [946684800000, 946684800333];
-		var i, j, k, m, n;
-		var fakeSinceDate = {getMicroTime: (function () { return testSinceStamps[k]; })};
-		expect(mgApiV1Container.get('MtGoxApi').getRequestSamplesUrl).isAFunction({withName:'getRequestSamplesUrl'});
-		expect(mgApiV2Container.get('MtGoxApi').getRequestSamplesUrl).isAFunction({withName:'getRequestSamplesUrl'});
-		for (i = 0; i < testBaseUrls.length; i++ ) {
-			for (j = 0; j < testCurrencies.length; j++ ) {
-				for (k = 0; k < testSinceStamps.length; k++ ) {
-					for (m = 0; m < testNowStamps.length; m++ ) {
-						testTimeStamp = testNowStamps[m];
-						mgApiV1Container.set('MtGoxAPI2BaseURL', testBaseUrls[i]);
-						mgApiV2Container.set('MtGoxAPI2BaseURL', testBaseUrls[i]);
-						expect(mgApiV1Container.get('MtGoxApi').getRequestSamplesUrl(testCurrencies[j], fakeSinceDate))
-							.toEqual("https://data.mtgox.com/api/0/data/getTrades.php?Currency=" + testCurrencies[j] + "&since=" + testSinceStamps[k] + "&nonce=" + (testNowStamps[m] * 1000));
-						expect(mgApiV2Container.get('MtGoxApi').getRequestSamplesUrl(testCurrencies[j], fakeSinceDate))
-							.toEqual(testBaseUrls[i] + "BTC" + testCurrencies[j] + "/money/trades/fetch?since=" + testSinceStamps[k] + "&nonce=" + (testNowStamps[m] * 1000));
-					}
-				}
-			}
-		}
+	embeddableTests.generators.getRequestSamplesUrl = (function (container, getExpectedUrl) {
+		return (function getRequestSamplesUrl(testCallback, testData) {
+			jasmine.iterateOverTestDataSets([
+					{name: 'baseUrls', data: ['https://data.mtgox.com/api/2/', 'https://fake.mtgox.hostname/fake/api/path/']},
+					{name: 'currencies', data: ['USD', 'Simoleons']},
+					{name: 'sinceStamps', data: [946674800000000, 946674800333000]},
+					{name: 'nowStamps', data: [946684800000, 946684800333]}],
+				testData,
+				(function (baseUrl, currency, sinceStamp, nowStamp) {
+					var fakeSinceDate = {getMicroTime: (function () { return sinceStamp; })};
+					testTimeStamp = nowStamp;
+					container.set('MtGoxAPI2BaseURL', baseUrl);
+					var expected = getExpectedUrl(baseUrl, currency, sinceStamp, nowStamp * 1000);
+					testCallback(baseUrl, currency, sinceStamp, nowStamp, fakeSinceDate, expected);
+				})
+			);
+		});
+	});
+
+	embeddableTests.v1.getRequestSamplesUrl = embeddableTests.generators.getRequestSamplesUrl(mgApiV1Container, function (baseUrl, currency, sinceStamp, nowMicroTime) {
+		return ("https://data.mtgox.com/api/0/data/getTrades.php?Currency=" + currency + "&since=" + sinceStamp + "&nonce=" + nowMicroTime);
+	});
+	embeddableTests.v2.getRequestSamplesUrl = embeddableTests.generators.getRequestSamplesUrl(mgApiV2Container,  function (baseUrl, currency, sinceStamp, nowMicroTime) {
+		return (baseUrl + 'BTC' + currency + "/money/trades/fetch?since=" + sinceStamp + "&nonce=" + nowMicroTime);
+	});
+
+
+	it("should return API object with no public getRequestSamplesUrl() method", function () {
+		expect(mgApiV1Container.get('MtGoxApi').getRequestSamplesUrl).toBeUndefined();
+		expect(mgApiV2Container.get('MtGoxApi').getRequestSamplesUrl).toBeUndefined();
 	});
 
 	it("should return API object supporting toString() method", function () {
@@ -412,7 +418,7 @@ describe("getMtGoxApi", function () {
 			return retVal;
 		});
 
-		return (function testUncachablePostUrl(testCallback, testData) {
+		return (function testGetByUrl(testCallback, testData) {
 			jasmine.iterateOverTestDataSets([
 					{name: 'urls', data: ['https://data.mtgox.com/api/2/info.php', 'https://fake.mtgox.hostname/fake/api/path/BTCSimolions/money/info']},
 					{name: 'requests', data: [null]}],
@@ -452,5 +458,67 @@ describe("getMtGoxApi", function () {
 		});
 		embeddableTests.v1.getByUrl(simpleTest);
 		embeddableTests.v2.getByUrl(simpleTest);
+	});
+
+	embeddableTests.generators.getSample = (function (container, getRequestSamplesUrlTester, getByUrlTester) {
+		return (function testGetSample(testCallback, testData) {
+			jasmine.iterateOverTestDataSets([
+					{name: 'baseUrls', data: ['https://data.mtgox.com/api/2/', 'https://fake.mtgox.hostname/fake/api/path/']},
+					{name: 'currencies', data: ['USD', 'Simoleons']},
+					{name: 'nowStamps', data: [946684800000, 946684800333]},
+					{name: 'minuteIds', data: [15777913, 15777918]},
+					{name: 'requests', data: [null]}],
+				testData,
+				(function (baseUrl, currency, nowStamp, minuteId, request) {
+					expect(FakeDateConstructor.createFromMinuteId).toBeUndefined();
+					FakeDateConstructor.createFromMinuteId = (function (val) {
+						return getTobliDateConstructor(function () { return Date; }).createFromMinuteId(val);
+					});
+					getRequestSamplesUrlTester(
+						(function (baseUrl, currency, sinceStamp, nowStamp, fakeSinceDate, expectedUrl) {
+							getByUrlTester(
+								(function (requestToTest, url, container) {
+									testCallback({
+										container: container,
+										baseUrl: baseUrl,
+										currency: currency,
+										sinceStamp: sinceStamp,
+										nowStamp: nowStamp,
+										sinceMinuteId: minuteId,
+										sinceDate: fakeSinceDate,
+										expectedUrl: expectedUrl,
+										innerUrl: url,
+										request: requestToTest
+									});
+								}),
+								{
+									urls: [expectedUrl],
+									requests: [request]
+								}
+							);
+						}),
+						{
+							baseUrls: [baseUrl],
+							currencies: [currency],
+							sinceStamps: [minuteId * 60 * 1000 * 1000],
+							nowStamps: [nowStamp]
+						}
+					);
+					FakeDateConstructor.createFromMinuteId = undefined;
+				})
+			);
+		});
+	});
+
+	embeddableTests.v1.getSample = embeddableTests.generators.getSample(mgApiV1Container, embeddableTests.v1.getRequestSamplesUrl, embeddableTests.v1.getByUrl);
+	embeddableTests.v2.getSample = embeddableTests.generators.getSample(mgApiV2Container, embeddableTests.v2.getRequestSamplesUrl, embeddableTests.v2.getByUrl);
+
+	it("should return API object supporting getSample() method", function () {
+		var simpleTest = (function (params) {
+			expect(params.expectedUrl).toEqual(params.innerUrl);
+			expect(params.container.get('MtGoxApi').getSample(params.request, params.sinceMinuteId, params.currency)).toBeUndefined();
+		});
+		embeddableTests.v1.getSample(simpleTest);
+		embeddableTests.v2.getSample(simpleTest);
 	});
 });

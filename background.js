@@ -475,20 +475,14 @@ function addSample(minuteFetch, price, nocache) {
 	}
 }
 
-function getSampleFromMtGox(req, minute_fetch) {
-	var since = tobliGoxBot.createNewTobliDate();
-	since.setMinuteId(minute_fetch);
-	tobliGoxBot.getMtGoxApi().getByUrl(req, tobliGoxBot.getMtGoxApi().getRequestSamplesUrl(currency, since));
-}
-
 function refreshPopup(fullRefresh) {
-	if ((popupRefresh!=null) && (fullRefresh)) {
+	if ((popupRefresh != null) && (fullRefresh)) {
 		try {
 			popupRefresh();
 		} catch (e) {
 			popupRefresh = null;
 		}
-	} else if (popupUpdateCounter!=null) {
+	} else if (popupUpdateCounter != null) {
 		try {
 			popupUpdateCounter();
 		} catch (e) {
@@ -638,7 +632,7 @@ function updateH1(reset) { // Added "reset" parameter to clear the H1 data - sho
 				if (minute_fetch <= minute_now) {
 					// We are not done, but a sample did not exist in local storage: We need to fetch more samples from MtGox...
 					lastUpdateStartTime = (new Date()).getTime();
-					getSampleFromMtGox(req, minute_fetch);
+					tobliGoxBot.getMtGoxApi().getSample(req, minute_fetch, currency);
 					done = false;
 					if (bootstrap) {
 						chrome.browserAction.setBadgeText({text: ('       |        ').substr((bootstrap++) % 9, 6)});
@@ -669,7 +663,7 @@ function updateH1(reset) { // Added "reset" parameter to clear the H1 data - sho
 
 		tobliGoxBot.getTobliLogger().logLevel('DEBUG').log('Fetching sample from MtGox: minute_fetch=' + minute_fetch);
 		lastUpdateStartTime = (new Date()).getTime();
-		getSampleFromMtGox(req, minute_fetch);
+		tobliGoxBot.getMtGoxApi().getSample(req, minute_fetch, currency);
 	} else {
 		// Done, and all samples where loaded from local storage...
 		tobliGoxBot.getTobliLogger().log('Got new samples (all loaded from cache) ' + H1.length + ' ' + MaxSamplesToKeep);
