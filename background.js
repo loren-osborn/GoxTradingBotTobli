@@ -391,10 +391,9 @@ function tidBinarySearch(tradeHistoryResponse, tid) {
 function cacheOtherUsefulSamples(tradeHistoryResponse) {
 	tobliGoxBot.getTobliLogger().logLevel('DEBUG').log('generating usefulSamplePoints');
 	// May not really be needed to generate this on every call, but to get the very latest sample points for long date durations, do it anyway (not very intensive)...
-	var time_now = (new Date()).getTime();
 	var usefulSamplePoints={};
 	for (var j = 0; j < validSampleIntervalMinutes.length; j++) {
-		var minute_now = parseInt(time_now / (validSampleIntervalMinutes[j] * 60 * 1000)) * validSampleIntervalMinutes[j]; // Fix trading samples to whole hours...
+		var minute_now = Math.floor(tobliGoxBot.createNewTobliDate().getMinuteId() / validSampleIntervalMinutes[j]) * validSampleIntervalMinutes[j]; // Fix trading samples to whole hours...
 		var interval_minute_fetch = minute_now - (MaxSamplesToKeep * validSampleIntervalMinutes[j]);
 		while (interval_minute_fetch < minute_now) {
 			usefulSamplePoints[interval_minute_fetch.toString()] = 1;
@@ -426,7 +425,7 @@ function getNextMinuteFetch() {
 	if (tim.length > 0) {
 		return (tim[tim.length - 1] + tradingIntervalMinutes);
 	} else {
-		var minute_now = parseInt((new Date()).getTime() / (tradingIntervalMinutes * 60 * 1000)) * tradingIntervalMinutes; // Fix trading samples to whole hours...
+		var minute_now = Math.floor(tobliGoxBot.createNewTobliDate().getMinuteId() / tradingIntervalMinutes) * tradingIntervalMinutes; // Fix trading samples to whole hours...
 		return (minute_now - (MaxSamplesToKeep * tradingIntervalMinutes));
 	}
 }
@@ -526,8 +525,8 @@ function forceAbort() {
 }
 
 function updateH1(reset) { // Added "reset" parameter to clear the H1 data - should be called after changing settings that affects tradingInterval...
-	var now = (new Date()).getTime();
-	if ((updateInProgress) && ((lastUpdateStartTime == 0) || (now - lastUpdateStartTime < 30 * 1000))) {
+	var now = tobliGoxBot.createNewTobliDate();
+	if ((updateInProgress) && ((lastUpdateStartTime == 0) || (now.getTime() - lastUpdateStartTime < 30 * 1000))) {
 		// Skip update if updateInProgress and no "long call" exists.
 		// Unless reset==true - in that case, abort and re-update
 		// Check abort status after 30 seconds and forst abort if still not
@@ -542,7 +541,7 @@ function updateH1(reset) { // Added "reset" parameter to clear the H1 data - sho
 	}
 
 	updateInProgress = true;
-	lastUpdateStartTime = (new Date()).getTime();
+	lastUpdateStartTime = now.getTime();
 
 	if (reset) {
 		tobliGoxBot.getTobliLogger().logLevel('DEBUG').logNative('updateH1(): reset H1 data (Interval has changed)');
@@ -555,7 +554,7 @@ function updateH1(reset) { // Added "reset" parameter to clear the H1 data - sho
 		abortUpdateAndRedo = false;
 	}
 
-	var minute_now = parseInt(now / (tradingIntervalMinutes * 60 * 1000)) * tradingIntervalMinutes; // Fix trading samples to whole hours...
+	var minute_now = Math.floor(now.getMinuteId() / tradingIntervalMinutes) * tradingIntervalMinutes; // Fix trading samples to whole hours...
 	var minute_fetch = getNextMinuteFetch();
 	if (minute_fetch > minute_now) {
 		tobliGoxBot.getTobliLogger().logLevel('DEBUG').log('Not yet time to fetch new samples...');
@@ -618,7 +617,7 @@ function updateH1(reset) { // Added "reset" parameter to clear the H1 data - sho
 					cacheOtherUsefulSamples(tradeHistoryResponse);
 				} else {
 					tobliGoxBot.getTobliLogger().log('Empty sample chunk from MtGox - no trades since minute_fetch=' + minute_fetch);
-					if (parseInt((new Date()).getTime() / (60 * 1000)) - minute_fetch < 5) {
+					if (tobliGoxBot.createNewTobliDate().getMinuteId() - minute_fetch < 5) {
 						// The trade we where trying to fetch is less than 5 minutes old
 						// => Probably no trades where made since then, so stop retrying...
 						// This will happen a lot with short sample interval on a calm market, so abort the update to prevent hammering of MtGox
