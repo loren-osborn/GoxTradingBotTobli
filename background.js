@@ -565,7 +565,7 @@ function updateH1(reset) { // Added "reset" parameter to clear the H1 data - sho
 		cleanSampleCache();
 
 		var req = new XMLHttpRequest();
-		var url, since;
+		var FIXME_neverInilializedUrl, since;
 
 		req.onerror = function (e) {
 			if (abortUpdateAndRedo) {
@@ -576,7 +576,7 @@ function updateH1(reset) { // Added "reset" parameter to clear the H1 data - sho
 			}
 			tobliGoxBot.getTobliLogger().logNative('getTrades error', e, '-repeat');
 			// lastUpdateStartTime = (new Date()).getTime();
-			tobliGoxBot.getMtGoxApi().getByUrl(req, url);
+			tobliGoxBot.getMtGoxApi().getByUrl(req, FIXME_neverInilializedUrl);
 		}
 
 		req.onload = function () {
@@ -597,7 +597,7 @@ function updateH1(reset) { // Added "reset" parameter to clear the H1 data - sho
 					tobliGoxBot.getTobliLogger().logLevel('DEBUG').log('Adding sample from MtGox: sample.' + minute_fetch + ' = ' + tradeHistoryResponse[0].price);
 					addSample(minute_fetch, tradeHistoryResponse[0].price);
 
-					// Check if the chunk contains more any useful data
+					// Check if the chunk contains any more useful data
 					minute_fetch = getNextMinuteFetch();
 					var i = 1;
 					while ((i < tradeHistoryResponse.length) && (minute_fetch <= minute_now)) {
