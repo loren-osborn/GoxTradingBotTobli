@@ -148,9 +148,9 @@ function save() {
 		return;
 	}
 */
-	
+
 	if (bp.EmaShortPar != es || bp.EmaLongPar != el || bp.MinBuyThreshold != buy_tr || bp.MinSellThreshold != sell_tr || bp.tradingIntervalMinutes != parseInt(tradInt.value) ) {
-		if (!confirm("Applying different Trading interval/EMA/Threshold values may case an instant trigger to execute a trade."))  return;
+		if (!confirm("Applying different Trading interval/EMA/Threshold values may case an instant trigger to execute a trade.")) return;
 	}
 
 	localStorage.ApiKey = bp.ApiKey = document.getElementById("apikey").value;
@@ -168,7 +168,7 @@ function save() {
 	// console.log("localStorage.tradingEnabled=" + localStorage.tradingEnabled);
 
 	var resetH1 = false;
-	
+
 	var currency = currencySelector.value;
 	if (currency != bp.currency) {
 		bp.emptySampleCache();
@@ -212,7 +212,7 @@ function save() {
 		localStorage.simple_buy_below = bp.simple_buy_below = simple_buy_below;
 		localStorage.simple_sell_above = bp.simple_sell_above = simple_sell_above;
 */
-		
+
 		// bp.refreshEMA(true);
 		if (resetH1) {
 			bp.updateH1(true); // call updateH1() with reset==true instead to also reset the H1-array if trading interval or currency has changed (current data in H1 is no good)
@@ -292,7 +292,7 @@ function setfields() {
 	document.getElementById("simple_buy_below").value = (bp.simple_buy_below > 0 ? bp.simple_buy_below : "");
 	document.getElementById("simple_sell_above").value = (bp.simple_sell_above > 0 ? bp.simple_sell_above : "");
 */
-	document.getElementById("maxVisibleSamples").innerHTML = (bp.MaxSamplesToKeep - bp.preSamples);  
+	document.getElementById("maxVisibleSamples").innerHTML = (bp.MaxSamplesToKeep - bp.preSamples);
 	intervalChanged();
 	updateFiatCurencyUnit();
 }

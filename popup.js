@@ -30,7 +30,7 @@ function refreshtable() {
 
 	document.getElementById("buyTres").innerHTML = bp.MinBuyThreshold;
 	document.getElementById("sellTres").innerHTML = bp.MinSellThreshold;
-	
+
 	if (bp.tradingEnabled == 1) {
 		document.getElementById("tradingEnabledStatus").style.display = "block";
 		document.getElementById("tradingDisabledStatus").style.display = "none";
@@ -48,7 +48,7 @@ function refreshtable() {
 
 	while (tab.rows.length > 4)
 		tab.deleteRow(4);
-		
+
 	nowDate=new Date();
 	nowDateStr=nowDate.getFullYear()+"-"+padit(nowDate.getMonth()+1)+"-"+padit(nowDate.getDate());
 
@@ -86,7 +86,7 @@ function refreshtable() {
 			r.style.backgroundColor = bcols[lastBgCol];
 
 			// r.insertCell(-1).innerHTML = (new Date(bp.tim[i] * 3600 * 1000)).getHours() + ":00"
-			//r.insertCell(-1).innerHTML = d.getFullYear() + "-" + padit(d.getMonth() + 1) + "-" + padit(d.getDate()) + " " +  padit(d.getHours()) + ":" + padit(d.getMinutes());
+			// r.insertCell(-1).innerHTML = d.getFullYear() + "-" + padit(d.getMonth() + 1) + "-" + padit(d.getDate()) + " " + padit(d.getHours()) + ":" + padit(d.getMinutes());
 
 			r.insertCell(-1).innerHTML = (dateStr != nowDateStr ? date : "") + padit(d.getHours()) + ":"+padit(d.getMinutes());
 			r.insertCell(-1).innerHTML = bp.H1[i].toFixed(3);
@@ -114,7 +114,7 @@ function refreshtable() {
 
 	var bitcoinchartsUrl;
 	if (bp.tradingIntervalMinutes < 10)
-		bitcoinchartsUrl = "http://www.bitcoincharts.com/charts/mtgoxUSD#rg1zig5-minztgSzbgBza1gEMAzm1g" + bp.EmaShortPar + "za2gEMAzm2g" + bp.EmaLongPar + "zi1gMACDzv";  // 1 day, 5-min, Candlestick , Bollinger Band, EMA(10), EMA(21), MACD
+		bitcoinchartsUrl = "http://www.bitcoincharts.com/charts/mtgoxUSD#rg1zig5-minztgSzbgBza1gEMAzm1g" + bp.EmaShortPar + "za2gEMAzm2g" + bp.EmaLongPar + "zi1gMACDzv"; // 1 day, 5-min, Candlestick , Bollinger Band, EMA(10), EMA(21), MACD
 	else if (bp.tradingIntervalMinutes < 30)
 		bitcoinchartsUrl = "http://www.bitcoincharts.com/charts/mtgoxUSD#rg1zig15-minztgSzbgBza1gEMAzm1g" + bp.EmaShortPar + "za2gEMAzm2g" + bp.EmaLongPar + "zi1gMACDzv"; // 1 day, 15-min
 	else if (bp.tradingIntervalMinutes < 60)
@@ -153,7 +153,7 @@ function redrawChart() {
 		var switchesDown = [];
 		var latestSolidTrend = 0;
 		// var lastSwitch = 0;
-		
+
 		// var visibleSamples = Math.min(bp.H1.length, (bp.LogLines == 0 ? bp.MaxSamplesToKeep - bp.preSamples : bp.LogLines));
 		var visibleSamples = Math.min(bp.H1.length, (visibleChartSamples == 0 ? bp.MaxSamplesToKeep - bp.preSamples : visibleChartSamples));
 		var visibleStartIndex = bp.H1.length - visibleSamples;
@@ -195,7 +195,7 @@ function redrawChart() {
 					chartMinY = bp.emaShort[i];
 				if (chartMaxY < bp.emaShort[i])
 					chartMaxY = bp.emaShort[i];
-	
+
 				if (chartMinY > bp.emaLong[i])
 					chartMinY = bp.emaLong[i];
 				if (chartMaxY < bp.emaLong[i])
@@ -378,7 +378,7 @@ function assembleTooltip(tim) {
 	lastEMALongTooltipLine = "";
 	lastTrendTooltipLine = "";
 	lastPriceTooltipLine = "";
-	
+
 	return tooltip;
 }
 

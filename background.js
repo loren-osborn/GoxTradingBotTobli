@@ -143,7 +143,7 @@ function mtgoxpost(path, params, ef, df) {
 	for (var i in params)
 		data+="&" + params[i];
 	data = encodeURI(data);
-	var	hmac = hmac_512((useAPIv2?path + '\0' + data:data), ApiSec);
+	var hmac = hmac_512((useAPIv2?path + '\0' + data:data), ApiSec);
 	req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 	req.setRequestHeader("Rest-Key", ApiKey);
 	req.setRequestHeader("Rest-Sign", hmac);
@@ -164,8 +164,8 @@ function dat2day(ms) {
 	var y = t.getUTCFullYear().toString();
 	var m = (t.getUTCMonth() + 1).toString();
 	var d = t.getUTCDate().toString();
-	if (m.length < 2)  m = '0' + m;
-	if (d.length < 2)  d = '0' + d;
+	if (m.length < 2) m = '0' + m;
+	if (d.length < 2) d = '0' + d;
 	return y + "-" + m + "-" + d;
 }
 
@@ -204,10 +204,10 @@ function checkThresholdsAt(idx, buy) {
 function getTrendAtIndex(i) {
 	// This function return the calculated trend at index i, with respect to EMA-values, thresholds and no of samples before triggering.
 	// Return values:
-	// 0		= no trend
-	// 1/-1	= weak trend up/down (below thresholds)
-	// 2/-2	= strong trend up/down (above thresholds)
-	// 3/-3	= strong trend up/down and enough samples has passed (according to settings "Buy/Sell after X samples")
+	// 0 = no trend
+	// 1/-1 = weak trend up/down (below thresholds)
+	// 2/-2 = strong trend up/down (above thresholds)
+	// 3/-3 = strong trend up/down and enough samples has passed (according to settings "Buy/Sell after X samples")
 
 	if ((H1.length < 5) || (i < 5) || (i >= H1.length)) {
 		// All data not available
@@ -479,8 +479,8 @@ function cacheOtherUsefulSamples(trs) {
 			if ((!sample) || (sample == "null")) {
 				var i = tidBinarySearch(trs, parseInt(key) * 60 * 1000000);
 				if (i != -1) {
-//					found++;
-//					log("Sample should be cached. key=" + key + " tid=" + parseInt(trs[i].tid / 60 / 1000000) + " lastTid=" + parseInt(trs[i - 1].tid / 60 / 1000000) + " price=" + trs[i].price);
+					// found++;
+					// log("Sample should be cached. key=" + key + " tid=" + parseInt(trs[i].tid / 60 / 1000000) + " lastTid=" + parseInt(trs[i - 1].tid / 60 / 1000000) + " price=" + trs[i].price);
 					localStorage.setItem("sample." + key, trs[i].price);
 				}
 			}
@@ -755,10 +755,10 @@ function updateH1(reset) { // Added "reset" parameter to clear the H1 data - sho
 	}
 }
 
-console.log("Using MtGox API v"+(useAPIv2?"2":"0"));
+console.log("Using MtGox API v"+(useAPIv2 ? "2" : "0"));
 chrome.browserAction.setBadgeBackgroundColor({color:[128, 128, 128, 50]});
 schedUpdateInfo(100);
-setTimeout(function(){ updateH1(false); }, 2 * 1000); 	// Delay first updateH1() to allow user info to be fetched first...
+setTimeout(function(){ updateH1(false); }, 2 * 1000); // Delay first updateH1() to allow user info to be fetched first...
 setInterval(function(){ updateH1(false); }, 60 * 1000); // Recheck every minute (should be a multiple of any trading interval)
 
 /*
