@@ -4,8 +4,8 @@ var nowDateStr;
 var visibleChartSamples = bp.LogLines;
 
 function padit(d) {
-	return d < 10 ? '0' + d.toString() : d.toString()
-};
+	return (d < 10) ? ("0" + d.toString()) : d.toString();
+}
 
 function refreshtable() {
 	const wds = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -16,20 +16,23 @@ function refreshtable() {
 	document.getElementById("emal").innerHTML = bp.EmaLongPar;
 	document.getElementById("emas").innerHTML = bp.EmaShortPar;
 
-	if (bp.tradingIntervalMinutes > 59)
-		document.getElementById("int").innerHTML = parseInt(bp.tradingIntervalMinutes / 60) + " hour" + (bp.tradingIntervalMinutes > 119 ? "s" : "")
-	else
+	if (bp.tradingIntervalMinutes > 59) {
+		document.getElementById("int").innerHTML = parseInt(bp.tradingIntervalMinutes / 60) + " hour" + ((bp.tradingIntervalMinutes > 119) ? "s" : "");
+	} else {
 		document.getElementById("int").innerHTML = bp.tradingIntervalMinutes + " min";
+	}
 
-	if (bp.tickCountBuy > 1)
-		document.getElementById("ticksBuy").innerHTML = bp.tickCountBuy + " samples"
-	else
+	if (bp.tickCountBuy > 1) {
+		document.getElementById("ticksBuy").innerHTML = bp.tickCountBuy + " samples";
+	} else {
 		document.getElementById("ticksBuy").innerHTML = "1 sample";
+	}
 
-	if (bp.tickCountSell > 1)
-		document.getElementById("ticksSell").innerHTML = bp.tickCountSell + " samples"
-	else
+	if (bp.tickCountSell > 1) {
+		document.getElementById("ticksSell").innerHTML = bp.tickCountSell + " samples";
+	} else {
 		document.getElementById("ticksSell").innerHTML = "1 sample";
+	}
 
 	document.getElementById("buyTres").innerHTML = bp.MinBuyThreshold;
 	document.getElementById("sellTres").innerHTML = bp.MinSellThreshold;
@@ -43,19 +46,22 @@ function refreshtable() {
 	}
 
 	var experimentalSettingsInfo = "";
-	if (bp.tradeOnlyAfterSwitch == 1)
+	if (bp.tradeOnlyAfterSwitch == 1) {
 		experimentalSettingsInfo = "<span class=\"experimentalSettingInfo\">Trade only after switch!</span>";
-	if (bp.inverseEMA == 1)
+	}
+	if (bp.inverseEMA == 1) {
 		experimentalSettingsInfo += "<span class=\"experimentalSettingInfo\">Inverse EMA enabled!</span>";
+	}
 	document.getElementById("experimentalSettings").innerHTML = experimentalSettingsInfo;
 
-	while (tab.rows.length > 4)
+	while (tab.rows.length > 4) {
 		tab.deleteRow(4);
+	}
 
 	nowDate = new Date();
 	nowDateStr = nowDate.getFullYear() + "-" + padit(nowDate.getMonth() + 1) + "-" + padit(nowDate.getDate());
 
-	var displayLines = Math.min(bp.H1.length, (bp.LogLines == 0 ? bp.MaxSamplesToKeep - bp.preSamples : bp.LogLines));
+	var displayLines = Math.min(bp.H1.length, ((bp.LogLines == 0) ? (bp.MaxSamplesToKeep - bp.preSamples) : bp.LogLines));
 	if ((bp.updateInProgress) && (bp.H1.length < bp.MaxSamplesToKeep)) { // && bp.H1.length > bp.LogLines) {
 		var r = tab.insertRow(4);
 		var c = r.insertCell(-1);
@@ -75,12 +81,12 @@ function refreshtable() {
 			var es = bp.emaShort[i];
 			var perc = 100 * (es - el) / ((es + el) / 2);
 			var r = tab.insertRow(4);
-			// var ti = new Date(bp.tim[i] * 3600 * 1000)
+			// var ti = new Date(bp.tim[i] * 3600 * 1000);
 			var d = new Date(bp.tim[i] * 60 * 1000);
 			r.title = wds[d.getDay()];
 			var dateStr = d.getFullYear() + "-" + padit(d.getMonth() + 1) + "-" + padit(d.getDate());
 			var date = d.getDate() + "/" + (d.getMonth() + 1) + " ";
-			// r.style.backgroundColor = bcols[((bp.tim[i] + 1) / 24) & 1]
+			// r.style.backgroundColor = bcols[((bp.tim[i] + 1) / 24) & 1];
 			if (lastDate != date) {
 				lastBgCol = 1 - lastBgCol;
 				lastDate = date;
@@ -88,19 +94,19 @@ function refreshtable() {
 
 			r.style.backgroundColor = bcols[lastBgCol];
 
-			// r.insertCell(-1).innerHTML = (new Date(bp.tim[i] * 3600 * 1000)).getHours() + ":00"
+			// r.insertCell(-1).innerHTML = (new Date(bp.tim[i] * 3600 * 1000)).getHours() + ":00";
 			// r.insertCell(-1).innerHTML = d.getFullYear() + "-" + padit(d.getMonth() + 1) + "-" + padit(d.getDate()) + " " + padit(d.getHours()) + ":" + padit(d.getMinutes());
 
-			r.insertCell(-1).innerHTML = (dateStr != nowDateStr ? date : "") + padit(d.getHours()) + ":" + padit(d.getMinutes());
+			r.insertCell(-1).innerHTML = ((dateStr != nowDateStr) ? date : "") + padit(d.getHours()) + ":" + padit(d.getMinutes());
 			r.insertCell(-1).innerHTML = bp.H1[i].toFixed(3);
 			r.insertCell(-1).innerHTML = es.toFixed(3);
 			r.insertCell(-1).innerHTML = el.toFixed(3);
 			var c = r.insertCell(-1);
 			c.innerHTML = perc.toFixed(3) + '%';
-			if (perc > bp.MinBuyThreshold || perc < -bp.MinSellThreshold) {
-				c.style.backgroundColor = perc < 0 ? "#ffd0d0" : "#d0ffd0";
+			if ((perc > bp.MinBuyThreshold) || (perc < -bp.MinSellThreshold)) {
+				c.style.backgroundColor = ((perc < 0) ? "#ffd0d0" : "#d0ffd0");
 			} else {
-				c.style.backgroundColor = perc < 0 ? "#fff0f0" : "#f0fff0";
+				c.style.backgroundColor = ((perc < 0) ? "#fff0f0" : "#f0fff0");
 			}
 		}
 	}
@@ -116,18 +122,19 @@ function refreshtable() {
 	}
 
 	var bitcoinchartsUrl;
-	if (bp.tradingIntervalMinutes < 10)
+	if (bp.tradingIntervalMinutes < 10) {
 		bitcoinchartsUrl = "http://www.bitcoincharts.com/charts/mtgoxUSD#rg1zig5-minztgSzbgBza1gEMAzm1g" + bp.EmaShortPar + "za2gEMAzm2g" + bp.EmaLongPar + "zi1gMACDzv"; // 1 day, 5-min, Candlestick , Bollinger Band, EMA(10), EMA(21), MACD
-	else if (bp.tradingIntervalMinutes < 30)
+	} else if (bp.tradingIntervalMinutes < 30) {
 		bitcoinchartsUrl = "http://www.bitcoincharts.com/charts/mtgoxUSD#rg1zig15-minztgSzbgBza1gEMAzm1g" + bp.EmaShortPar + "za2gEMAzm2g" + bp.EmaLongPar + "zi1gMACDzv"; // 1 day, 15-min
-	else if (bp.tradingIntervalMinutes < 60)
+	} else if (bp.tradingIntervalMinutes < 60) {
 		bitcoinchartsUrl = "http://www.bitcoincharts.com/charts/mtgoxUSD#rg2zig30-minztgSzbgBza1gEMAzm1g" + bp.EmaShortPar + "za2gEMAzm2g" + bp.EmaLongPar + "zi1gMACDzv"; // 2 days, 30-min
-	else if (bp.tradingIntervalMinutes < 120)
+	} else if (bp.tradingIntervalMinutes < 120) {
 		bitcoinchartsUrl = "http://www.bitcoincharts.com/charts/mtgoxUSD#rg5zigHourlyztgSzbgBza1gEMAzm1g" + bp.EmaShortPar + "za2gEMAzm2g" + bp.EmaLongPar + "zi1gMACDzv"; // 5 days, hourly
-	else if (bp.tradingIntervalMinutes <= 180)
+	} else if (bp.tradingIntervalMinutes <= 180) {
 		bitcoinchartsUrl = "http://www.bitcoincharts.com/charts/mtgoxUSD#rg10zig2-hourztgSzbgBza1gEMAzm1g" + bp.EmaShortPar + "za2gEMAzm2g" + bp.EmaLongPar + "zi1gMACDzv"; // 10 days, 2-hours
-	else
+	} else {
 		bitcoinchartsUrl = "http://www.bitcoincharts.com/charts/mtgoxUSD#rg30zig6-hourztgSzbgBza1gEMAzm1g" + bp.EmaShortPar + "za2gEMAzm2g" + bp.EmaLongPar + "zi1gMACDzv"; // month, 6-hours
+	}
 
 	document.getElementById("externalChartLink").setAttribute('href', bitcoinchartsUrl);
 
@@ -157,8 +164,8 @@ function redrawChart() {
 		var latestSolidTrend = 0;
 		// var lastSwitch = 0;
 
-		// var visibleSamples = Math.min(bp.H1.length, (bp.LogLines == 0 ? bp.MaxSamplesToKeep - bp.preSamples : bp.LogLines));
-		var visibleSamples = Math.min(bp.H1.length, (visibleChartSamples == 0 ? bp.MaxSamplesToKeep - bp.preSamples : visibleChartSamples));
+		// var visibleSamples = Math.min(bp.H1.length, ((bp.LogLines == 0) ? (bp.MaxSamplesToKeep - bp.preSamples) : bp.LogLines));
+		var visibleSamples = Math.min(bp.H1.length, ((visibleChartSamples == 0) ? (bp.MaxSamplesToKeep - bp.preSamples) : visibleChartSamples));
 		var visibleStartIndex = bp.H1.length - visibleSamples;
 		var H1Visible = [];
 		var emaShortVisible = [];
@@ -176,7 +183,7 @@ function redrawChart() {
 			visibleDays = Math.floor(visibleHours / 24);
 			visibleHours = visibleHours - visibleDays * 24;
 		}
-		document.getElementById("chartTimeSpan").innerHTML = (visibleDays > 0 ? visibleDays + " days " : "") + (visibleHours > 0 ? visibleHours + " hrs " : "") + (visibleMinutes > 0 ? visibleMinutes + " min" : "");
+		document.getElementById("chartTimeSpan").innerHTML = ((visibleDays > 0) ? (visibleDays + " days ") : "") + ((visibleHours > 0) ? (visibleHours + " hrs ") : "") + ((visibleMinutes > 0) ? (visibleMinutes + " min") : "");
 
 		// Calculate the chart scale (max/min of y-value) and find where the trend switches (for the first time in each direction)
 		var chartMinY = bp.H1[visibleStartIndex];
@@ -185,24 +192,30 @@ function redrawChart() {
 			H1Visible.push(bp.H1[i]);
 			timVisible.push(bp.tim[i]);
 
-			if (chartMinY > bp.H1[i])
+			if (chartMinY > bp.H1[i]) {
 				chartMinY = bp.H1[i];
-			if (chartMaxY < bp.H1[i])
+			}
+			if (chartMaxY < bp.H1[i]) {
 				chartMaxY = bp.H1[i];
+			}
 
 			try {
 				emaShortVisible.push(bp.emaShort[i]);
 				emaLongVisible.push(bp.emaLong[i]);
 
-				if (chartMinY > bp.emaShort[i])
+				if (chartMinY > bp.emaShort[i]) {
 					chartMinY = bp.emaShort[i];
-				if (chartMaxY < bp.emaShort[i])
+				}
+				if (chartMaxY < bp.emaShort[i]) {
 					chartMaxY = bp.emaShort[i];
+				}
 
-				if (chartMinY > bp.emaLong[i])
+				if (chartMinY > bp.emaLong[i]) {
 					chartMinY = bp.emaLong[i];
-				if (chartMaxY < bp.emaLong[i])
+				}
+				if (chartMaxY < bp.emaLong[i]) {
 					chartMaxY = bp.emaLong[i];
+				}
 			} catch (e) {
 				// Exception - probably because the length of emaShort or emaLong is less that H1 - no big deal...
 			}
@@ -348,9 +361,9 @@ function formatEMALongTooltip(sp, options, fields) {
 
 	if (lastEmaTime == fields.x) {
 		if (trendIndicator > 0) {
-			trend = '<img class="trendIndicatorImg" src="trend_' + (trendIndicator > bp.MinBuyThreshold ? 'strong' : 'weak') + '_up.gif">';
+			trend = '<img class="trendIndicatorImg" src="trend_' + ((trendIndicator > bp.MinBuyThreshold) ? 'strong' : 'weak') + '_up.gif">';
 		} else if (trendIndicator < 0) {
-			trend = '<img class="trendIndicatorImg" src="trend_' + (-trendIndicator > bp.MinSellThreshold ? 'strong' : 'weak') + '_down.gif">';
+			trend = '<img class="trendIndicatorImg" src="trend_' + ((-trendIndicator > bp.MinSellThreshold) ? 'strong' : 'weak') + '_down.gif">';
 		} else {
 			trend = 'none';
 		}
@@ -368,7 +381,7 @@ function formatPriceTooltip(sp, options, fields) {
 function assembleTooltip(tim) {
 	var d = new Date(tim * 60 * 1000);
 	var dateStr = d.getFullYear() + "-" + padit(d.getMonth() + 1) + "-" + padit(d.getDate());
-	var t = (dateStr != nowDateStr ? dateStr : "Today") + " " + padit(d.getHours()) + ":" + padit(d.getMinutes());
+	var t = ((dateStr != nowDateStr) ? dateStr : "Today") + " " + padit(d.getHours()) + ":" + padit(d.getMinutes());
 	var tooltip = '<div align="center">' + t +
 		'<table width="100%" border="0"><tr><td align="center" class="tooltipTableCell">' +
 		lastPriceTooltipLine + '<br>' +
@@ -396,30 +409,31 @@ function toggleChart() {
 
 function zoomChart(zoomIn) {
 	var maxVisibleSamples = bp.MaxSamplesToKeep - bp.preSamples;
-	var visibleSamples = Math.min(bp.H1.length, (visibleChartSamples == 0 ? maxVisibleSamples : visibleChartSamples));
+	var visibleSamples = Math.min(bp.H1.length, ((visibleChartSamples == 0) ? maxVisibleSamples : visibleChartSamples));
 	var maxMinutes = parseInt(maxVisibleSamples * bp.tradingIntervalMinutes);
 	var visibleChartTimespan = visibleSamples * bp.tradingIntervalMinutes;
 
 	var changeMinutes;
-	if (visibleChartTimespan < (60 * 3))
+	if (visibleChartTimespan < (60 * 3)) {
 		changeMinutes = 30;
-	else if (visibleChartTimespan < (60 * 12))
+	} else if (visibleChartTimespan < (60 * 12)) {
 		changeMinutes = 60;
-	else if (visibleChartTimespan < (60 * 24))
+	} else if (visibleChartTimespan < (60 * 24)) {
 		changeMinutes = 60 * 3;
-	else if (visibleChartTimespan < (60 * 3 * 24))
+	} else if (visibleChartTimespan < (60 * 3 * 24)) {
 		changeMinutes = 60 * 6;
-	else if (visibleChartTimespan < (60 * 4 * 24))
+	} else if (visibleChartTimespan < (60 * 4 * 24)) {
 		changeMinutes = 60 * 12;
-	else
+	} else {
 		changeMinutes = 60 * 24;
+	}
 
 	if (zoomIn) {
 		visibleChartTimespan = Math.max(30, visibleChartTimespan - changeMinutes);
 	} else {
 		visibleChartTimespan = Math.min(maxMinutes, visibleChartTimespan + changeMinutes);
 	}
-	visibleChartSamples = (visibleChartTimespan == maxMinutes ? 0 : Math.max(10, parseInt(visibleChartTimespan / bp.tradingIntervalMinutes)));
+	visibleChartSamples = ((visibleChartTimespan == maxMinutes) ? 0 : Math.max(10, parseInt(visibleChartTimespan / bp.tradingIntervalMinutes)));
 	redrawChart();
 }
 
@@ -435,7 +449,7 @@ bp.popupRefresh = refreshtable;
 bp.popupUpdateCounter = popupUpdateCounter;
 
 document.addEventListener('DOMContentLoaded', function () {
-	chartLink.addEventListener('click', function () { toggleChart() });
+	chartLink.addEventListener('click', function () { toggleChart(); });
 	enableTrading.addEventListener('click', function () {
 		localStorage.tradingEnabled = bp.tradingEnabled = 1;
 		bp.chrome.browserAction.setIcon({path: 'robot_trading_on.png'});

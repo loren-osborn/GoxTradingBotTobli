@@ -79,7 +79,7 @@ function rese() {
 		}
 	}
 	document.getElementById("simple_buy_below").value = "";
-	document.getElementById("simple_sell_above").value = ""
+	document.getElementById("simple_sell_above").value = "";
 */
 }
 
@@ -195,7 +195,7 @@ function save() {
 		localStorage.tradingIntervalMinutes = bp.tradingIntervalMinutes = parseInt(tradInt.value);
 		// localStorage.MaxMinutesBack = bp.MaxMinutesBack = parseInt(bp.MaxSamplesToKeep * bp.tradingIntervalMinutes);
 
-		// localStorage.LogLines = bp.LogLines = parseInt(sla.value)
+		// localStorage.LogLines = bp.LogLines = parseInt(sla.value);
 		localStorage.LogLines = bp.LogLines = parseInt(sla.value * 60 / localStorage.tradingIntervalMinutes);
 
 		localStorage.tickCountBuy = bp.tickCountBuy = parseInt(tc_buy.value);
@@ -238,7 +238,7 @@ function setfields() {
 	document.getElementById("sell_tras").value = bp.MinSellThreshold.toFixed(2);
 
 	document.getElementById("currencySelector").value = bp.currency;
-	document.getElementById("keepBTC").value = bp.keepBTC.toString() + (bp.keepBTCUnitIsPercentage == 1 ? " %" : "");
+	document.getElementById("keepBTC").value = bp.keepBTC.toString() + ((bp.keepBTCUnitIsPercentage == 1) ? " %" : "");
 
 	document.getElementById("tradingEnabled").checked = (bp.tradingEnabled == 1);
 	document.getElementById("tradingDisabledOnStart").checked = (bp.tradingDisabledOnStart == 1);
@@ -291,8 +291,8 @@ function setfields() {
 			break;
 		}
 	}
-	document.getElementById("simple_buy_below").value = (bp.simple_buy_below > 0 ? bp.simple_buy_below : "");
-	document.getElementById("simple_sell_above").value = (bp.simple_sell_above > 0 ? bp.simple_sell_above : "");
+	document.getElementById("simple_buy_below").value = ((bp.simple_buy_below > 0) ? bp.simple_buy_below : "");
+	document.getElementById("simple_sell_above").value = ((bp.simple_sell_above > 0) ? bp.simple_sell_above : "");
 */
 	document.getElementById("maxVisibleSamples").innerHTML = (bp.MaxSamplesToKeep - bp.preSamples);
 	intervalChanged();
@@ -337,20 +337,20 @@ function currencyChanged() {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
-	butres.addEventListener('click', function () { rese() });
-	butsav.addEventListener('click', function () { save() });
-	tradingIntervalMinutes.addEventListener('change', function () { intervalChanged() });
-	currencySelector.addEventListener('change', function () { currencyChanged() });
+	butres.addEventListener('click', function () { rese(); });
+	butsav.addEventListener('click', function () { save(); });
+	tradingIntervalMinutes.addEventListener('change', function () { intervalChanged(); });
+	currencySelector.addEventListener('change', function () { currencyChanged(); });
 	setfields();
 
 /*
 	setcontrols();
 	setInterval(col, 300);
 
-	spyes.addEventListener('change', function () { sp.readOnly = !spyes.checked })
-	butres.addEventListener('click', function () { reset() })
-	butsav.addEventListener('click', function () { save() })
-	allcur.addEventListener('click', function () { cf.value = '' })
-	swtchlog.addEventListener('click', function () { chlog.style.display = chlog.style.display == 'none' ? 'block' : 'none' })
+	spyes.addEventListener('change', function () { sp.readOnly = !spyes.checked; });
+	butres.addEventListener('click', function () { reset(); });
+	butsav.addEventListener('click', function () { save(); });
+	allcur.addEventListener('click', function () { cf.value = ''; });
+	swtchlog.addEventListener('click', function () { chlog.style.display = ((chlog.style.display == 'none') ? 'block' : 'none'); });
 */
-})
+});

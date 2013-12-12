@@ -9,7 +9,7 @@ var ApiKey = localStorage.ApiKey || '';
 var ApiSec = localStorage.ApiSec || '';
 
 var tradingDisabledOnStart = (localStorage.tradingDisabledOnStart || 0);
-var tradingEnabled = (tradingDisabledOnStart == 1 ? 0 : (localStorage.tradingEnabled || 0));
+var tradingEnabled = ((tradingDisabledOnStart == 1) ? 0 : (localStorage.tradingEnabled || 0));
 if (tradingEnabled == 1) {
 	chrome.browserAction.setIcon({path: 'robot_trading_on.png'});
 } else {
@@ -60,7 +60,7 @@ var lastUpdateStartTime = 0;
 var abortUpdateAndRedo = false;
 
 function padit(d) {
-	return d < 10 ? '0' + d.toString() : d.toString()
+	return (d < 10) ? ('0' + d.toString()) : d.toString();
 }
 
 function updateEMA(ema, N) {
@@ -76,8 +76,9 @@ function updateEMA(ema, N) {
 
 var updateInfoTimer = null;
 function schedUpdateInfo(t) {
-	if (updateInfoTimer)
+	if (updateInfoTimer) {
 		clearTimeout(updateInfoTimer);
+	}
 	updateInfoTimer = setTimeout(updateInfo, t);
 }
 
@@ -92,10 +93,11 @@ function updateInfo() {
 	}
 
 	var path;
-	if (useAPIv2)
+	if (useAPIv2) {
 		path = "BTC" + currency + "/money/info";
-	else
+	} else {
 		path = "info.php";
+	}
 
 	mtgoxpost(path, [],
 		function (e) {
@@ -107,8 +109,9 @@ function updateInfo() {
 			// console.log("info.php", d.currentTarget.responseText)
 			try {
 				var rr = JSON.parse(d.currentTarget.responseText);
-				if (useAPIv2)
+				if (useAPIv2) {
 					rr = rr.data;
+				}
 
 				if (typeof(rr.Wallets) == "undefined") {
 					log("Error fetching user info:" + rr.error);
@@ -142,10 +145,11 @@ function mtgoxpost(path, params, ef, df) {
 	req.onerror = ef;
 	req.onload = df;
 	var data = "nonce=" + (t * 1000);
-	for (var i in params)
+	for (var i in params) {
 		data += "&" + params[i];
+	}
 	data = encodeURI(data);
-	var hmac = hmac_512((useAPIv2 ? path + '\0' + data : data), ApiSec);
+	var hmac = hmac_512((useAPIv2 ? (path + '\0' + data) : data), ApiSec);
 	req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 	req.setRequestHeader("Rest-Key", ApiKey);
 	req.setRequestHeader("Rest-Sign", hmac);
@@ -166,8 +170,12 @@ function dat2day(ms) {
 	var y = t.getUTCFullYear().toString();
 	var m = (t.getUTCMonth() + 1).toString();
 	var d = t.getUTCDate().toString();
-	if (m.length < 2) m = '0' + m;
-	if (d.length < 2) d = '0' + d;
+	if (m.length < 2) {
+		m = '0' + m;
+	}
+	if (d.length < 2) {
+		d = '0' + d;
+	}
 	return y + "-" + m + "-" + d;
 }
 
@@ -189,15 +197,17 @@ function checkThresholdsAt(idx, buy) {
 	if (buy) {
 		for (var i = 0; i < tickCountBuy; i++) {
 			var dif = getemadif(idx - i);
-			if (dif <= MinBuyThreshold)
+			if (dif <= MinBuyThreshold) {
 				return false;
+			}
 		}
 		return true;
 	} else {
 		for (var i = 0; i < tickCountSell; i++) {
 			var dif = getemadif(idx - i);
-			if (dif >= -MinSellThreshold)
+			if (dif >= -MinSellThreshold) {
 				return false;
+			}
 		}
 		return true;
 	}
@@ -267,7 +277,7 @@ function findLatestSolidTrend() {
 			break;
 		}
 	}
-	log("Latest solid trend: " + (latestSolidTrend == 3 ? "up" : (latestSolidTrend == -3 ? "down" : "none")));
+	log("Latest solid trend: " + ((latestSolidTrend == 3) ? "up" : ((latestSolidTrend == -3) ? "down" : "none")));
 }
 
 function trade() {
@@ -276,7 +286,7 @@ function trade() {
 		// Not implemented yet...
 	}
 */
-	var keepBTCAmount = (keepBTCUnitIsPercentage == 1 ? (BTC * keepBTC / 100) : keepBTC);
+	var keepBTCAmount = ((keepBTCUnitIsPercentage == 1) ? (BTC * keepBTC / 100) : keepBTC);
 	var sellAmount = BTC - keepBTCAmount;
 	var currentTrend = getTrendAtIndex(H1.length - 1);
 
@@ -302,24 +312,27 @@ function trade() {
 					if (inverseEMA != 1) {
 						// Normal EMA-strategy
 						console.log("BUY! (EMA(" + EmaShortPar + ")/EMA(" + EmaLongPar + ")>" + MinBuyThreshold + "% for " + tickCountBuy + " or more ticks)");
-						if (useAPIv2)
+						if (useAPIv2) {
 							mtgoxpost("BTC" + currency + "/money/order/add", ['type=bid', 'amount_int=' + (1000 * 100000000).toString()], one, onl);
-						else
+						} else {
 							mtgoxpost("buyBTC.php", ['Currency=' + currency, 'amount=1000'], one, onl);
+						}
 					} else {
 						// Crazy Ivan!
-						console.log("Crazy Ivan SELL " + sellAmount + " BTC!" + (keepBTC > 0 ? " (keep " + (keepBTC.toString() + (keepBTCUnitIsPercentage == 1 ? " %" : " BTC")) + ")" : "") + " EMA(" + EmaShortPar + ")/EMA(" + EmaLongPar + ")>" + MinBuyThreshold + "% for " + tickCountBuy + " or more ticks");
-						if (useAPIv2)
+						console.log("Crazy Ivan SELL " + sellAmount + " BTC!" + ((keepBTC > 0) ? (" (keep " + (keepBTC.toString() + ((keepBTCUnitIsPercentage == 1) ? " %" : " BTC")) + ")") : "") + " EMA(" + EmaShortPar + ")/EMA(" + EmaLongPar + ")>" + MinBuyThreshold + "% for " + tickCountBuy + " or more ticks");
+						if (useAPIv2) {
 							mtgoxpost("BTC" + currency + "/money/order/add", ['type=ask', 'amount_int=' + Math.round(sellAmount * 100000000).toString()], one, onl);
-						else
+						} else {
 							mtgoxpost("sellBTC.php", ['Currency=' + currency, 'amount=' + sellAmount.toString()], one, onl);
+						}
 					}
 				} else {
 					// Simulation only
-					if (inverseEMA != 1)
+					if (inverseEMA != 1) {
 						console.log("Simulted BUY! EMA(" + EmaShortPar + ")/EMA(" + EmaLongPar + ")>" + MinBuyThreshold + "% for " + tickCountBuy + " or more ticks (Simulation only: no trade was made)");
-					else
-						console.log("Simulated Crazy Ivan SELL " + sellAmount + " BTC!" + (keepBTC > 0 ? " (keep " + (keepBTC.toString() + (keepBTCUnitIsPercentage == 1 ? " %" : " BTC")) + ")" : "") + " EMA(" + EmaShortPar + ")/EMA(" + EmaLongPar + ")>" + MinBuyThreshold + "% for " + tickCountBuy + " or more ticks (Simulation only: no trade was made)");
+					} else {
+						console.log("Simulated Crazy Ivan SELL " + sellAmount + " BTC!" + ((keepBTC > 0) ? (" (keep " + (keepBTC.toString() + ((keepBTCUnitIsPercentage == 1) ? " %" : " BTC")) + ")") : "") + " EMA(" + EmaShortPar + ")/EMA(" + EmaLongPar + ")>" + MinBuyThreshold + "% for " + tickCountBuy + " or more ticks (Simulation only: no trade was made)");
+					}
 				}
 			} else {
 				console.log("Trend is up, but no " + currency + " to spend...");
@@ -345,25 +358,28 @@ function trade() {
 				if ((tradingEnabled == 1) && (ApiKey != '')) {
 					if (inverseEMA != 1) {
 						// Normal EMA-strategy
-						console.log("SELL " + sellAmount + " BTC! (keep " + (keepBTC.toString() + (keepBTCUnitIsPercentage == 1 ? " %" : " BTC")) + ") EMA(" + EmaShortPar + ")/EMA(" + EmaLongPar + ")<-" + MinSellThreshold + "% for " + tickCountSell + " or more ticks");
-						if (useAPIv2)
+						console.log("SELL " + sellAmount + " BTC! (keep " + (keepBTC.toString() + ((keepBTCUnitIsPercentage == 1) ? " %" : " BTC")) + ") EMA(" + EmaShortPar + ")/EMA(" + EmaLongPar + ")<-" + MinSellThreshold + "% for " + tickCountSell + " or more ticks");
+						if (useAPIv2) {
 							mtgoxpost("BTC" + currency + "/money/order/add", ['type=ask', 'amount_int=' + Math.round(sellAmount * 100000000).toString()], one, onl);
-						else
+						} else {
 							mtgoxpost("sellBTC.php", ['Currency=' + currency, 'amount=' + sellAmount.toString()], one, onl);
+						}
 					} else {
 						// Crazy Ivan!
 						console.log("Crazy Ivan BUY! (EMA(" + EmaShortPar + ")/EMA(" + EmaLongPar + ")<-" + MinSellThreshold + "% for " + tickCountSell + " or more ticks)");
-						if (useAPIv2)
+						if (useAPIv2) {
 							mtgoxpost("BTC" + currency + "/money/order/add", ['type=bid', 'amount_int=' + (1000 * 100000000).toString()], one, onl);
-						else
+						} else {
 							mtgoxpost("buyBTC.php", ['Currency=' + currency,'amount=1000'], one, onl);
+						}
 					}
 				} else {
 					// Simulation only
-					if (inverseEMA != 1)
-						console.log("Simulated SELL " + sellAmount + " BTC! (keep " + (keepBTC.toString() + (keepBTCUnitIsPercentage == 1 ? " %" : " BTC")) + ") EMA(" + EmaShortPar + ")/EMA(" + EmaLongPar + ")<-" + MinSellThreshold + "% for " + tickCountSell + " or more ticks (Simulation only: no trade was made)");
-					else
+					if (inverseEMA != 1) {
+						console.log("Simulated SELL " + sellAmount + " BTC! (keep " + (keepBTC.toString() + ((keepBTCUnitIsPercentage == 1) ? " %" : " BTC")) + ") EMA(" + EmaShortPar + ")/EMA(" + EmaLongPar + ")<-" + MinSellThreshold + "% for " + tickCountSell + " or more ticks (Simulation only: no trade was made)");
+					} else {
 						console.log("Simulted Crazy Ivan BUY! EMA(" + EmaShortPar + ")/EMA(" + EmaLongPar + ")<-" + MinSellThreshold + "% for " + tickCountSell + " or more ticks (Simulation only: no trade was made)");
+					}
 				}
 			} else {
 				console.log("Trend is down, but no BTC to sell...");
@@ -408,8 +424,9 @@ function refreshEMA(reset) {
 	updateEMA(emaLong, EmaLongPar);
 	updateEMA(emaShort, EmaShortPar);
 
-	if (reset)
+	if (reset) {
 		findLatestSolidTrend();
+	}
 
 	if (updateInProgress) {
 		chrome.browserAction.setBadgeText({text: "?"});
@@ -444,21 +461,25 @@ var log = console.log = function () {
 
 Object.size = function (obj) {
 	var size = 0, key;
-	for (key in obj)
-		if (obj.hasOwnProperty(key))
+	for (key in obj) {
+		if (obj.hasOwnProperty(key)) {
 			size++;
+		}
+	}
 	return size;
 }
 
 function tidBinarySearch(trs, tid) {
-	if ((trs.length <= 1) || (tid < trs[1].tid) || (tid > trs[trs.length - 1].tid))
+	if ((trs.length <= 1) || (tid < trs[1].tid) || (tid > trs[trs.length - 1].tid)) {
 		return -1;
+	}
 	var l = 1, u = trs.length, m;
 	while (l <= u) {
-		if (tid > parseInt(trs[(m = Math.floor((l + u) / 2))].tid))
+		if (tid > parseInt(trs[(m = Math.floor((l + u) / 2))].tid)) {
 			l = m + 1;
-		else
-			u = (tid == parseInt(trs[m].tid)) ? -2 : m - 1;
+		} else {
+			u = (tid == parseInt(trs[m].tid)) ? -2 : (m - 1);
+		}
 	}
 	return (u == -2) ? m : l;
 }
@@ -540,8 +561,9 @@ function addSample(minuteFetch, price, nocache) {
 	}
 	H1.push(f);
 
-	if (nocache)
+	if (nocache) {
 		return;
+	}
 
 	var sample = localStorage.getItem("sample." + minuteFetch);
 	if ((!sample) || (sample == "null")) {
@@ -553,10 +575,11 @@ function addSample(minuteFetch, price, nocache) {
 
 function getSampleFromMtGox(req, minute_fetch) {
 	var since = (minute_fetch * 60 * 1000000).toString();
-	if (useAPIv2)
+	if (useAPIv2) {
 		get_url(req, MtGoxAPI2BaseURL + "BTC" + currency + "/money/trades/fetch?since=" + since + "&nonce=" + ((new Date()).getTime() * 1000));
-	else
+	} else {
 		get_url(req, "https://data.mtgox.com/api/0/data/getTrades.php?Currency=" + currency + "&since=" + since + "&nonce=" + ((new Date()).getTime() * 1000));
+	}
 }
 
 function refreshPopup(fullRefresh) {
@@ -611,8 +634,9 @@ function updateH1(reset) { // Added "reset" parameter to clear the H1 data - sho
 		if (reset) {
 			abortUpdateAndRedo = true;
 			log("updateH1(): Reset while update in progress: abort current update");
-			if (forceAbortTimer)
+			if (forceAbortTimer) {
 				clearTimeout(forceAbortTimer);
+			}
 			forceAbortTimer = setTimeout(forceAbort, 30 * 1000);
 		}
 		return;
@@ -676,8 +700,9 @@ function updateH1(reset) { // Added "reset" parameter to clear the H1 data - sho
 			try {
 				// log(req.responseText)
 				var trs = JSON.parse(req.responseText);
-				if (useAPIv2)
+				if (useAPIv2) {
 					trs = trs.data;
+				}
 
 				if (trs.length > 0) {
 					// log("Adding sample from MtGox: sample." + minute_fetch + " = " + trs[0].price);
@@ -741,8 +766,9 @@ function updateH1(reset) { // Added "reset" parameter to clear the H1 data - sho
 				updateInProgress = false;
 				lastUpdateStartTime = 0;
 			}
-			if (refr)
+			if (refr) {
 				refreshEMA(reset);
+			}
 
 			refreshPopup(refr);
 		}
