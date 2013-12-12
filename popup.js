@@ -249,7 +249,7 @@ function redrawChart() {
 				lineColor: '#B00000',
 				fillColor: false,
 				lineWidth: 1,
-				composite: (lineDrawn?true:false),
+				composite: (lineDrawn ? true : false),
 				width: chartWidth + 'px',
 				height: chartHeight + 'px',
 			minSpotColor: false,
@@ -274,7 +274,7 @@ function redrawChart() {
 		minSpotColor: false,
 		maxSpotColor: false,
 		spotColor: false,
-		composite: (lineDrawn?true:false),
+		composite: (lineDrawn ? true : false),
 		width: chartWidth + 'px',
 		height: chartHeight + 'px',
 		tooltipContainer: document.getElementById("chart"),
@@ -327,14 +327,14 @@ var lastEMALongTooltipLine = "";
 var lastTrendTooltipLine = "";
 var lastPriceTooltipLine = "";
 
-function formatEMAShortTooltip(sp, options, fields){
+function formatEMAShortTooltip(sp, options, fields) {
 	lastEmaTime = fields.x;
 	lastEmaShort = fields.y;
 	lastEMAShortTooltipLine = '<span style="color: ' + fields.color + '">&#9679;</span> EMA' + bp.EmaShortPar + ': ' + formatChartNumbers(fields.y);
 	return ""; // Don't draw until last curve's tooltip is calculated...
 }
 
-function formatEMALongTooltip(sp, options, fields){
+function formatEMALongTooltip(sp, options, fields) {
 	var trend = '?';
 
 	//

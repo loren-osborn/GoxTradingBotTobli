@@ -112,8 +112,8 @@ function updateInfo() {
 					log("Error fetching user info:" + rr.error);
 					chrome.browserAction.setTitle({title: "Error getting balance. MtGox problem?"});
 				} else {
-					BTC = (rr.Wallets["BTC"]?parseFloat(rr.Wallets["BTC"].Balance.value):0);
-					fiat = (rr.Wallets[currency]?parseFloat(rr.Wallets[currency].Balance.value):0);
+					BTC = (rr.Wallets["BTC"] ? parseFloat(rr.Wallets["BTC"].Balance.value) : 0);
+					fiat = (rr.Wallets[currency] ? parseFloat(rr.Wallets[currency].Balance.value) : 0);
 					chrome.browserAction.setTitle({title: (BTC.toFixed(3) + " BTC + " + fiat.toFixed(2) + " " + currency)});
 					refreshPopup(true);
 				}
@@ -143,7 +143,7 @@ function mtgoxpost(path, params, ef, df) {
 	for (var i in params)
 		data+="&" + params[i];
 	data = encodeURI(data);
-	var hmac = hmac_512((useAPIv2?path + '\0' + data:data), ApiSec);
+	var hmac = hmac_512((useAPIv2 ? path + '\0' + data : data), ApiSec);
 	req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 	req.setRequestHeader("Rest-Key", ApiKey);
 	req.setRequestHeader("Rest-Sign", hmac);
@@ -276,7 +276,7 @@ function trade() {
 
 	if (currentTrend > 1) {
 		// Trend is up
-		chrome.browserAction.setBadgeBackgroundColor({color:[0, 128, 0, 200]});
+		chrome.browserAction.setBadgeBackgroundColor({color: [0, 128, 0, 200]});
 
 		if (currentTrend == 3) {
 
@@ -323,7 +323,7 @@ function trade() {
 		}
 	} else if (currentTrend < -1) {
 		// Trend is down
-		chrome.browserAction.setBadgeBackgroundColor({color:[128, 0, 0, 200]});
+		chrome.browserAction.setBadgeBackgroundColor({color: [128, 0, 0, 200]});
 
 		if (currentTrend == -3) {
 			// Trend is down, also according to the "Sell after X samples"-setting
@@ -368,9 +368,9 @@ function trade() {
 	} else {
 		// Trend is undefined/weak
 		if (currentTrend > 0) {
-			chrome.browserAction.setBadgeBackgroundColor({color:[10, 100, 10, 100]});
+			chrome.browserAction.setBadgeBackgroundColor({color: [10, 100, 10, 100]});
 		} else {
-			chrome.browserAction.setBadgeBackgroundColor({color:[100, 10, 10, 100]});
+			chrome.browserAction.setBadgeBackgroundColor({color: [100, 10, 10, 100]});
 		}
 	}
 }
@@ -622,7 +622,7 @@ function updateH1(reset) { // Added "reset" parameter to clear the H1 data - sho
 		emaLong = [];
 		emaShort = [];
 		bootstrap = 1;
-		chrome.browserAction.setBadgeBackgroundColor({color:[128, 128, 128, 50]});
+		chrome.browserAction.setBadgeBackgroundColor({color: [128, 128, 128, 50]});
 		abortUpdateAndRedo = false;
 	}
 
@@ -756,7 +756,7 @@ function updateH1(reset) { // Added "reset" parameter to clear the H1 data - sho
 }
 
 console.log("Using MtGox API v"+(useAPIv2 ? "2" : "0"));
-chrome.browserAction.setBadgeBackgroundColor({color:[128, 128, 128, 50]});
+chrome.browserAction.setBadgeBackgroundColor({color: [128, 128, 128, 50]});
 schedUpdateInfo(100);
 setTimeout(function () { updateH1(false); }, 2 * 1000); // Delay first updateH1() to allow user info to be fetched first...
 setInterval(function () { updateH1(false); }, 60 * 1000); // Recheck every minute (should be a multiple of any trading interval)
@@ -768,7 +768,7 @@ function onErr(e) {
 function onLod(d) {
 	log("getTrades post ok", d.currentTarget.responseText);
 }
-setTimeout(function (){
+setTimeout(function () {
 	mtgoxpost("money/wallet/history", ['currency=USD'], onErr, onLod);
 	mtgoxpost("BTCUSD/money/info", [], onErr, onLod);
 }, 1000);

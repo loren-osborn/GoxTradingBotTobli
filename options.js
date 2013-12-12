@@ -163,7 +163,7 @@ function save() {
 	} else {
 		bp.chrome.browserAction.setIcon({path: 'robot_trading_off.png'});
 	}
-	localStorage.tradingDisabledOnStart=bp.tradingDisabledOnStart=(document.getElementById("tradingDisabledOnStart").checked?1:0);
+	localStorage.tradingDisabledOnStart = bp.tradingDisabledOnStart = (document.getElementById("tradingDisabledOnStart").checked ? 1 : 0);
 
 	// console.log("localStorage.tradingEnabled=" + localStorage.tradingEnabled);
 
