@@ -13,7 +13,7 @@ if (!String.prototype.endsWith) {
 }
 if (!String.prototype.trim) {
 	String.prototype.trim = function () {
-		return this.replace(/^\s+|\s+$/g,'');
+		return this.replace(/^\s+|\s+$/g, '');
 	};
 }
 
@@ -150,7 +150,9 @@ function save() {
 */
 
 	if (bp.EmaShortPar != es || bp.EmaLongPar != el || bp.MinBuyThreshold != buy_tr || bp.MinSellThreshold != sell_tr || bp.tradingIntervalMinutes != parseInt(tradInt.value) ) {
-		if (!confirm("Applying different Trading interval/EMA/Threshold values may case an instant trigger to execute a trade.")) return;
+		if (!confirm("Applying different Trading interval/EMA/Threshold values may case an instant trigger to execute a trade.")) {
+			return;
+		}
 	}
 
 	localStorage.ApiKey = bp.ApiKey = document.getElementById("apikey").value;
@@ -241,9 +243,9 @@ function setfields() {
 	document.getElementById("tradingEnabled").checked = (bp.tradingEnabled == 1);
 	document.getElementById("tradingDisabledOnStart").checked = (bp.tradingDisabledOnStart == 1);
 
-	// console.log("bp.tradingEnabled="+bp.tradingEnabled);
+	// console.log("bp.tradingEnabled=" + bp.tradingEnabled);
 
-	// document.getElementById("keepFiat").value=bp.keepFiat.toString();
+	// document.getElementById("keepFiat").value = bp.keepFiat.toString();
 
 	for (var i = 0; i < sla.options.length; i++) {
 		if (parseInt(sla.options[i].value) == (bp.LogLines * bp.tradingIntervalMinutes / 60)) {

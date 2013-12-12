@@ -3,7 +3,10 @@ var nowDate;
 var nowDateStr;
 var visibleChartSamples = bp.LogLines;
 
-function padit(d) { return d < 10 ? '0' + d.toString() : d.toString() };
+function padit(d) {
+	return d < 10 ? '0' + d.toString() : d.toString()
+};
+
 function refreshtable() {
 	const wds = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 	const bcols = ["#f2f2ff", "#fffff0"];
@@ -49,8 +52,8 @@ function refreshtable() {
 	while (tab.rows.length > 4)
 		tab.deleteRow(4);
 
-	nowDate=new Date();
-	nowDateStr=nowDate.getFullYear()+"-"+padit(nowDate.getMonth()+1)+"-"+padit(nowDate.getDate());
+	nowDate = new Date();
+	nowDateStr = nowDate.getFullYear() + "-" + padit(nowDate.getMonth() + 1) + "-" + padit(nowDate.getDate());
 
 	var displayLines = Math.min(bp.H1.length, (bp.LogLines == 0 ? bp.MaxSamplesToKeep - bp.preSamples : bp.LogLines));
 	if ((bp.updateInProgress) && (bp.H1.length < bp.MaxSamplesToKeep)) { // && bp.H1.length > bp.LogLines) {
@@ -88,7 +91,7 @@ function refreshtable() {
 			// r.insertCell(-1).innerHTML = (new Date(bp.tim[i] * 3600 * 1000)).getHours() + ":00"
 			// r.insertCell(-1).innerHTML = d.getFullYear() + "-" + padit(d.getMonth() + 1) + "-" + padit(d.getDate()) + " " + padit(d.getHours()) + ":" + padit(d.getMinutes());
 
-			r.insertCell(-1).innerHTML = (dateStr != nowDateStr ? date : "") + padit(d.getHours()) + ":"+padit(d.getMinutes());
+			r.insertCell(-1).innerHTML = (dateStr != nowDateStr ? date : "") + padit(d.getHours()) + ":" + padit(d.getMinutes());
 			r.insertCell(-1).innerHTML = bp.H1[i].toFixed(3);
 			r.insertCell(-1).innerHTML = es.toFixed(3);
 			r.insertCell(-1).innerHTML = el.toFixed(3);
@@ -173,7 +176,7 @@ function redrawChart() {
 			visibleDays = Math.floor(visibleHours / 24);
 			visibleHours = visibleHours - visibleDays * 24;
 		}
-		document.getElementById("chartTimeSpan").innerHTML = (visibleDays > 0 ? visibleDays + " days " : "") + (visibleHours > 0 ? visibleHours+ " hrs " : "") + (visibleMinutes > 0 ? visibleMinutes + " min" : "");
+		document.getElementById("chartTimeSpan").innerHTML = (visibleDays > 0 ? visibleDays + " days " : "") + (visibleHours > 0 ? visibleHours + " hrs " : "") + (visibleMinutes > 0 ? visibleMinutes + " min" : "");
 
 		// Calculate the chart scale (max/min of y-value) and find where the trend switches (for the first time in each direction)
 		var chartMinY = bp.H1[visibleStartIndex];
@@ -218,7 +221,7 @@ function redrawChart() {
 			}
 		}
 
-	// settings: http://omnipotent.net/jquery.sparkline/#s-docs
+		// settings: http://omnipotent.net/jquery.sparkline/#s-docs
 		var lineDrawn = false;
 		if (emaShortVisible.length >= H1Visible.length) {
 			$('#EMAChart').sparkline(emaShortVisible, {
@@ -227,10 +230,10 @@ function redrawChart() {
 				fillColor: false,
 				lineWidth: 1,
 				composite: false,
-			width: chartWidth + 'px',
-			height: chartHeight + 'px',
-			minSpotColor: false,
-			maxSpotColor: false,
+				width: chartWidth + 'px',
+				height: chartHeight + 'px',
+				minSpotColor: false,
+				maxSpotColor: false,
 				spotColor: false,
 				tooltipContainer: document.getElementById("chart"),
 				tooltipClassname: 'chartTooltip',
@@ -238,8 +241,8 @@ function redrawChart() {
 				highlightLineColor: '#CCC',
 				highlightSpotColor: '#000',
 				xvalues: timVisible,
-			chartRangeMin: chartMinY,
-			chartRangeMax: chartMaxY
+				chartRangeMin: chartMinY,
+				chartRangeMax: chartMaxY
 			});
 			lineDrawn = true;
 		}
@@ -252,8 +255,8 @@ function redrawChart() {
 				composite: (lineDrawn ? true : false),
 				width: chartWidth + 'px',
 				height: chartHeight + 'px',
-			minSpotColor: false,
-			maxSpotColor: false,
+				minSpotColor: false,
+				maxSpotColor: false,
 				spotColor: false,
 				tooltipContainer: document.getElementById("chart"),
 				tooltipClassname: 'chartTooltip',
@@ -261,8 +264,8 @@ function redrawChart() {
 				highlightLineColor: '#CCC',
 				highlightSpotColor: '#000',
 				xvalues: timVisible,
-			chartRangeMin: chartMinY,
-			chartRangeMax: chartMaxY
+				chartRangeMin: chartMinY,
+				chartRangeMax: chartMaxY
 			});
 			lineDrawn = true;
 		}
@@ -285,7 +288,7 @@ function redrawChart() {
 		xvalues: timVisible,
 		chartRangeMin: chartMinY,
 		chartRangeMax: chartMaxY
-		});
+	});
 
 
 		// Draw trend switch arrows

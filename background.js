@@ -59,7 +59,9 @@ var updateInProgress = false;
 var lastUpdateStartTime = 0;
 var abortUpdateAndRedo = false;
 
-function padit(d) { return d < 10 ? '0' + d.toString() : d.toString() }
+function padit(d) {
+	return d < 10 ? '0' + d.toString() : d.toString()
+}
 
 function updateEMA(ema, N) {
 	var pr, k = 2 / (N + 1);
@@ -141,7 +143,7 @@ function mtgoxpost(path, params, ef, df) {
 	req.onload = df;
 	var data = "nonce=" + (t * 1000);
 	for (var i in params)
-		data+="&" + params[i];
+		data += "&" + params[i];
 	data = encodeURI(data);
 	var hmac = hmac_512((useAPIv2 ? path + '\0' + data : data), ApiSec);
 	req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
@@ -224,28 +226,32 @@ function getTrendAtIndex(i) {
 			var dif3 = getemadif(i - 2);
 			var dif4 = getemadif(i - 3);
 			var dif5 = getemadif(i - 4);
-			if ((tickCountBuy == 1) ||
+			if (
+					(tickCountBuy == 1) ||
 					(tickCountBuy == 2 && (dif2 > MinBuyThreshold)) ||
 					(tickCountBuy == 3 && (dif2 > MinBuyThreshold) && (dif3 > MinBuyThreshold)) ||
 					(tickCountBuy == 4 && (dif2 > MinBuyThreshold) && (dif3 > MinBuyThreshold) && (dif4 > MinBuyThreshold)) ||
-					(tickCountBuy == 5 && (dif2 > MinBuyThreshold) && (dif3 > MinBuyThreshold) && (dif4 > MinBuyThreshold) && (dif5 > MinBuyThreshold))) {
+					(tickCountBuy == 5 && (dif2 > MinBuyThreshold) && (dif3 > MinBuyThreshold) && (dif4 > MinBuyThreshold) && (dif5 > MinBuyThreshold))
+			) {
 				trend = 3;
 			}
 		}
 	} else if (dif1 < 0) {
-		trend=-1;
-		if (dif1<-MinSellThreshold) {
-			trend=-2;
+		trend = -1;
+		if (dif1 < -MinSellThreshold) {
+			trend = -2;
 			var dif2 = getemadif(i - 1);
 			var dif3 = getemadif(i - 2);
 			var dif4 = getemadif(i - 3);
 			var dif5 = getemadif(i - 4);
-			if ((tickCountSell == 1) ||
-					(tickCountSell == 2 && (dif2<-MinSellThreshold)) ||
-					(tickCountSell == 3 && (dif2<-MinSellThreshold) && (dif3<-MinSellThreshold)) ||
-					(tickCountSell == 4 && (dif2<-MinSellThreshold) && (dif3<-MinSellThreshold) && (dif4<-MinSellThreshold)) ||
-					(tickCountSell == 5 && (dif2<-MinSellThreshold) && (dif3<-MinSellThreshold) && (dif4<-MinSellThreshold) && (dif5<-MinSellThreshold))) {
-				trend=-3;
+			if (
+					(tickCountSell == 1) ||
+					(tickCountSell == 2 && (dif2 < -MinSellThreshold)) ||
+					(tickCountSell == 3 && (dif2 < -MinSellThreshold) && (dif3 < -MinSellThreshold)) ||
+					(tickCountSell == 4 && (dif2 < -MinSellThreshold) && (dif3 < -MinSellThreshold) && (dif4 < -MinSellThreshold)) ||
+					(tickCountSell == 5 && (dif2 < -MinSellThreshold) && (dif3 < -MinSellThreshold) && (dif4 < -MinSellThreshold) && (dif5 < -MinSellThreshold))
+			) {
+				trend = -3;
 			}
 		}
 	}
@@ -416,11 +422,11 @@ function refreshEMA(reset) {
 
 var origLog = console.log;
 var log = console.log = function () {
-		var t = new Date();
-		var file = "";
-		var line = "";
-		try {
-			var stack = new Error().stack;
+	var t = new Date();
+	var file = "";
+	var line = "";
+	try {
+		var stack = new Error().stack;
 		file = stack.split("\n")[2].split("/")[3].split(":")[0];
 		line = stack.split("\n")[2].split("/")[3].split(":")[1];
 	} catch (e) {}
@@ -454,7 +460,7 @@ function tidBinarySearch(trs, tid) {
 		else
 			u = (tid == parseInt(trs[m].tid)) ? -2 : m - 1;
 	}
-	return (u==-2) ? m : l;
+	return (u == -2) ? m : l;
 }
 
 function cacheOtherUsefulSamples(trs) {
@@ -554,13 +560,13 @@ function getSampleFromMtGox(req, minute_fetch) {
 }
 
 function refreshPopup(fullRefresh) {
-	if ((popupRefresh!=null) && (fullRefresh)) {
+	if ((popupRefresh != null) && (fullRefresh)) {
 		try {
 			popupRefresh();
 		} catch (e) {
 			popupRefresh = null;
 		}
-	} else if (popupUpdateCounter!=null) {
+	} else if (popupUpdateCounter != null) {
 		try {
 			popupUpdateCounter();
 		} catch (e) {
@@ -755,7 +761,7 @@ function updateH1(reset) { // Added "reset" parameter to clear the H1 data - sho
 	}
 }
 
-console.log("Using MtGox API v"+(useAPIv2 ? "2" : "0"));
+console.log("Using MtGox API v" + (useAPIv2 ? "2" : "0"));
 chrome.browserAction.setBadgeBackgroundColor({color: [128, 128, 128, 50]});
 schedUpdateInfo(100);
 setTimeout(function () { updateH1(false); }, 2 * 1000); // Delay first updateH1() to allow user info to be fetched first...
