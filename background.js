@@ -2,21 +2,21 @@ const MaxSamplesToKeep = 200; // Should be "visible sample" + preSamples below
 const preSamples = 56; // Use this number of samples from the MaxSamplesToKeep only for initial EMA-calculation (these samples will not show in the graph, but provides better buy/sell-indicator arrows early in the graph)
 const validSampleIntervalMinutes = [1, 5, 10, 15, 30, 45, 60, 120, 180, 240, 300];
 const showLastHours = [1, 2, 3, 6, 12, 24, 48, 72, 96, 120, 240, 0];
-const MtGoxAPI2BaseURL = 'https://data.mtgox.com/api/2/';
+const MtGoxAPI2BaseURL = "https://data.mtgox.com/api/2/";
 const useAPIv2 = true;
 
 var tradingDisabledOnStart = (localStorage.tradingDisabledOnStart || 0);
 var tradingEnabled = (tradingDisabledOnStart == 1 ? 0 : (localStorage.tradingEnabled || 0));
 if (tradingEnabled == 1) {
-	chrome.browserAction.setIcon({path: 'robot_trading_on.png'});
+	chrome.browserAction.setIcon({path: "robot_trading_on.png"});
 } else {
-	chrome.browserAction.setIcon({path: 'robot_trading_off.png'});
+	chrome.browserAction.setIcon({path: "robot_trading_off.png"});
 }
 
 // General settings
 var tradingIntervalMinutes = parseInt(localStorage.tradingIntervalMinutes || 60);
 var LogLines = parseInt(localStorage.LogLines || 0);
-var currency = localStorage.currency || 'USD'; // Fiat currency to trade with
+var currency = localStorage.currency || "USD"; // Fiat currency to trade with
 var keepBTC = parseFloat(localStorage.keepBTC || 0.0); // this amount in BTC will be untouched by trade - bot will play with the rest
 var keepBTCUnitIsPercentage = 0; // (localStorage.keepBTCUnitIsPercentage || 0);  // Does not work, so don't uncomment...
 // var keepFiat = parseFloat(localStorage.keepFiat || 0.0); 	// this amount in Fiat currency will be untouched by trade - bot will play with the rest - does not work, so don't uncomment...
@@ -51,8 +51,8 @@ var tobliGoxBot = new DependancyInjectionContainer({
 	MtGoxAPI2BaseURL: MtGoxAPI2BaseURL
 });
 
-tobliGoxBot.getMtGoxApi().setKey(localStorage.ApiKey || '');
-tobliGoxBot.getMtGoxApi().setSecret(localStorage.ApiSec || '');
+tobliGoxBot.getMtGoxApi().setKey(localStorage.ApiKey || "");
+tobliGoxBot.getMtGoxApi().setSecret(localStorage.ApiSec || "");
 
 var BTC = Number.NaN;
 var fiat = Number.NaN;
@@ -97,7 +97,7 @@ function updateInfo() {
 		// No API key. No use trying to fetch info...
 		BTC = Number.NaN;
 		fiat = Number.NaN;
-		chrome.browserAction.setTitle({title: 'Gox Trading Bot (Tobli)'});
+		chrome.browserAction.setTitle({title: "Gox Trading Bot (Tobli)"});
 		return;
 	}
 
@@ -105,27 +105,27 @@ function updateInfo() {
 
 	tobliGoxBot.getMtGoxApi().post(path, [],
 		function (e) {
-			tobliGoxBot.getTobliLogger().logNative('info error', e);
-			chrome.browserAction.setTitle({title: 'Error getting user info. MtGox problem?'});
+			tobliGoxBot.getTobliLogger().logNative("info error", e);
+			chrome.browserAction.setTitle({title: "Error getting user info. MtGox problem?"});
 			schedUpdateInfo(60 * 1000); // retry after 1 minute
 		},
 		function (d) {
-			tobliGoxBot.getTobliLogger().logLevel('DEBUG').logNative('info.php', d.currentTarget.responseText)
+			tobliGoxBot.getTobliLogger().logLevel("DEBUG").logNative("info.php", d.currentTarget.responseText)
 			try {
 				var rr = tobliGoxBot.getMtGoxApi().getResponseData(d.currentTarget.responseText);
-				if (typeof(rr.Wallets) == 'undefined') {
-					tobliGoxBot.getTobliLogger().log('Error fetching user info:' + rr.error);
-					chrome.browserAction.setTitle({title: 'Error getting balance. MtGox problem?'});
+				if (typeof(rr.Wallets) == "undefined") {
+					tobliGoxBot.getTobliLogger().log("Error fetching user info:" + rr.error);
+					chrome.browserAction.setTitle({title: "Error getting balance. MtGox problem?"});
 				} else {
-					BTC = (rr.Wallets['BTC'] ? parseFloat(rr.Wallets['BTC'].Balance.value) : 0);
+					BTC = (rr.Wallets["BTC"] ? parseFloat(rr.Wallets["BTC"].Balance.value) : 0);
 					fiat = (rr.Wallets[currency] ? parseFloat(rr.Wallets[currency].Balance.value) : 0);
-					chrome.browserAction.setTitle({title: (BTC.toFixed(3) + ' BTC + ' + fiat.toFixed(2) + ' ' + currency)});
+					chrome.browserAction.setTitle({title: (BTC.toFixed(3) + " BTC + " + fiat.toFixed(2) + " " + currency)});
 					refreshPopup(true);
 				}
 			} catch (e) {
-				tobliGoxBot.getTobliLogger().logLevel('DEBUG').log(e + ' ' + d.currentTarget.responseText);
+				tobliGoxBot.getTobliLogger().logLevel("DEBUG").log(e + " " + d.currentTarget.responseText);
 				tobliGoxBot.getTobliLogger().log(e);
-				chrome.browserAction.setTitle({title: 'Exception parsing user info. MtGox problem?'});
+				chrome.browserAction.setTitle({title: "Exception parsing user info. MtGox problem?"});
 			}
 			schedUpdateInfo(5 * 60 * 1000); // Update balance every 5 minutes (should be smaller than the trading interval?)
 		}
@@ -133,11 +133,11 @@ function updateInfo() {
 }
 
 function logOnErrorCallback(e) {
-	tobliGoxBot.getTobliLogger().logNative('ajax post error', e);
+	tobliGoxBot.getTobliLogger().logNative("ajax post error", e);
 }
 
 function logOnLoadCallback(d) {
-	tobliGoxBot.getTobliLogger().logNative('ajax post ok', d);
+	tobliGoxBot.getTobliLogger().logNative("ajax post ok", d);
 	schedUpdateInfo(2500);
 }
 
@@ -226,7 +226,7 @@ function findLatestSolidTrend() {
 			break;
 		}
 	}
-	tobliGoxBot.getTobliLogger().log('Latest solid trend: ' + (latestSolidTrend == 3 ? 'up' : (latestSolidTrend == -3 ? 'down' : 'none')));
+	tobliGoxBot.getTobliLogger().log("Latest solid trend: " + (latestSolidTrend == 3 ? "up" : (latestSolidTrend == -3 ? "down" : "none")));
 }
 
 function trade() {
@@ -249,7 +249,7 @@ function trade() {
 
 			if ((tradeOnlyAfterSwitch == 1) && (latestSolidTrend == 3)) {
 				// tradeOnlyAfterSwitch == true but the trend has not switched: Don't trade
-				tobliGoxBot.getTobliLogger().log('Trend has not switched (still up). The setting "tradeOnlyAfterSwitch==true", so do not trade...');
+				tobliGoxBot.getTobliLogger().log("Trend has not switched (still up). The setting \"tradeOnlyAfterSwitch==true\", so do not trade...");
 				return;
 			}
 			latestSolidTrend = 3;
@@ -260,25 +260,25 @@ function trade() {
 				if ((tradingEnabled == 1) && (tobliGoxBot.getMtGoxApi().isKeySet())) {
 					if (inverseEMA!=1) {
 						// Normal EMA-strategy
-						tobliGoxBot.getTobliLogger().logNative('BUY! (EMA(' + EmaShortPar + ')/EMA(' + EmaLongPar + ')>' + MinBuyThreshold + '% for ' + tickCountBuy + ' or more ticks)');
+						tobliGoxBot.getTobliLogger().logNative("BUY! (EMA(" + EmaShortPar + ")/EMA(" + EmaLongPar + ")>" + MinBuyThreshold + "% for " + tickCountBuy + " or more ticks)");
 						tobliGoxBot.getMtGoxApi().addBuyOrder(currency, 1000, logOnErrorCallback, logOnLoadCallback);
 					} else {
 						// Crazy Ivan!
-						tobliGoxBot.getTobliLogger().logNative('Crazy Ivan SELL ' + sellAmount + ' BTC!' + (keepBTC > 0 ? ' (keep ' + (keepBTC.toString() + (keepBTCUnitIsPercentage == 1 ? ' %' : ' BTC')) + ')' : '') + ' EMA(' + EmaShortPar + ')/EMA(' + EmaLongPar + ')>' + MinBuyThreshold + '% for ' + tickCountBuy + ' or more ticks');
+						tobliGoxBot.getTobliLogger().logNative("Crazy Ivan SELL " + sellAmount + " BTC!" + (keepBTC > 0 ? " (keep " + (keepBTC.toString() + (keepBTCUnitIsPercentage == 1 ? " %" : " BTC")) + ")" : "") + " EMA(" + EmaShortPar + ")/EMA(" + EmaLongPar + ")>" + MinBuyThreshold + "% for " + tickCountBuy + " or more ticks");
 						tobliGoxBot.getMtGoxApi().addSellOrder(currency, sellAmount, logOnErrorCallback, logOnLoadCallback);
 					}
 				} else {
 					// Simulation only
 					if (inverseEMA!=1)
-						tobliGoxBot.getTobliLogger().logNative('Simulted BUY! EMA(' + EmaShortPar + ')/EMA(' + EmaLongPar + ')>' + MinBuyThreshold + '% for ' + tickCountBuy + ' or more ticks (Simulation only: no trade was made)');
+						tobliGoxBot.getTobliLogger().logNative("Simulted BUY! EMA(" + EmaShortPar + ")/EMA(" + EmaLongPar + ")>" + MinBuyThreshold + "% for " + tickCountBuy + " or more ticks (Simulation only: no trade was made)");
 					else
-						tobliGoxBot.getTobliLogger().logNative('Simulated Crazy Ivan SELL ' + sellAmount + ' BTC!' + (keepBTC > 0 ? ' (keep ' + (keepBTC.toString() + (keepBTCUnitIsPercentage == 1 ? ' %' : ' BTC')) + ')' : '') + ' EMA(' + EmaShortPar + ')/EMA(' + EmaLongPar + ')>' + MinBuyThreshold + '% for ' + tickCountBuy + ' or more ticks (Simulation only: no trade was made)');
+						tobliGoxBot.getTobliLogger().logNative("Simulated Crazy Ivan SELL " + sellAmount + " BTC!" + (keepBTC > 0 ? " (keep " + (keepBTC.toString() + (keepBTCUnitIsPercentage == 1 ? " %" : " BTC")) + ")" : "") + " EMA(" + EmaShortPar + ")/EMA(" + EmaLongPar + ")>" + MinBuyThreshold + "% for " + tickCountBuy + " or more ticks (Simulation only: no trade was made)");
 				}
 			} else {
-				tobliGoxBot.getTobliLogger().logNative('Trend is up, but no ' + currency + ' to spend...');
+				tobliGoxBot.getTobliLogger().logNative("Trend is up, but no " + currency + " to spend...");
 			}
 		} else {
-			tobliGoxBot.getTobliLogger().logNative("Trend is up, but not for long enough (needs to be \"up\" for at least " + tickCountBuy + ' samples)');
+			tobliGoxBot.getTobliLogger().logNative("Trend is up, but not for long enough (needs to be \"up\" for at least " + tickCountBuy + " samples)");
 		}
 	} else if (currentTrend < -1) {
 		// Trend is down
@@ -289,7 +289,7 @@ function trade() {
 
 			if ((tradeOnlyAfterSwitch == 1) && (latestSolidTrend == -3)) {
 				// tradeOnlyAfterSwitch == true but the trend has not switched: Don't trade
-				tobliGoxBot.getTobliLogger().log('Trend has not switched (still down). The setting "tradeOnlyAfterSwitch==true", so do not trade...');
+				tobliGoxBot.getTobliLogger().log("Trend has not switched (still down). The setting \"tradeOnlyAfterSwitch==true\", so do not trade...");
 				return;
 			}
 			latestSolidTrend = -3;
@@ -298,25 +298,25 @@ function trade() {
 				if ((tradingEnabled == 1) && (tobliGoxBot.getMtGoxApi().isKeySet())) {
 					if (inverseEMA != 1) {
 						// Normal EMA-strategy
-						tobliGoxBot.getTobliLogger().logNative('SELL ' + sellAmount + ' BTC! (keep ' + (keepBTC.toString() + (keepBTCUnitIsPercentage == 1 ? ' %' : ' BTC')) + ') EMA(' + EmaShortPar + ')/EMA(' + EmaLongPar + ')<-' + MinSellThreshold + '% for ' + tickCountSell + ' or more ticks');
+						tobliGoxBot.getTobliLogger().logNative("SELL " + sellAmount + " BTC! (keep " + (keepBTC.toString() + (keepBTCUnitIsPercentage == 1 ? " %" : " BTC")) + ") EMA(" + EmaShortPar + ")/EMA(" + EmaLongPar + ")<-" + MinSellThreshold + "% for " + tickCountSell + " or more ticks");
 						tobliGoxBot.getMtGoxApi().addSellOrder(currency, sellAmount, logOnErrorCallback, logOnLoadCallback);
 					} else {
 						// Crazy Ivan!
-						tobliGoxBot.getTobliLogger().logNative('Crazy Ivan BUY! (EMA(' + EmaShortPar + ')/EMA(' + EmaLongPar + ')<-' + MinSellThreshold + '% for ' + tickCountSell + ' or more ticks)');
+						tobliGoxBot.getTobliLogger().logNative("Crazy Ivan BUY! (EMA(" + EmaShortPar + ")/EMA(" + EmaLongPar + ")<-" + MinSellThreshold + "% for " + tickCountSell + " or more ticks)");
 						tobliGoxBot.getMtGoxApi().addBuyOrder(currency, 1000, logOnErrorCallback, logOnLoadCallback);
 					}
 				} else {
 					// Simulation only
 					if (inverseEMA != 1)
-						tobliGoxBot.getTobliLogger().logNative('Simulated SELL ' + sellAmount + ' BTC! (keep ' + (keepBTC.toString() + (keepBTCUnitIsPercentage == 1 ? ' %' : ' BTC')) + ') EMA(' + EmaShortPar + ')/EMA(' + EmaLongPar + ')<-' + MinSellThreshold + '% for ' + tickCountSell + ' or more ticks (Simulation only: no trade was made)');
+						tobliGoxBot.getTobliLogger().logNative("Simulated SELL " + sellAmount + " BTC! (keep " + (keepBTC.toString() + (keepBTCUnitIsPercentage == 1 ? " %" : " BTC")) + ") EMA(" + EmaShortPar + ")/EMA(" + EmaLongPar + ")<-" + MinSellThreshold + "% for " + tickCountSell + " or more ticks (Simulation only: no trade was made)");
 					else
-						tobliGoxBot.getTobliLogger().logNative('Simulted Crazy Ivan BUY! EMA(' + EmaShortPar + ')/EMA(' + EmaLongPar + ')<-' + MinSellThreshold + '% for ' + tickCountSell + ' or more ticks (Simulation only: no trade was made)');
+						tobliGoxBot.getTobliLogger().logNative("Simulted Crazy Ivan BUY! EMA(" + EmaShortPar + ")/EMA(" + EmaLongPar + ")<-" + MinSellThreshold + "% for " + tickCountSell + " or more ticks (Simulation only: no trade was made)");
 				}
 			} else {
-				tobliGoxBot.getTobliLogger().logNative('Trend is down, but no BTC to sell...');
+				tobliGoxBot.getTobliLogger().logNative("Trend is down, but no BTC to sell...");
 			}
 		} else {
-			tobliGoxBot.getTobliLogger().logNative('Trend is down, but not for long enough (needs to be "down" for at least ' + tickCountSell + ' samples)');
+			tobliGoxBot.getTobliLogger().logNative("Trend is down, but not for long enough (needs to be \"down\" for at least " + tickCountSell + " samples)");
 		}
 	} else {
 		// Trend is undefined/weak
@@ -330,7 +330,7 @@ function trade() {
 
 function refreshEMA(reset) {
 	if (reset) {
-		tobliGoxBot.getTobliLogger().logLevel('DEBUG').logNative('refreshEMA(): reset EMA data (EMA/Thresholds/Interval has changed)');
+		tobliGoxBot.getTobliLogger().logLevel("DEBUG").logNative("refreshEMA(): reset EMA data (EMA/Thresholds/Interval has changed)");
 		emaLong = [];
 		emaShort = [];
 	}
@@ -338,7 +338,7 @@ function refreshEMA(reset) {
 	}
 
 	if (H1.length == 0) {
-		tobliGoxBot.getTobliLogger().logNative('Error: H1 not loaded!');
+		tobliGoxBot.getTobliLogger().logNative("Error: H1 not loaded!");
 	} else if (H1.length > MaxSamplesToKeep) {
 		var skip = H1.length - MaxSamplesToKeep;
 		H1 = H1.slice(skip);
@@ -348,7 +348,7 @@ function refreshEMA(reset) {
 	}
 
 	if ((emaShort.length < H1.length - 1) || (emaLong.length < H1.length - 1)) {
-		tobliGoxBot.getTobliLogger().logLevel('DEBUG').log('refreshEMA H1.length=' + H1.length + ' emaShort.length=' + emaShort.length + ' emaLong.length=' + emaLong.length);
+		tobliGoxBot.getTobliLogger().logLevel("DEBUG").log("refreshEMA H1.length=" + H1.length + " emaShort.length=" + emaShort.length + " emaLong.length=" + emaLong.length);
 		reset = true;
 	}
 
@@ -359,8 +359,8 @@ function refreshEMA(reset) {
 		findLatestSolidTrend();
 
 	if (updateInProgress) {
-		chrome.browserAction.setBadgeText({text: '?'});
-		tobliGoxBot.getTobliLogger().logNative('Update not finished - do not trade!');
+		chrome.browserAction.setBadgeText({text: "?"});
+		tobliGoxBot.getTobliLogger().logNative("Update not finished - do not trade!");
 		return;
 	}
 	chrome.browserAction.setBadgeText({text: getemadif(H1.length - 1).toFixed(2)});
@@ -389,7 +389,7 @@ function tidBinarySearch(tradeHistoryResponse, tid) {
 }
 
 function cacheOtherUsefulSamples(tradeHistoryResponse) {
-	tobliGoxBot.getTobliLogger().logLevel('DEBUG').log('generating usefulSamplePoints');
+	tobliGoxBot.getTobliLogger().logLevel("DEBUG").log("generating usefulSamplePoints");
 	// May not really be needed to generate this on every call, but to get the very latest sample points for long date durations, do it anyway (not very intensive)...
 	var usefulSamplePoints={};
 	for (var j = 0; j < validSampleIntervalMinutes.length; j++) {
@@ -400,25 +400,25 @@ function cacheOtherUsefulSamples(tradeHistoryResponse) {
 			interval_minute_fetch += validSampleIntervalMinutes[j];
 		}
 	}
-	tobliGoxBot.getTobliLogger().logLevel('DEBUG').log('Useful sample points generated (size = ' + Object.size(usefulSamplePoints) + ')');
+	tobliGoxBot.getTobliLogger().logLevel("DEBUG").log("Useful sample points generated (size = " + Object.size(usefulSamplePoints) + ")");
 
 	// var found = 0;
 	try {
 		for (var key in usefulSamplePoints) {
-			var sample = localStorage.getItem('sample.' + key);
-			if ((!sample) || (sample == 'null')) {
+			var sample = localStorage.getItem("sample." + key);
+			if ((!sample) || (sample == "null")) {
 				var i = tidBinarySearch(tradeHistoryResponse, parseInt(key) * 60 * 1000000);
 				if (i!=-1) {
 					// found++;
-					tobliGoxBot.getTobliLogger().logLevel('DEBUG').log('Sample should be cached. key=' + key + ' tid=' + parseInt(tradeHistoryResponse[i].tid / 60 / 1000000) + ' lastTid=' + parseInt(tradeHistoryResponse[i - 1].tid / 60 / 1000000) + ' price=' + tradeHistoryResponse[i].price);
-					localStorage.setItem('sample.' + key, tradeHistoryResponse[i].price);
+					tobliGoxBot.getTobliLogger().logLevel("DEBUG").log("Sample should be cached. key=" + key + " tid=" + parseInt(tradeHistoryResponse[i].tid / 60 / 1000000) + " lastTid=" + parseInt(tradeHistoryResponse[i - 1].tid / 60 / 1000000) + " price=" + tradeHistoryResponse[i].price);
+					localStorage.setItem("sample." + key, tradeHistoryResponse[i].price);
 				}
 			}
 		}
 	} catch (e) {
-		tobliGoxBot.getTobliLogger().log('Exception in cacheOtherUsefulSamples(): ' + e.stack);
+		tobliGoxBot.getTobliLogger().log("Exception in cacheOtherUsefulSamples(): " + e.stack);
 	}
-	tobliGoxBot.getTobliLogger().logLevel('DEBUG').log('cacheOtherUsefulSamples() - done - found=' + found);
+	tobliGoxBot.getTobliLogger().logLevel("DEBUG").log("cacheOtherUsefulSamples() - done - found=" + found);
 }
 
 function getNextMinuteFetch() {
@@ -431,9 +431,9 @@ function getNextMinuteFetch() {
 }
 
 function emptySampleCache() {
-	tobliGoxBot.getTobliLogger().log('emptySampleCache(): remove all cached samples');
+	tobliGoxBot.getTobliLogger().log("emptySampleCache(): remove all cached samples");
 	for (var key in localStorage) {
-		if (key.indexOf('sample.') == 0) {
+		if (key.indexOf("sample.") == 0) {
 			localStorage.removeItem(key);
 		}
 	}
@@ -442,13 +442,13 @@ function emptySampleCache() {
 
 function cleanSampleCache() {
 	// Clean old, cached items from local storage
-	tobliGoxBot.getTobliLogger().logLevel('DEBUG').log('cleanSampleCache()');
+	tobliGoxBot.getTobliLogger().logLevel("DEBUG").log("cleanSampleCache()");
 	var minute_first = tobliGoxBot.createNewTobliDate().getMinuteId() - (MaxSamplesToKeep + 1) * (validSampleIntervalMinutes[validSampleIntervalMinutes.length - 1]);
 	for (var key in localStorage) {
-		if (key.indexOf('sample.') == 0) {
+		if (key.indexOf("sample.") == 0) {
 			var tid = parseInt(key.substring(7));
 			if (tid < minute_first) {
-				tobliGoxBot.getTobliLogger().logLevel('DEBUG').log('cleanSampleCache(): removing old cached item (key=' + key + ')');
+				tobliGoxBot.getTobliLogger().logLevel("DEBUG").log("cleanSampleCache(): removing old cached item (key=" + key + ")");
 				localStorage.removeItem(key);
 			}
 		}
@@ -467,11 +467,11 @@ function addSample(minuteFetch, price, nocache) {
 	if (nocache)
 		return;
 
-	var sample = localStorage.getItem('sample.' + minuteFetch);
-	if ((!sample) || (sample == 'null')) {
+	var sample = localStorage.getItem("sample." + minuteFetch);
+	if ((!sample) || (sample == "null")) {
 		// The trade does not exist in local storage - add it...
-		localStorage.setItem('sample.' + minuteFetch, price);
-		tobliGoxBot.getTobliLogger().logLevel('DEBUG').log('Added sample to local storage: sample.' + minuteFetch + ' = ' + price);
+		localStorage.setItem("sample." + minuteFetch, price);
+		tobliGoxBot.getTobliLogger().logLevel("DEBUG").log("Added sample to local storage: sample." + minuteFetch + " = " + price);
 	}
 }
 
@@ -492,16 +492,16 @@ function refreshPopup(fullRefresh) {
 }
 
 function getSamplesFromCache(minute_fetch, minute_now) {
-	var sample = localStorage.getItem('sample.' + minute_fetch);
-	while ((sample) && (sample!='null') && (minute_fetch <= minute_now)) {
+	var sample = localStorage.getItem("sample." + minute_fetch);
+	while ((sample) && (sample!="null") && (minute_fetch <= minute_now)) {
 		// As long as trades exist in in local storage: Just add them...
-		tobliGoxBot.getTobliLogger().logLevel('DEBUG').log('Adding sample from local storage: sample.' + minute_fetch + ' = ' + localStorage.getItem('sample.' + minute_fetch));
-		addSample(minute_fetch, localStorage.getItem('sample.' + minute_fetch));
+		tobliGoxBot.getTobliLogger().logLevel("DEBUG").log("Adding sample from local storage: sample." + minute_fetch + " = " + localStorage.getItem("sample." + minute_fetch));
+		addSample(minute_fetch, localStorage.getItem("sample." + minute_fetch));
 		if (bootstrap) {
-			chrome.browserAction.setBadgeText({text: ('       |        ').substr((bootstrap++) % 9, 6)});
+			chrome.browserAction.setBadgeText({text: ("       |        ").substr((bootstrap++) % 9, 6)});
 		}
 		minute_fetch = getNextMinuteFetch();
-		sample = localStorage.getItem('sample.' + minute_fetch);
+		sample = localStorage.getItem("sample." + minute_fetch);
 	}
 	return minute_fetch;
 }
@@ -511,7 +511,7 @@ function forceAbort() {
 	forceAbortTimer = null;
 	if ((updateInProgress) && (abortUpdateAndRedo)) {
 		// Still not aborted: force!
-		tobliGoxBot.getTobliLogger().log('forceAbort(): Still not aborted: force!');
+		tobliGoxBot.getTobliLogger().log("forceAbort(): Still not aborted: force!");
 		updateInProgress = false;
 		lastUpdateStartTime = 0;
 		updateH1(true);
@@ -526,7 +526,7 @@ function updateH1(reset) { // Added "reset" parameter to clear the H1 data - sho
 		// Check abort status after 30 seconds and forst abort if still not
 		if (reset) {
 			abortUpdateAndRedo = true;
-			tobliGoxBot.getTobliLogger().log('updateH1(): Reset while update in progress: abort current update');
+			tobliGoxBot.getTobliLogger().log("updateH1(): Reset while update in progress: abort current update");
 			if (forceAbortTimer)
 				clearTimeout(forceAbortTimer);
 			forceAbortTimer = setTimeout(forceAbort, 30 * 1000);
@@ -538,7 +538,7 @@ function updateH1(reset) { // Added "reset" parameter to clear the H1 data - sho
 	lastUpdateStartTime = now.getTime();
 
 	if (reset) {
-		tobliGoxBot.getTobliLogger().logLevel('DEBUG').logNative('updateH1(): reset H1 data (Interval has changed)');
+		tobliGoxBot.getTobliLogger().logLevel("DEBUG").logNative("updateH1(): reset H1 data (Interval has changed)");
 		H1 = [];
 		tim = [];
 		emaLong = [];
@@ -551,7 +551,7 @@ function updateH1(reset) { // Added "reset" parameter to clear the H1 data - sho
 	var minute_now = Math.floor(now.getMinuteId() / tradingIntervalMinutes) * tradingIntervalMinutes; // Fix trading samples to whole hours...
 	var minute_fetch = getNextMinuteFetch();
 	if (minute_fetch > minute_now) {
-		tobliGoxBot.getTobliLogger().logLevel('DEBUG').log('Not yet time to fetch new samples...');
+		tobliGoxBot.getTobliLogger().logLevel("DEBUG").log("Not yet time to fetch new samples...");
 		updateInProgress = false;
 		lastUpdateStartTime = 0;
 		return;
@@ -574,7 +574,7 @@ function updateH1(reset) { // Added "reset" parameter to clear the H1 data - sho
 				updateH1(true);
 				return;
 			}
-			tobliGoxBot.getTobliLogger().logNative('getTrades error', e, '-repeat');
+			tobliGoxBot.getTobliLogger().logNative("getTrades error", e, "-repeat");
 			// lastUpdateStartTime = (new Date()).getTime();
 			tobliGoxBot.getMtGoxApi().getByUrl(req, FIXME_neverInilializedUrl);
 		}
@@ -590,11 +590,11 @@ function updateH1(reset) { // Added "reset" parameter to clear the H1 data - sho
 			var refr = false;
 			var done = true;
 			try {
-				tobliGoxBot.getTobliLogger().logLevel('DEBUG').log(req.responseText)
+				tobliGoxBot.getTobliLogger().logLevel("DEBUG").log(req.responseText)
 				var tradeHistoryResponse = tobliGoxBot.getMtGoxApi().getResponseData(req.responseText);
 
 				if (tradeHistoryResponse.length > 0) {
-					tobliGoxBot.getTobliLogger().logLevel('DEBUG').log('Adding sample from MtGox: sample.' + minute_fetch + ' = ' + tradeHistoryResponse[0].price);
+					tobliGoxBot.getTobliLogger().logLevel("DEBUG").log("Adding sample from MtGox: sample." + minute_fetch + " = " + tradeHistoryResponse[0].price);
 					addSample(minute_fetch, tradeHistoryResponse[0].price);
 
 					// Check if the chunk contains any more useful data
@@ -602,7 +602,7 @@ function updateH1(reset) { // Added "reset" parameter to clear the H1 data - sho
 					var i = 1;
 					while ((i < tradeHistoryResponse.length) && (minute_fetch <= minute_now)) {
 						if (parseInt(tradeHistoryResponse[i].tid) > minute_fetch * 60 * 1000000) {
-							tobliGoxBot.getTobliLogger().logLevel('DEBUG').log('Adding bonus sample from MtGox :) sample.' + minute_fetch + ' = ' + tradeHistoryResponse[i].price);
+							tobliGoxBot.getTobliLogger().logLevel("DEBUG").log("Adding bonus sample from MtGox :) sample." + minute_fetch + " = " + tradeHistoryResponse[i].price);
 							addSample(minute_fetch, tradeHistoryResponse[i].price);
 							minute_fetch = getNextMinuteFetch();
 						}
@@ -610,12 +610,12 @@ function updateH1(reset) { // Added "reset" parameter to clear the H1 data - sho
 					}
 					cacheOtherUsefulSamples(tradeHistoryResponse);
 				} else {
-					tobliGoxBot.getTobliLogger().log('Empty sample chunk from MtGox - no trades since minute_fetch=' + minute_fetch);
+					tobliGoxBot.getTobliLogger().log("Empty sample chunk from MtGox - no trades since minute_fetch=" + minute_fetch);
 					if (tobliGoxBot.createNewTobliDate().getMinuteId() - minute_fetch < 5) {
 						// The trade we where trying to fetch is less than 5 minutes old
 						// => Probably no trades where made since then, so stop retrying...
 						// This will happen a lot with short sample interval on a calm market, so abort the update to prevent hammering of MtGox
-						tobliGoxBot.getTobliLogger().logLevel('DEBUG').log('Aborting update (probably no trades have been made since minute_fetch)');
+						tobliGoxBot.getTobliLogger().logLevel("DEBUG").log("Aborting update (probably no trades have been made since minute_fetch)");
 						updateInProgress = false;
 						lastUpdateStartTime = 0;
 						refreshPopup(true);
@@ -635,20 +635,20 @@ function updateH1(reset) { // Added "reset" parameter to clear the H1 data - sho
 					tobliGoxBot.getMtGoxApi().getSample(req, minute_fetch, currency);
 					done = false;
 					if (bootstrap) {
-						chrome.browserAction.setBadgeText({text: ('       |        ').substr((bootstrap++) % 9, 6)});
+						chrome.browserAction.setBadgeText({text: ("       |        ").substr((bootstrap++) % 9, 6)});
 					}
 				} else {
-					tobliGoxBot.getTobliLogger().log('Got new samples from MtGox ' + H1.length + ' ' + MaxSamplesToKeep);
+					tobliGoxBot.getTobliLogger().log("Got new samples from MtGox " + H1.length + " " + MaxSamplesToKeep);
 					refr = true;
 					bootstrap = 0;
 				}
 			} catch (e) {
 				var error = req.responseText;
-				if (error.indexOf('Website is currently unreachable') != -1) {
-					error = 'MtGox says: Website is currently unreachable';
+				if (error.indexOf("Website is currently unreachable") != -1) {
+					error = "MtGox says: Website is currently unreachable";
 				}
-				tobliGoxBot.getTobliLogger().log('getTrades JSON error', e, error);
-				chrome.browserAction.setBadgeText({text: '?'});
+				tobliGoxBot.getTobliLogger().log("getTrades JSON error", e, error);
+				chrome.browserAction.setBadgeText({text: "?"});
 			}
 
 			if (done) {
@@ -661,12 +661,12 @@ function updateH1(reset) { // Added "reset" parameter to clear the H1 data - sho
 			refreshPopup(refr);
 		}
 
-		tobliGoxBot.getTobliLogger().logLevel('DEBUG').log('Fetching sample from MtGox: minute_fetch=' + minute_fetch);
+		tobliGoxBot.getTobliLogger().logLevel("DEBUG").log("Fetching sample from MtGox: minute_fetch=" + minute_fetch);
 		lastUpdateStartTime = (new Date()).getTime();
 		tobliGoxBot.getMtGoxApi().getSample(req, minute_fetch, currency);
 	} else {
 		// Done, and all samples where loaded from local storage...
-		tobliGoxBot.getTobliLogger().log('Got new samples (all loaded from cache) ' + H1.length + ' ' + MaxSamplesToKeep);
+		tobliGoxBot.getTobliLogger().log("Got new samples (all loaded from cache) " + H1.length + " " + MaxSamplesToKeep);
 		updateInProgress = false;
 		lastUpdateStartTime = 0;
 		refreshEMA(reset);
@@ -675,7 +675,7 @@ function updateH1(reset) { // Added "reset" parameter to clear the H1 data - sho
 	}
 }
 
-tobliGoxBot.getTobliLogger().logNative('Using ' + tobliGoxBot.getMtGoxApi().toString());
+tobliGoxBot.getTobliLogger().logNative("Using " + tobliGoxBot.getMtGoxApi().toString());
 chrome.browserAction.setBadgeBackgroundColor({color:[128, 128, 128, 50]});
 schedUpdateInfo(100);
 setTimeout(function () { updateH1(false); }, 2 * 1000); // Delay first updateH1() to allow user info to be fetched first...
@@ -683,13 +683,13 @@ setInterval(function () { updateH1(false); }, 60 * 1000); // Recheck every minut
 
 /*
 function onErr(e) {
-	tobliGoxBot.getTobliLogger().log('getTrades post error', e);
+	tobliGoxBot.getTobliLogger().log("getTrades post error", e);
 }
 function onLod(d) {
-	tobliGoxBot.getTobliLogger().log('getTrades post ok', d.currentTarget.responseText);
+	tobliGoxBot.getTobliLogger().log("getTrades post ok", d.currentTarget.responseText);
 }
 setTimeout(function () {
-	tobliGoxBot.getMtGoxApi().post('money/wallet/history', ['currency=USD'], onErr, onLod);
-	tobliGoxBot.getMtGoxApi().post('BTCUSD/money/info', [], onErr, onLod);
+	tobliGoxBot.getMtGoxApi().post("money/wallet/history", ["currency=USD"], onErr, onLod);
+	tobliGoxBot.getMtGoxApi().post("BTCUSD/money/info", [], onErr, onLod);
 }, 1000);
 */

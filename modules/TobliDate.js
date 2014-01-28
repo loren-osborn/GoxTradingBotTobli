@@ -1,8 +1,8 @@
 function getTobliDateConstructor(getNativeDate) {
-	var weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+	var weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 	var TobliDate;
 	var zeroPadTwoDigits = function zeroPadTwoDigits(d) {
-		return ((d < 10) ? '0' : '') + d.toString();
+		return ((d < 10) ? "0" : "") + d.toString();
 	}
 	var createWithVariadicArgs = (function () {
 		var cache = [
@@ -29,21 +29,21 @@ function getTobliDateConstructor(getNativeDate) {
 			})
 		];
 		return (function createWithVariadicArgs(constructor, args) {
-			var funcSource = '';
+			var funcSource = "";
 			/*
 			var argList = [];
 			var i = 0;
 			*/
 			if ((args.length >= cache.length) || !(cache[args.length])) {
-				throw 'Too many variadic constructor arguments without eval support (disabled in Chrome plugins)';
+				throw "Too many variadic constructor arguments without eval support (disabled in Chrome plugins)";
 				/*
 				for (i = 0; i < args.length; i++) {
-					argList[i] = 'args[' + i + ']';
+					argList[i] = "args[" + i + "]";
 				}
 				funcSource =
-					'return (function (constructor, args) {' +
-						'return new constructor(' + argList + ');' +
-					'});';
+					"return (function (constructor, args) {" +
+						"return new constructor(" + argList + ");" +
+					"});";
 				cache[args.length] = eval(funcSource);
 				*/
 			}
@@ -51,40 +51,40 @@ function getTobliDateConstructor(getNativeDate) {
 		});
 	})();
 	var formatDate = (function formatDate(d) {
-		return d.getFullYear() + '-' + zeroPadTwoDigits(d.getMonth() + 1) + '-' + zeroPadTwoDigits(d.getDate());
+		return d.getFullYear() + "-" + zeroPadTwoDigits(d.getMonth() + 1) + "-" + zeroPadTwoDigits(d.getDate());
 	});
 	var formatTime = (function formatTime(t) {
-		return zeroPadTwoDigits(t.getHours()) + ':' + zeroPadTwoDigits(t.getMinutes());
+		return zeroPadTwoDigits(t.getHours()) + ":" + zeroPadTwoDigits(t.getMinutes());
 	});
 	var formatTimeWithSeconds = (function formatTimeWithSeconds(t) {
-		return formatTime(t) + ':' + zeroPadTwoDigits(t.getSeconds());
+		return formatTime(t) + ":" + zeroPadTwoDigits(t.getSeconds());
 	});
 	var tobliDateMethods = {};
 	/*
 	// Only used by commented out code elsewhere.
 	tobliDateMethods.formatTimeAndDate = (function formatTimeAndDate() {
-		return formatDate(this) + ' ' + formatTime(this);
+		return formatDate(this) + " " + formatTime(this);
 	});
 	*/
 	var dateTimeFormatGenerator = (function dateTimeFormatGenerator(todayLabel, dateFormater) {
 		return (function formatWithConditionalDate() {
-			var timePrefix = '';
+			var timePrefix = "";
 			if (!(this.isSameDate(new TobliDate()))) {
-				timePrefix = dateFormater(this) + ' ';
+				timePrefix = dateFormater(this) + " ";
 			} else {
 				timePrefix = todayLabel;
 			}
 			return (timePrefix + formatTime(this));
 		});
 	});
-	tobliDateMethods.formatDateAndTimeWithLabeledTodayDate = dateTimeFormatGenerator('Today ', formatDate);
-	tobliDateMethods.FIXME_formatDayMonthAndTimeWithImplicitTodayDate = dateTimeFormatGenerator('', (function formatEuDate(d) {
-		return d.getDate() + '/' + (d.getMonth() + 1);
+	tobliDateMethods.formatDateAndTimeWithLabeledTodayDate = dateTimeFormatGenerator("Today ", formatDate);
+	tobliDateMethods.FIXME_formatDayMonthAndTimeWithImplicitTodayDate = dateTimeFormatGenerator("", (function formatEuDate(d) {
+		return d.getDate() + "/" + (d.getMonth() + 1);
 	}));
 	tobliDateMethods.FIXME_formatUtcDateWithLocalTimeWithSeconds = (function FIXME_formatUtcDateWithLocalTimeWithSeconds() {
 		return (
-			this.getUTCFullYear() + '-' + zeroPadTwoDigits(this.getUTCMonth() + 1) + '-' + zeroPadTwoDigits(this.getUTCDate()) +
-			' ' + formatTimeWithSeconds(this)
+			this.getUTCFullYear() + "-" + zeroPadTwoDigits(this.getUTCMonth() + 1) + "-" + zeroPadTwoDigits(this.getUTCDate()) +
+			" " + formatTimeWithSeconds(this)
 		);
 	});
 	tobliDateMethods.isSameDate = (function isSameDate(other) {

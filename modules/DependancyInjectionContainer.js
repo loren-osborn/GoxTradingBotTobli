@@ -1,12 +1,12 @@
 var DependancyInjectionContainer = (function () {
 	var addConvenienceFunctions = (function addConvenienceFunctions(dicInstance, name) {
-		dicInstance['get' + name] = (function getByName() {
+		dicInstance["get" + name] = (function getByName() {
 			return dicInstance.get(name);
 		});
-		dicInstance['createNew' + name] = (function createNewByName() {
+		dicInstance["createNew" + name] = (function createNewByName() {
 			var constructor = dicInstance.get(name);
-			if ({}.toString.call(constructor) != '[object Function]') {
-				throw name + ' is not a function';
+			if ({}.toString.call(constructor) != "[object Function]") {
+				throw name + " is not a function";
 			}
 			return new constructor();
 		});
@@ -18,11 +18,11 @@ var DependancyInjectionContainer = (function () {
 		var resolvingList = [];
 		var expirationMap = {};
 		if (arguments.length < 1) {
-			throw 'Missing required argument';
+			throw "Missing required argument";
 		} else if (arguments.length > 1) {
-			throw 'Too many arguments';
-		} else if (Object.prototype.toString.apply(specObject) != '[object Object]') {
-			throw ((specObject.toString()) + ' not a simple object');
+			throw "Too many arguments";
+		} else if (Object.prototype.toString.apply(specObject) != "[object Object]") {
+			throw ((specObject.toString()) + " not a simple object");
 		}
 		keyCount = 0;
 		for (key in specObject) {
@@ -30,7 +30,7 @@ var DependancyInjectionContainer = (function () {
 			addConvenienceFunctions(this, key);
 		}
 		if (keyCount == 0) {
-			throw 'argument must be non-empty Object';
+			throw "argument must be non-empty Object";
 		}
 		this.get = (function get(key) {
 			var funcArgsPattern = /^function\s*[^\(]*\(\s*([^\)]*)\)/m;
@@ -40,21 +40,21 @@ var DependancyInjectionContainer = (function () {
 			var i;
 			var j;
 			if (specObject[key] === undefined) {
-				throw ('Key "' + key + '" undefined!');
+				throw ("Key \"" + key + "\" undefined!");
 			}
 			if (valueCache[key] === undefined) {
-				if (Object.prototype.toString.apply(specObject[key]) == '[object Function]') {
+				if (Object.prototype.toString.apply(specObject[key]) == "[object Function]") {
 					funcSource = specObject[key].toString();
 					funcArgKeyList = funcSource.match(funcArgsPattern)[1].split(/\s*,\s*/m);
 					funcArgValueList = [];
 					for (i = 0; i < funcArgKeyList.length; i++) {
-						if (funcArgKeyList[i] != '') {
+						if (funcArgKeyList[i] != "") {
 							if (!(/^get([A-Z])/.test(funcArgKeyList[i]))) {
-								throw ('function argument ' + funcArgKeyList[i] + ' name must start with "get"!');
+								throw ("function argument " + funcArgKeyList[i] + " name must start with \"get\"!");
 							}
-							funcArgKeyList[i] = funcArgKeyList[i].replace(/^get/,'');
+							funcArgKeyList[i] = funcArgKeyList[i].replace(/^get/,"");
 							if (resolvingList.indexOf(funcArgKeyList[i]) >= 0) {
-								throw ('cyclical dependancy detected resolving key: ' + funcArgKeyList[i]);
+								throw ("cyclical dependancy detected resolving key: " + funcArgKeyList[i]);
 							}
 							resolvingList.push(funcArgKeyList[i]);
 							for (j = 0; j < resolvingList.length; j++) {

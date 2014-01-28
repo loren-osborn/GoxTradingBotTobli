@@ -1,35 +1,35 @@
 getTobliLogger = (function () {
 	var validLogLevels = [
-		'END_USER',
-		'CRITICAL',
-		'ERROR',
-		'WARNING',
-		'NOTICE',
-		'INFO',
-		'DEBUG',
-		'TRACE'];
+		"END_USER",
+		"CRITICAL",
+		"ERROR",
+		"WARNING",
+		"NOTICE",
+		"INFO",
+		"DEBUG",
+		"TRACE"];
 	return (function getTobliLogger(getTobliDate, getNativeLogFunc, getNativeError) {
-		var currentLogLevel = 'END_USER';
+		var currentLogLevel = "END_USER";
 		var FIXME_parseBacktrace = (function FIXME_parseBacktrace(backtrace) {
-			var file = '';
-			var line = '';
+			var file = "";
+			var line = "";
 			try {
-				file = backtrace.split('\n')[2].split('/')[3].split(':')[0];
-				line = backtrace.split('\n')[2].split('/')[3].split(':')[1];
+				file = backtrace.split("\n")[2].split("/")[3].split(":")[0];
+				line = backtrace.split("\n")[2].split("/")[3].split(":")[1];
 			} catch (e) {}
-			return ('[' + file + ':' + line + ']');
+			return ("[" + file + ":" + line + "]");
 		});
 		return {
 			setLogLevel: (function setLogLevel(levelName) {
 				if ((arguments.length != 1) || (validLogLevels.indexOf(levelName) < 0)) {
-					throw 'Invalid arguments';
+					throw "Invalid arguments";
 				}
 				currentLogLevel = levelName;
 			}),
 			logLevel: (function logLevel(levelName) {
 				var retVal = this;
 				if ((arguments.length != 1) || (validLogLevels.indexOf(levelName) < 0)) {
-					throw 'Invalid arguments';
+					throw "Invalid arguments";
 				}
 				if (validLogLevels.indexOf(levelName) > validLogLevels.indexOf(currentLogLevel)) {
 					retVal = {
