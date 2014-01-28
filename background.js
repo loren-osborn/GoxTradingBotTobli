@@ -2,24 +2,24 @@ const MaxSamplesToKeep = 200; // Should be "visible sample" + preSamples below
 const preSamples = 56; // Use this number of samples from the MaxSamplesToKeep only for initial EMA-calculation (these samples will not show in the graph, but provides better buy/sell-indicator arrows early in the graph)
 const validSampleIntervalMinutes = [1, 5, 10, 15, 30, 45, 60, 120, 180, 240, 300];
 const showLastHours = [1, 2, 3, 6, 12, 24, 48, 72, 96, 120, 240, 0];
-const MtGoxAPI2BaseURL = 'https://data.mtgox.com/api/2/';
+const MtGoxAPI2BaseURL = "https://data.mtgox.com/api/2/";
 const useAPIv2 = true;
 
-var ApiKey = localStorage.ApiKey || '';
-var ApiSec = localStorage.ApiSec || '';
+var ApiKey = localStorage.ApiKey || "";
+var ApiSec = localStorage.ApiSec || "";
 
 var tradingDisabledOnStart = (localStorage.tradingDisabledOnStart || 0);
 var tradingEnabled = ((tradingDisabledOnStart == 1) ? 0 : (localStorage.tradingEnabled || 0));
 if (tradingEnabled == 1) {
-	chrome.browserAction.setIcon({path: 'robot_trading_on.png'});
+	chrome.browserAction.setIcon({path: "robot_trading_on.png"});
 } else {
-	chrome.browserAction.setIcon({path: 'robot_trading_off.png'});
+	chrome.browserAction.setIcon({path: "robot_trading_off.png"});
 }
 
 // General settings
 var tradingIntervalMinutes = parseInt(localStorage.tradingIntervalMinutes || 60);
 var LogLines = parseInt(localStorage.LogLines || 0);
-var currency = localStorage.currency || 'USD'; // Fiat currency to trade with
+var currency = localStorage.currency || "USD"; // Fiat currency to trade with
 var keepBTC = parseFloat(localStorage.keepBTC || 0.0); // this amount in BTC will be untouched by trade - bot will play with the rest
 var keepBTCUnitIsPercentage = 0; // (localStorage.keepBTCUnitIsPercentage || 0); // Does not work, so don't uncomment...
 // var keepFiat = parseFloat(localStorage.keepFiat || 0.0); // this amount in Fiat currency will be untouched by trade - bot will play with the rest - does not work, so don't uncomment...
@@ -60,7 +60,7 @@ var lastUpdateStartTime = 0;
 var abortUpdateAndRedo = false;
 
 function padit(d) {
-	return (d < 10) ? ('0' + d.toString()) : d.toString();
+	return (d < 10) ? ("0" + d.toString()) : d.toString();
 }
 
 function updateEMA(ema, N) {
@@ -69,7 +69,7 @@ function updateEMA(ema, N) {
 		if (ema.length == 0) {
 			ema.push(H1[0]);
 		} else {
-			ema.push(H1[ema.length]*k + ema[ema.length - 1]*(1 - k));
+			ema.push(H1[ema.length] * k + ema[ema.length - 1] * (1 - k));
 		}
 	}
 }
@@ -84,7 +84,7 @@ function schedUpdateInfo(t) {
 
 function updateInfo() {
 	updateInfoTimer = null;
-	if (ApiKey == '') {
+	if (ApiKey == "") {
 		// No API key. No use trying to fetch info...
 		BTC = Number.NaN;
 		fiat = Number.NaN;
@@ -149,7 +149,7 @@ function mtgoxpost(path, params, ef, df) {
 		data += "&" + params[i];
 	}
 	data = encodeURI(data);
-	var hmac = hmac_512((useAPIv2 ? (path + '\0' + data) : data), ApiSec);
+	var hmac = hmac_512((useAPIv2 ? (path + "\0" + data) : data), ApiSec);
 	req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 	req.setRequestHeader("Rest-Key", ApiKey);
 	req.setRequestHeader("Rest-Sign", hmac);
@@ -171,10 +171,10 @@ function dat2day(ms) {
 	var m = (t.getUTCMonth() + 1).toString();
 	var d = t.getUTCDate().toString();
 	if (m.length < 2) {
-		m = '0' + m;
+		m = "0" + m;
 	}
 	if (d.length < 2) {
-		d = '0' + d;
+		d = "0" + d;
 	}
 	return y + "-" + m + "-" + d;
 }
@@ -308,22 +308,22 @@ function trade() {
 			if ((fiat > 0) || ((inverseEMA == 1) && (sellAmount > 0))) {
 			// if (fiat > (Math.max(0, keepFiat))) {
 				// var s = fiat - keepFiat;
-				if ((tradingEnabled == 1) && (ApiKey != '')) {
+				if ((tradingEnabled == 1) && (ApiKey != "")) {
 					if (inverseEMA != 1) {
 						// Normal EMA-strategy
 						console.log("BUY! (EMA(" + EmaShortPar + ")/EMA(" + EmaLongPar + ")>" + MinBuyThreshold + "% for " + tickCountBuy + " or more ticks)");
 						if (useAPIv2) {
-							mtgoxpost("BTC" + currency + "/money/order/add", ['type=bid', 'amount_int=' + (1000 * 100000000).toString()], one, onl);
+							mtgoxpost("BTC" + currency + "/money/order/add", ["type=bid", "amount_int=" + (1000 * 100000000).toString()], one, onl);
 						} else {
-							mtgoxpost("buyBTC.php", ['Currency=' + currency, 'amount=1000'], one, onl);
+							mtgoxpost("buyBTC.php", ["Currency=" + currency, "amount=1000"], one, onl);
 						}
 					} else {
 						// Crazy Ivan!
 						console.log("Crazy Ivan SELL " + sellAmount + " BTC!" + ((keepBTC > 0) ? (" (keep " + (keepBTC.toString() + ((keepBTCUnitIsPercentage == 1) ? " %" : " BTC")) + ")") : "") + " EMA(" + EmaShortPar + ")/EMA(" + EmaLongPar + ")>" + MinBuyThreshold + "% for " + tickCountBuy + " or more ticks");
 						if (useAPIv2) {
-							mtgoxpost("BTC" + currency + "/money/order/add", ['type=ask', 'amount_int=' + Math.round(sellAmount * 100000000).toString()], one, onl);
+							mtgoxpost("BTC" + currency + "/money/order/add", ["type=ask", "amount_int=" + Math.round(sellAmount * 100000000).toString()], one, onl);
 						} else {
-							mtgoxpost("sellBTC.php", ['Currency=' + currency, 'amount=' + sellAmount.toString()], one, onl);
+							mtgoxpost("sellBTC.php", ["Currency=" + currency, "amount=" + sellAmount.toString()], one, onl);
 						}
 					}
 				} else {
@@ -355,22 +355,22 @@ function trade() {
 			latestSolidTrend = -3;
 
 			if ((sellAmount > 0) || ((inverseEMA == 1) && (fiat > 0))) {
-				if ((tradingEnabled == 1) && (ApiKey != '')) {
+				if ((tradingEnabled == 1) && (ApiKey != "")) {
 					if (inverseEMA != 1) {
 						// Normal EMA-strategy
 						console.log("SELL " + sellAmount + " BTC! (keep " + (keepBTC.toString() + ((keepBTCUnitIsPercentage == 1) ? " %" : " BTC")) + ") EMA(" + EmaShortPar + ")/EMA(" + EmaLongPar + ")<-" + MinSellThreshold + "% for " + tickCountSell + " or more ticks");
 						if (useAPIv2) {
-							mtgoxpost("BTC" + currency + "/money/order/add", ['type=ask', 'amount_int=' + Math.round(sellAmount * 100000000).toString()], one, onl);
+							mtgoxpost("BTC" + currency + "/money/order/add", ["type=ask", "amount_int=" + Math.round(sellAmount * 100000000).toString()], one, onl);
 						} else {
-							mtgoxpost("sellBTC.php", ['Currency=' + currency, 'amount=' + sellAmount.toString()], one, onl);
+							mtgoxpost("sellBTC.php", ["Currency=" + currency, "amount=" + sellAmount.toString()], one, onl);
 						}
 					} else {
 						// Crazy Ivan!
 						console.log("Crazy Ivan BUY! (EMA(" + EmaShortPar + ")/EMA(" + EmaLongPar + ")<-" + MinSellThreshold + "% for " + tickCountSell + " or more ticks)");
 						if (useAPIv2) {
-							mtgoxpost("BTC" + currency + "/money/order/add", ['type=bid', 'amount_int=' + (1000 * 100000000).toString()], one, onl);
+							mtgoxpost("BTC" + currency + "/money/order/add", ["type=bid", "amount_int=" + (1000 * 100000000).toString()], one, onl);
 						} else {
-							mtgoxpost("buyBTC.php", ['Currency=' + currency,'amount=1000'], one, onl);
+							mtgoxpost("buyBTC.php", ["Currency=" + currency, "amount=1000"], one, onl);
 						}
 					}
 				} else {
@@ -801,7 +801,7 @@ function onLod(d) {
 	log("getTrades post ok", d.currentTarget.responseText);
 }
 setTimeout(function () {
-	mtgoxpost("money/wallet/history", ['currency=USD'], onErr, onLod);
+	mtgoxpost("money/wallet/history", ["currency=USD"], onErr, onLod);
 	mtgoxpost("BTCUSD/money/info", [], onErr, onLod);
 }, 1000);
 */

@@ -13,7 +13,7 @@ if (!String.prototype.endsWith) {
 }
 if (!String.prototype.trim) {
 	String.prototype.trim = function () {
-		return this.replace(/^\s+|\s+$/g, '');
+		return this.replace(/^\s+|\s+$/g, "");
 	};
 }
 
@@ -161,9 +161,9 @@ function save() {
 
 	localStorage.tradingEnabled = bp.tradingEnabled = (document.getElementById("tradingEnabled").checked ? 1 : 0);
 	if (bp.tradingEnabled == 1) {
-		bp.chrome.browserAction.setIcon({path: 'robot_trading_on.png'});
+		bp.chrome.browserAction.setIcon({path: "robot_trading_on.png"});
 	} else {
-		bp.chrome.browserAction.setIcon({path: 'robot_trading_off.png'});
+		bp.chrome.browserAction.setIcon({path: "robot_trading_off.png"});
 	}
 	localStorage.tradingDisabledOnStart = bp.tradingDisabledOnStart = (document.getElementById("tradingDisabledOnStart").checked ? 1 : 0);
 
@@ -322,9 +322,9 @@ function intervalChanged() {
 }
 
 function updateFiatCurencyUnit() {
-	var elems = document.getElementsByTagName('*'), i;
+	var elems = document.getElementsByTagName("*"), i;
 	for (i in elems) {
-		if ((' ' + elems[i].className + ' ').indexOf(' fiatUnit ') > -1) {
+		if ((" " + elems[i].className + " ").indexOf(" fiatUnit ") > -1) {
 			elems[i].innerHTML = currencySelector.value;
 		}
 	}
@@ -336,21 +336,21 @@ function currencyChanged() {
 	// document.getElementById("simple_sell_above").value = "";
 }
 
-document.addEventListener('DOMContentLoaded', function () {
-	butres.addEventListener('click', function () { rese(); });
-	butsav.addEventListener('click', function () { save(); });
-	tradingIntervalMinutes.addEventListener('change', function () { intervalChanged(); });
-	currencySelector.addEventListener('change', function () { currencyChanged(); });
+document.addEventListener("DOMContentLoaded", function () {
+	butres.addEventListener("click", function () { rese(); });
+	butsav.addEventListener("click", function () { save(); });
+	tradingIntervalMinutes.addEventListener("change", function () { intervalChanged(); });
+	currencySelector.addEventListener("change", function () { currencyChanged(); });
 	setfields();
 
 /*
 	setcontrols();
 	setInterval(col, 300);
 
-	spyes.addEventListener('change', function () { sp.readOnly = !spyes.checked; });
-	butres.addEventListener('click', function () { reset(); });
-	butsav.addEventListener('click', function () { save(); });
-	allcur.addEventListener('click', function () { cf.value = ''; });
-	swtchlog.addEventListener('click', function () { chlog.style.display = ((chlog.style.display == 'none') ? 'block' : 'none'); });
+	spyes.addEventListener("change", function () { sp.readOnly = !spyes.checked; });
+	butres.addEventListener("click", function () { reset(); });
+	butsav.addEventListener("click", function () { save(); });
+	allcur.addEventListener("click", function () { cf.value = ''; });
+	swtchlog.addEventListener("click", function () { chlog.style.display = ((chlog.style.display == 'none') ? 'block' : 'none'); });
 */
 });

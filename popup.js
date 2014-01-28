@@ -102,7 +102,7 @@ function refreshtable() {
 			r.insertCell(-1).innerHTML = es.toFixed(3);
 			r.insertCell(-1).innerHTML = el.toFixed(3);
 			var c = r.insertCell(-1);
-			c.innerHTML = perc.toFixed(3) + '%';
+			c.innerHTML = perc.toFixed(3) + "%";
 			if ((perc > bp.MinBuyThreshold) || (perc < -bp.MinSellThreshold)) {
 				c.style.backgroundColor = ((perc < 0) ? "#ffd0d0" : "#d0ffd0");
 			} else {
@@ -136,7 +136,7 @@ function refreshtable() {
 		bitcoinchartsUrl = "http://www.bitcoincharts.com/charts/mtgoxUSD#rg30zig6-hourztgSzbgBza1gEMAzm1g" + bp.EmaShortPar + "za2gEMAzm2g" + bp.EmaLongPar + "zi1gMACDzv"; // month, 6-hours
 	}
 
-	document.getElementById("externalChartLink").setAttribute('href', bitcoinchartsUrl);
+	document.getElementById("externalChartLink").setAttribute("href", bitcoinchartsUrl);
 
 	redrawChart();
 }
@@ -237,22 +237,22 @@ function redrawChart() {
 		// settings: http://omnipotent.net/jquery.sparkline/#s-docs
 		var lineDrawn = false;
 		if (emaShortVisible.length >= H1Visible.length) {
-			$('#EMAChart').sparkline(emaShortVisible, {
-				type: 'line',
-				lineColor: '#008800',
+			$("#EMAChart").sparkline(emaShortVisible, {
+				type: "line",
+				lineColor: "#008800",
 				fillColor: false,
 				lineWidth: 1,
 				composite: false,
-				width: chartWidth + 'px',
-				height: chartHeight + 'px',
+				width: chartWidth + "px",
+				height: chartHeight + "px",
 				minSpotColor: false,
 				maxSpotColor: false,
 				spotColor: false,
 				tooltipContainer: document.getElementById("chart"),
-				tooltipClassname: 'chartTooltip',
+				tooltipClassname: "chartTooltip",
 				tooltipFormatter: formatEMAShortTooltip,
-				highlightLineColor: '#CCC',
-				highlightSpotColor: '#000',
+				highlightLineColor: "#CCC",
+				highlightSpotColor: "#000",
 				xvalues: timVisible,
 				chartRangeMin: chartMinY,
 				chartRangeMax: chartMaxY
@@ -260,44 +260,44 @@ function redrawChart() {
 			lineDrawn = true;
 		}
 		if (emaLongVisible.length >= H1Visible.length) {
-			$('#EMAChart').sparkline(emaLongVisible, {
-				type: 'line',
-				lineColor: '#B00000',
+			$("#EMAChart").sparkline(emaLongVisible, {
+				type: "line",
+				lineColor: "#B00000",
 				fillColor: false,
 				lineWidth: 1,
 				composite: (lineDrawn ? true : false),
-				width: chartWidth + 'px',
-				height: chartHeight + 'px',
+				width: chartWidth + "px",
+				height: chartHeight + "px",
 				minSpotColor: false,
 				maxSpotColor: false,
 				spotColor: false,
 				tooltipContainer: document.getElementById("chart"),
-				tooltipClassname: 'chartTooltip',
+				tooltipClassname: "chartTooltip",
 				tooltipFormatter: formatEMALongTooltip,
-				highlightLineColor: '#CCC',
-				highlightSpotColor: '#000',
+				highlightLineColor: "#CCC",
+				highlightSpotColor: "#000",
 				xvalues: timVisible,
 				chartRangeMin: chartMinY,
 				chartRangeMax: chartMaxY
 			});
 			lineDrawn = true;
 		}
-	$('#EMAChart').sparkline(H1Visible, {
-		type: 'line',
-		lineColor: '#0000FF',
+	$("#EMAChart").sparkline(H1Visible, {
+		type: "line",
+		lineColor: "#0000FF",
 		fillColor: false,
 		lineWidth: 1,
 		minSpotColor: false,
 		maxSpotColor: false,
 		spotColor: false,
 		composite: (lineDrawn ? true : false),
-		width: chartWidth + 'px',
-		height: chartHeight + 'px',
+		width: chartWidth + "px",
+		height: chartHeight + "px",
 		tooltipContainer: document.getElementById("chart"),
-		tooltipClassname: 'chartTooltip',
+		tooltipClassname: "chartTooltip",
 		tooltipFormatter: formatPriceTooltip,
-		highlightLineColor: '#CCC',
-		highlightSpotColor: '#000',
+		highlightLineColor: "#CCC",
+		highlightSpotColor: "#000",
 		xvalues: timVisible,
 		chartRangeMin: chartMinY,
 		chartRangeMax: chartMaxY
@@ -308,14 +308,14 @@ function redrawChart() {
 		var indicatorCanvasOffset = 4;
 		var indicatorCanvas = document.getElementById("indicatorCanvas");
 		if (!indicatorCanvas) {
-			indicatorCanvas = document.createElement('canvas');
+			indicatorCanvas = document.createElement("canvas");
 			indicatorCanvas.id = "indicatorCanvas";
 			indicatorCanvas.setAttribute("width", chartWidth);
 			indicatorCanvas.setAttribute("height", (chartHeight + 2 * indicatorCanvasOffset));
 			indicatorCanvas.setAttribute("style", "position:absolute;top:0px;left:0px;z-index:2000;pointer-events:none;margin:auto;margin-top:-4px;width:" + chartWidth + "px;height:" + (chartHeight + 2 * indicatorCanvasOffset + 1) + "px;");
 			document.getElementById("EMAChart").appendChild(indicatorCanvas);
 		}
-		var ctx =indicatorCanvas.getContext('2d');
+		var ctx =indicatorCanvas.getContext("2d");
 		for (var i = 0; i < switchesUp.length; i++) {
 			var x = Math.round((switchesUp[i][0] - visibleStartIndex) / (visibleSamples - 1) * (chartWidth - 3) - 3);
 			var y = Math.min(chartHeight - Math.round((switchesUp[i][1] - chartMinY) / (chartMaxY - chartMinY) * chartHeight) + 5 + indicatorCanvasOffset, chartHeight + 2 * indicatorCanvasOffset - 6);
@@ -346,12 +346,12 @@ var lastPriceTooltipLine = "";
 function formatEMAShortTooltip(sp, options, fields) {
 	lastEmaTime = fields.x;
 	lastEmaShort = fields.y;
-	lastEMAShortTooltipLine = '<span style="color: ' + fields.color + '">&#9679;</span> EMA' + bp.EmaShortPar + ': ' + formatChartNumbers(fields.y);
+	lastEMAShortTooltipLine = "<span style=\"color: " + fields.color + "\">&#9679;</span> EMA" + bp.EmaShortPar + ": " + formatChartNumbers(fields.y);
 	return ""; // Don't draw until last curve's tooltip is calculated...
 }
 
 function formatEMALongTooltip(sp, options, fields) {
-	var trend = '?';
+	var trend = "?";
 
 	//
 	// Display EMA S/L %. Helpful for gauging on the graph when trades execute on new trend directions.
@@ -361,20 +361,20 @@ function formatEMALongTooltip(sp, options, fields) {
 
 	if (lastEmaTime == fields.x) {
 		if (trendIndicator > 0) {
-			trend = '<img class="trendIndicatorImg" src="trend_' + ((trendIndicator > bp.MinBuyThreshold) ? 'strong' : 'weak') + '_up.gif">';
+			trend = "<img class=\"trendIndicatorImg\" src=\"trend_" + ((trendIndicator > bp.MinBuyThreshold) ? "strong" : "weak") + "_up.gif\">";
 		} else if (trendIndicator < 0) {
-			trend = '<img class="trendIndicatorImg" src="trend_' + ((-trendIndicator > bp.MinSellThreshold) ? 'strong' : 'weak') + '_down.gif">';
+			trend = "<img class=\"trendIndicatorImg\" src=\"trend_" + ((-trendIndicator > bp.MinSellThreshold) ? "strong" : "weak") + "_down.gif\">";
 		} else {
-			trend = 'none';
+			trend = "none";
 		}
 	}
-	lastEMALongTooltipLine = '<span style="color: ' + fields.color + '">&#9679;</span> EMA' + bp.EmaLongPar + ': ' + formatChartNumbers(fields.y);
-	lastTrendTooltipLine = 'Trend: ' + trend + ' ' + formatChartNumbers(trendIndicator) + '%';
+	lastEMALongTooltipLine = "<span style=\"color: " + fields.color + "\">&#9679;</span> EMA" + bp.EmaLongPar + ": " + formatChartNumbers(fields.y);
+	lastTrendTooltipLine = "Trend: " + trend + " " + formatChartNumbers(trendIndicator) + "%";
 	return ""; // Don't draw until last curve's tooltip is calculated...
 }
 
 function formatPriceTooltip(sp, options, fields) {
-	lastPriceTooltipLine = '<span style="color: ' + fields.color + '">&#9679;</span> Price: ' + formatChartNumbers(fields.y);
+	lastPriceTooltipLine = "<span style=\"color: " + fields.color + "\">&#9679;</span> Price: " + formatChartNumbers(fields.y);
 	return assembleTooltip(fields.x); // This is the last curve, so draw the final tooltip
 }
 
@@ -382,13 +382,13 @@ function assembleTooltip(tim) {
 	var d = new Date(tim * 60 * 1000);
 	var dateStr = d.getFullYear() + "-" + padit(d.getMonth() + 1) + "-" + padit(d.getDate());
 	var t = ((dateStr != nowDateStr) ? dateStr : "Today") + " " + padit(d.getHours()) + ":" + padit(d.getMinutes());
-	var tooltip = '<div align="center">' + t +
-		'<table width="100%" border="0"><tr><td align="center" class="tooltipTableCell">' +
-		lastPriceTooltipLine + '<br>' +
-		lastEMAShortTooltipLine + '<br>' +
-		lastEMALongTooltipLine + '<br>' +
-		'</td></tr></table>' +
-		lastTrendTooltipLine + '</div>';
+	var tooltip = "<div align=\"center\">" + t +
+		"<table width=\"100%\" border=\"0\"><tr><td align=\"center\" class=\"tooltipTableCell\">" +
+		lastPriceTooltipLine + "<br>" +
+		lastEMAShortTooltipLine + "<br>" +
+		lastEMALongTooltipLine + "<br>" +
+		"</td></tr></table>" +
+		lastTrendTooltipLine + "</div>";
 
 	lastEMAShortTooltipLine = "";
 	lastEMALongTooltipLine = "";
@@ -441,30 +441,30 @@ var upImg = new Image();
 var downImg = new Image();
 upImg.onload = refreshtable;
 downImg.onload = refreshtable;
-upImg.src = 'trend_strong_up.gif';
-downImg.src = 'trend_strong_down.gif';
+upImg.src = "trend_strong_up.gif";
+downImg.src = "trend_strong_down.gif";
 
 refreshtable();
 bp.popupRefresh = refreshtable;
 bp.popupUpdateCounter = popupUpdateCounter;
 
-document.addEventListener('DOMContentLoaded', function () {
-	chartLink.addEventListener('click', function () { toggleChart(); });
-	enableTrading.addEventListener('click', function () {
+document.addEventListener("DOMContentLoaded", function () {
+	chartLink.addEventListener("click", function () { toggleChart(); });
+	enableTrading.addEventListener("click", function () {
 		localStorage.tradingEnabled = bp.tradingEnabled = 1;
-		bp.chrome.browserAction.setIcon({path: 'robot_trading_on.png'});
+		bp.chrome.browserAction.setIcon({path: "robot_trading_on.png"});
 		refreshtable();
 	});
-	disableTrading.addEventListener('click', function () {
+	disableTrading.addEventListener("click", function () {
 		localStorage.tradingEnabled = bp.tradingEnabled = 0;
-		bp.chrome.browserAction.setIcon({path: 'robot_trading_off.png'});
+		bp.chrome.browserAction.setIcon({path: "robot_trading_off.png"});
 		refreshtable();
 	});
-	zoomIn.addEventListener('click', function (e) {
+	zoomIn.addEventListener("click", function (e) {
 		zoomChart(true);
 		return false;
 	});
-	zoomOut.addEventListener('click', function (e) {
+	zoomOut.addEventListener("click", function (e) {
 		zoomChart(false);
 		return false;
 	});
