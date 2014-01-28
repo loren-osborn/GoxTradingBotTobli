@@ -34,7 +34,7 @@ getMtGoxApi = (function () {
 			});
 		});
 		MtGoxApiCommon.prototype.getByUrl = (function getByUrl(request, url) {
-			// *FIXME*: function name changed to getByUrl()
+			// *FIXME*: method name changed to getByUrl()
 			getTobliLogger().logLevel("DEBUG").logNative("get_url(): " + url);
 			request.open("GET", url);
 			request.send();

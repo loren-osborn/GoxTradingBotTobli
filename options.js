@@ -13,7 +13,7 @@ if (!String.prototype.endsWith) {
 }
 if (!String.prototype.trim) {
 	String.prototype.trim = function () {
-		return this.replace(/^\s+|\s+$/g,"");
+		return this.replace(/^\s+|\s+$/g, "");
 	};
 }
 
@@ -149,15 +149,17 @@ function save() {
 	}
 */
 
-	if (bkgdPg.EmaShortPar!=es || bkgdPg.EmaLongPar!=el || bkgdPg.MinBuyThreshold!=buy_tr || bkgdPg.MinSellThreshold!=sell_tr || bkgdPg.tradingIntervalMinutes != parseInt(tradInt.value) ) {
-		if (!confirm("Applying different Trading interval/EMA/Threshold values may case an instant trigger to execute a trade.")) return;
+	if (bkgdPg.EmaShortPar != es || bkgdPg.EmaLongPar != el || bkgdPg.MinBuyThreshold != buy_tr || bkgdPg.MinSellThreshold != sell_tr || bkgdPg.tradingIntervalMinutes != parseInt(tradInt.value) ) {
+		if (!confirm("Applying different Trading interval/EMA/Threshold values may case an instant trigger to execute a trade.")) {
+			return;
+		}
 	}
 
 	bkgdPg.tobliGoxBot.getMtGoxApi().setKey(localStorage.ApiKey = document.getElementById("apikey").value);
 	bkgdPg.tobliGoxBot.getMtGoxApi().setSecret(localStorage.ApiSec = document.getElementById("apisec").value);
 	bkgdPg.schedUpdateInfo(10);
 
-	localStorage.tradingEnabled = bkgdPg.tradingEnabled = (document.getElementById("tradingEnabled").checked?1:0);
+	localStorage.tradingEnabled = bkgdPg.tradingEnabled = (document.getElementById("tradingEnabled").checked ? 1 : 0);
 	if (bkgdPg.tradingEnabled == 1) {
 		bkgdPg.chrome.browserAction.setIcon({path: "robot_trading_on.png"});
 	} else {
@@ -170,7 +172,7 @@ function save() {
 	var resetH1 = false;
 
 	var currency = currencySelector.value;
-	if (currency!=bkgdPg.currency) {
+	if (currency != bkgdPg.currency) {
 		bkgdPg.emptySampleCache();
 		resetH1 = true;
 	}
@@ -193,7 +195,7 @@ function save() {
 		localStorage.tradingIntervalMinutes = bkgdPg.tradingIntervalMinutes = parseInt(tradInt.value);
 		// localStorage.MaxMinutesBack = bkgdPg.MaxMinutesBack = parseInt(bkgdPg.MaxSamplesToKeep * bkgdPg.tradingIntervalMinutes);
 
-		// localStorage.LogLines = bkgdPg.LogLines = parseInt(sla.value)
+		// localStorage.LogLines = bkgdPg.LogLines = parseInt(sla.value);
 		localStorage.LogLines = bkgdPg.LogLines = parseInt(sla.value * 60 / localStorage.tradingIntervalMinutes);
 
 		localStorage.tickCountBuy = bkgdPg.tickCountBuy = parseInt(tc_buy.value);
@@ -205,8 +207,8 @@ function save() {
 		localStorage.MinBuyThreshold = bkgdPg.MinBuyThreshold = buy_tr;
 		localStorage.MinSellThreshold = bkgdPg.MinSellThreshold = sell_tr;
 
-		localStorage.tradeOnlyAfterSwitch = bkgdPg.tradeOnlyAfterSwitch = (document.getElementById("tradeOnlyAfterSwitch").checked?1:0);
-		localStorage.inverseEMA = bkgdPg.inverseEMA = (document.getElementById("inverseEMA").checked?1:0);
+		localStorage.tradeOnlyAfterSwitch = bkgdPg.tradeOnlyAfterSwitch = (document.getElementById("tradeOnlyAfterSwitch").checked ? 1 : 0);
+		localStorage.inverseEMA = bkgdPg.inverseEMA = (document.getElementById("inverseEMA").checked ? 1 : 0);
 /*
 		localStorage.simpleRulesMode = bkgdPg.simpleRulesMode = simpleRulesModeSelector.value;
 		localStorage.simple_buy_below = bkgdPg.simple_buy_below = simple_buy_below;
@@ -236,7 +238,7 @@ function setfields() {
 	document.getElementById("sell_tras").value = bkgdPg.MinSellThreshold.toFixed(2);
 
 	document.getElementById("currencySelector").value = bkgdPg.currency;
-	document.getElementById("keepBTC").value = bkgdPg.keepBTC.toString() + (bkgdPg.keepBTCUnitIsPercentage == 1 ? " %" : "");
+	document.getElementById("keepBTC").value = bkgdPg.keepBTC.toString() + ((bkgdPg.keepBTCUnitIsPercentage == 1) ? " %" : "");
 
 
 	document.getElementById("tradingEnabled").checked = (bkgdPg.tradingEnabled == 1);
@@ -245,7 +247,6 @@ function setfields() {
 	bkgdPg.tobliGoxBot.getTobliLogger().logLevel("DEBUG").logNative("bkgdPg.tradingEnabled=" + bkgdPg.tradingEnabled);
 
 	// document.getElementById("keepFiat").value = bkgdPg.keepFiat.toString();
-
 
 	for (var i = 0; i < sla.options.length; i++) {
 		if (parseInt(sla.options[i].value) == (bkgdPg.LogLines * bkgdPg.tradingIntervalMinutes / 60)) {
@@ -281,7 +282,7 @@ function setfields() {
 		}
 	}
 
-	// Parameters for 'Experimental settings'
+	// Parameters for "Experimental settings"
 	document.getElementById("tradeOnlyAfterSwitch").checked = (bkgdPg.tradeOnlyAfterSwitch == 1);
 	document.getElementById("inverseEMA").checked = (bkgdPg.inverseEMA == 1);
 /*
@@ -291,8 +292,8 @@ function setfields() {
 			break;
 		}
 	}
-	document.getElementById("simple_buy_below").value = (bkgdPg.simple_buy_below > 0?bkgdPg.simple_buy_below:"");
-	document.getElementById("simple_sell_above").value = (bkgdPg.simple_sell_above > 0?bkgdPg.simple_sell_above:"");
+	document.getElementById("simple_buy_below").value = ((bkgdPg.simple_buy_below > 0) ? bkgdPg.simple_buy_below : "");
+	document.getElementById("simple_sell_above").value = ((bkgdPg.simple_sell_above > 0) ? bkgdPg.simple_sell_above : "");
 */
 	document.getElementById("maxVisibleSamples").innerHTML = (bkgdPg.MaxSamplesToKeep - bkgdPg.preSamples);
 	intervalChanged();
@@ -310,7 +311,7 @@ function intervalChanged() {
 		if (slaVal > maxHours) {
 			sla.options[i].disabled = true;
 			sla.options[i].style.color = "#B0B0B0";
-		} else if (slaVal!=0) {
+		} else if (slaVal != 0) {
 			sla.options[i].disabled = false;
 			sla.options[i].style.color = "#000000";
 			if (currentSlaValue > maxHours) {
@@ -347,9 +348,9 @@ document.addEventListener("DOMContentLoaded", function () {
 	setcontrols();
 	setInterval(col, 300);
 
-	spyes.addEventListener("change", function () { sp.readOnly = !spyes.checked; })
-	butres.addEventListener("click", function () { reset(); })
-	butsav.addEventListener("click", function () { save(); })
+	spyes.addEventListener("change", function () { sp.readOnly = !spyes.checked; });
+	butres.addEventListener("click", function () { reset(); });
+	butsav.addEventListener("click", function () { save(); });
 	allcur.addEventListener("click", function () { cf.value = ""; });
 	swtchlog.addEventListener("click", function () { chlog.style.display = ((chlog.style.display == "none") ? "block" : "none"); });
 */

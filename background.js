@@ -6,7 +6,7 @@ const MtGoxAPI2BaseURL = "https://data.mtgox.com/api/2/";
 const useAPIv2 = true;
 
 var tradingDisabledOnStart = (localStorage.tradingDisabledOnStart || 0);
-var tradingEnabled = (tradingDisabledOnStart == 1 ? 0 : (localStorage.tradingEnabled || 0));
+var tradingEnabled = ((tradingDisabledOnStart == 1) ? 0 : (localStorage.tradingEnabled || 0));
 if (tradingEnabled == 1) {
 	chrome.browserAction.setIcon({path: "robot_trading_on.png"});
 } else {
@@ -152,15 +152,17 @@ function checkThresholdsAt(idx, buy) {
 	if (buy) {
 		for (var i = 0; i < tickCountBuy; i++) {
 			var dif = getemadif(idx - i);
-			if (dif <= MinBuyThreshold)
+			if (dif <= MinBuyThreshold) {
 				return false;
+			}
 		}
 		return true;
 	} else {
 		for (var i = 0; i < tickCountSell; i++) {
 			var dif = getemadif(idx - i);
-			if (dif >= -MinSellThreshold)
+			if (dif >= -MinSellThreshold) {
 				return false;
+			}
 		}
 		return true;
 	}
@@ -189,11 +191,13 @@ function getTrendAtIndex(i) {
 			var dif3 = getemadif(i - 2);
 			var dif4 = getemadif(i - 3);
 			var dif5 = getemadif(i - 4);
-			if ((tickCountBuy == 1) ||
+			if (
+					(tickCountBuy == 1) ||
 					(tickCountBuy == 2 && (dif2 > MinBuyThreshold)) ||
 					(tickCountBuy == 3 && (dif2 > MinBuyThreshold) && (dif3 > MinBuyThreshold)) ||
 					(tickCountBuy == 4 && (dif2 > MinBuyThreshold) && (dif3 > MinBuyThreshold) && (dif4 > MinBuyThreshold)) ||
-					(tickCountBuy == 5 && (dif2 > MinBuyThreshold) && (dif3 > MinBuyThreshold) && (dif4 > MinBuyThreshold) && (dif5 > MinBuyThreshold))) {
+					(tickCountBuy == 5 && (dif2 > MinBuyThreshold) && (dif3 > MinBuyThreshold) && (dif4 > MinBuyThreshold) && (dif5 > MinBuyThreshold))
+			) {
 				trend = 3;
 			}
 		}
@@ -205,11 +209,13 @@ function getTrendAtIndex(i) {
 			var dif3 = getemadif(i - 2);
 			var dif4 = getemadif(i - 3);
 			var dif5 = getemadif(i - 4);
-			if ((tickCountSell == 1) ||
+			if (
+					(tickCountSell == 1) ||
 					(tickCountSell == 2 && (dif2 < -MinSellThreshold)) ||
 					(tickCountSell == 3 && (dif2 < -MinSellThreshold) && (dif3 < -MinSellThreshold)) ||
 					(tickCountSell == 4 && (dif2 < -MinSellThreshold) && (dif3 < -MinSellThreshold) && (dif4 < -MinSellThreshold)) ||
-					(tickCountSell == 5 && (dif2 < -MinSellThreshold) && (dif3 < -MinSellThreshold) && (dif4 < -MinSellThreshold) && (dif5 < -MinSellThreshold))) {
+					(tickCountSell == 5 && (dif2 < -MinSellThreshold) && (dif3 < -MinSellThreshold) && (dif4 < -MinSellThreshold) && (dif5 < -MinSellThreshold))
+			) {
 				trend = -3;
 			}
 		}
@@ -235,13 +241,13 @@ function trade() {
 		// Not implemented yet...
 	}
 */
-	var keepBTCAmount = (keepBTCUnitIsPercentage == 1 ? (BTC * keepBTC / 100) : keepBTC);
+	var keepBTCAmount = ((keepBTCUnitIsPercentage == 1) ? (BTC * keepBTC / 100) : keepBTC);
 	var sellAmount = BTC - keepBTCAmount;
 	var currentTrend = getTrendAtIndex(H1.length - 1);
 
 	if (currentTrend > 1) {
 		// Trend is up
-		chrome.browserAction.setBadgeBackgroundColor({color:[0, 128, 0, 200]});
+		chrome.browserAction.setBadgeBackgroundColor({color: [0, 128, 0, 200]});
 
 		if (currentTrend == 3) {
 
@@ -258,7 +264,7 @@ function trade() {
 			// if (fiat > (Math.max(0, keepFiat))) {
 				// var s = fiat - keepFiat;
 				if ((tradingEnabled == 1) && (tobliGoxBot.getMtGoxApi().isKeySet())) {
-					if (inverseEMA!=1) {
+					if (inverseEMA != 1) {
 						// Normal EMA-strategy
 						tobliGoxBot.getTobliLogger().logNative("BUY! (EMA(" + EmaShortPar + ")/EMA(" + EmaLongPar + ")>" + MinBuyThreshold + "% for " + tickCountBuy + " or more ticks)");
 						tobliGoxBot.getMtGoxApi().addBuyOrder(currency, 1000, logOnErrorCallback, logOnLoadCallback);
@@ -269,7 +275,7 @@ function trade() {
 					}
 				} else {
 					// Simulation only
-					if (inverseEMA!=1)
+					if (inverseEMA != 1)
 						tobliGoxBot.getTobliLogger().logNative("Simulted BUY! EMA(" + EmaShortPar + ")/EMA(" + EmaLongPar + ")>" + MinBuyThreshold + "% for " + tickCountBuy + " or more ticks (Simulation only: no trade was made)");
 					else
 						tobliGoxBot.getTobliLogger().logNative("Simulated Crazy Ivan SELL " + sellAmount + " BTC!" + (keepBTC > 0 ? " (keep " + (keepBTC.toString() + (keepBTCUnitIsPercentage == 1 ? " %" : " BTC")) + ")" : "") + " EMA(" + EmaShortPar + ")/EMA(" + EmaLongPar + ")>" + MinBuyThreshold + "% for " + tickCountBuy + " or more ticks (Simulation only: no trade was made)");
@@ -282,7 +288,7 @@ function trade() {
 		}
 	} else if (currentTrend < -1) {
 		// Trend is down
-		chrome.browserAction.setBadgeBackgroundColor({color:[128, 0, 0, 200]});
+		chrome.browserAction.setBadgeBackgroundColor({color: [128, 0, 0, 200]});
 
 		if (currentTrend == -3) {
 			// Trend is down, also according to the "Sell after X samples"-setting
@@ -321,9 +327,9 @@ function trade() {
 	} else {
 		// Trend is undefined/weak
 		if (currentTrend > 0) {
-			chrome.browserAction.setBadgeBackgroundColor({color:[10, 100, 10, 100]});
+			chrome.browserAction.setBadgeBackgroundColor({color: [10, 100, 10, 100]});
 		} else {
-			chrome.browserAction.setBadgeBackgroundColor({color:[100, 10, 10, 100]});
+			chrome.browserAction.setBadgeBackgroundColor({color: [100, 10, 10, 100]});
 		}
 	}
 }
@@ -355,8 +361,9 @@ function refreshEMA(reset) {
 	updateEMA(emaLong, EmaLongPar);
 	updateEMA(emaShort, EmaShortPar);
 
-	if (reset)
+	if (reset) {
 		findLatestSolidTrend();
+	}
 
 	if (updateInProgress) {
 		chrome.browserAction.setBadgeText({text: "?"});
@@ -369,29 +376,37 @@ function refreshEMA(reset) {
 
 Object.size = function (obj) {
 	var size = 0, key;
-	for (key in obj)
-		if (obj.hasOwnProperty(key))
+	for (key in obj) {
+		if (obj.hasOwnProperty(key)) {
 			size++;
+		}
+	}
 	return size;
 }
 
 function tidBinarySearch(tradeHistoryResponse, tid) {
-	if ((tradeHistoryResponse.length <= 1) || (tid < tradeHistoryResponse[1].tid) || (tid > tradeHistoryResponse[tradeHistoryResponse.length - 1].tid))
+	if (
+		(tradeHistoryResponse.length <= 1) ||
+		(tid < tradeHistoryResponse[1].tid) ||
+		(tid > tradeHistoryResponse[tradeHistoryResponse.length - 1].tid)
+	) {
 		return -1;
+	}
 	var l = 1, u = tradeHistoryResponse.length, m;
 	while (l <= u) {
-		if (tid > parseInt(tradeHistoryResponse[(m = Math.floor((l + u) / 2))].tid))
+		if (tid > parseInt(tradeHistoryResponse[(m = Math.floor((l + u) / 2))].tid)) {
 			l = m + 1;
-		else
-			u = (tid == parseInt(tradeHistoryResponse[m].tid)) ? -2 : m - 1;
+		} else {
+			u = (tid == parseInt(tradeHistoryResponse[m].tid)) ? -2 : (m - 1);
+		}
 	}
-	return (u==-2) ? m : l;
+	return (u == -2) ? m : l;
 }
 
 function cacheOtherUsefulSamples(tradeHistoryResponse) {
 	tobliGoxBot.getTobliLogger().logLevel("DEBUG").log("generating usefulSamplePoints");
 	// May not really be needed to generate this on every call, but to get the very latest sample points for long date durations, do it anyway (not very intensive)...
-	var usefulSamplePoints={};
+	var usefulSamplePoints = {};
 	for (var j = 0; j < validSampleIntervalMinutes.length; j++) {
 		var minute_now = Math.floor(tobliGoxBot.createNewTobliDate().getMinuteId() / validSampleIntervalMinutes[j]) * validSampleIntervalMinutes[j]; // Fix trading samples to whole hours...
 		var interval_minute_fetch = minute_now - (MaxSamplesToKeep * validSampleIntervalMinutes[j]);
@@ -408,7 +423,7 @@ function cacheOtherUsefulSamples(tradeHistoryResponse) {
 			var sample = localStorage.getItem("sample." + key);
 			if ((!sample) || (sample == "null")) {
 				var i = tidBinarySearch(tradeHistoryResponse, parseInt(key) * 60 * 1000000);
-				if (i!=-1) {
+				if (i != -1) {
 					// found++;
 					tobliGoxBot.getTobliLogger().logLevel("DEBUG").log("Sample should be cached. key=" + key + " tid=" + parseInt(tradeHistoryResponse[i].tid / 60 / 1000000) + " lastTid=" + parseInt(tradeHistoryResponse[i - 1].tid / 60 / 1000000) + " price=" + tradeHistoryResponse[i].price);
 					localStorage.setItem("sample." + key, tradeHistoryResponse[i].price);
@@ -464,8 +479,9 @@ function addSample(minuteFetch, price, nocache) {
 	}
 	H1.push(f);
 
-	if (nocache)
+	if (nocache) {
 		return;
+	}
 
 	var sample = localStorage.getItem("sample." + minuteFetch);
 	if ((!sample) || (sample == "null")) {
@@ -493,7 +509,7 @@ function refreshPopup(fullRefresh) {
 
 function getSamplesFromCache(minute_fetch, minute_now) {
 	var sample = localStorage.getItem("sample." + minute_fetch);
-	while ((sample) && (sample!="null") && (minute_fetch <= minute_now)) {
+	while ((sample) && (sample != "null") && (minute_fetch <= minute_now)) {
 		// As long as trades exist in in local storage: Just add them...
 		tobliGoxBot.getTobliLogger().logLevel("DEBUG").log("Adding sample from local storage: sample." + minute_fetch + " = " + localStorage.getItem("sample." + minute_fetch));
 		addSample(minute_fetch, localStorage.getItem("sample." + minute_fetch));
@@ -527,8 +543,9 @@ function updateH1(reset) { // Added "reset" parameter to clear the H1 data - sho
 		if (reset) {
 			abortUpdateAndRedo = true;
 			tobliGoxBot.getTobliLogger().log("updateH1(): Reset while update in progress: abort current update");
-			if (forceAbortTimer)
+			if (forceAbortTimer) {
 				clearTimeout(forceAbortTimer);
+			}
 			forceAbortTimer = setTimeout(forceAbort, 30 * 1000);
 		}
 		return;
@@ -544,7 +561,7 @@ function updateH1(reset) { // Added "reset" parameter to clear the H1 data - sho
 		emaLong = [];
 		emaShort = [];
 		bootstrap = 1;
-		chrome.browserAction.setBadgeBackgroundColor({color:[128, 128, 128, 50]});
+		chrome.browserAction.setBadgeBackgroundColor({color: [128, 128, 128, 50]});
 		abortUpdateAndRedo = false;
 	}
 
@@ -655,8 +672,9 @@ function updateH1(reset) { // Added "reset" parameter to clear the H1 data - sho
 				updateInProgress = false;
 				lastUpdateStartTime = 0;
 			}
-			if (refr)
+			if (refr) {
 				refreshEMA(reset);
+			}
 
 			refreshPopup(refr);
 		}
@@ -676,7 +694,7 @@ function updateH1(reset) { // Added "reset" parameter to clear the H1 data - sho
 }
 
 tobliGoxBot.getTobliLogger().logNative("Using " + tobliGoxBot.getMtGoxApi().toString());
-chrome.browserAction.setBadgeBackgroundColor({color:[128, 128, 128, 50]});
+chrome.browserAction.setBadgeBackgroundColor({color: [128, 128, 128, 50]});
 schedUpdateInfo(100);
 setTimeout(function () { updateH1(false); }, 2 * 1000); // Delay first updateH1() to allow user info to be fetched first...
 setInterval(function () { updateH1(false); }, 60 * 1000); // Recheck every minute (should be a multiple of any trading interval)
