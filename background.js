@@ -5,8 +5,8 @@ const showLastHours = [1, 2, 3, 6, 12, 24, 48, 72, 96, 120, 240, 0];
 const MtGoxAPI2BaseURL = "https://data.mtgox.com/api/2/";
 const useAPIv2 = true;
 
-var ApiKey = localStorage.ApiKey || "";
-var ApiSec = localStorage.ApiSec || "";
+var mtGoxApiKey = localStorage.ApiKey || "";
+var mtGoxApiSecret = localStorage.ApiSec || "";
 
 var tradingDisabledOnStart = (localStorage.tradingDisabledOnStart || 0);
 var tradingEnabled = ((tradingDisabledOnStart == 1) ? 0 : (localStorage.tradingEnabled || 0));
@@ -59,7 +59,7 @@ var updateInProgress = false;
 var lastUpdateStartTime = 0;
 var abortUpdateAndRedo = false;
 
-function padit(d) {
+function zeroPadTwoDigits(d) {
 	return (d < 10) ? ("0" + d.toString()) : d.toString();
 }
 
@@ -84,7 +84,7 @@ function schedUpdateInfo(t) {
 
 function updateInfo() {
 	updateInfoTimer = null;
-	if (ApiKey == "") {
+	if (mtGoxApiKey == "") {
 		// No API key. No use trying to fetch info...
 		BTC = Number.NaN;
 		fiat = Number.NaN;
@@ -99,7 +99,7 @@ function updateInfo() {
 		path = "info.php";
 	}
 
-	mtgoxpost(path, [],
+	mtGoxApiPost(path, [],
 		function (e) {
 			console.log("info error", e);
 			chrome.browserAction.setTitle({title: "Error getting user info. MtGox problem?"});
@@ -132,35 +132,35 @@ function updateInfo() {
 	)
 }
 
-function hmac_512(message, secret) {
+function mtGoxApiComputeHmac512(message, secret) {
 	var shaObj = new jsSHA(message, "TEXT");
 	var hmac = shaObj.getHMAC(secret, "B64", "SHA-512", "B64");
 	return hmac;
 }
 
-function mtgoxpost(path, params, ef, df) {
-	var req = new XMLHttpRequest();
-	var t = (new Date()).getTime();
-	req.open("POST", (useAPIv2 ? MtGoxAPI2BaseURL : "https://mtgox.com/api/0/") + path + "?t=" + t, true); // Extra cache-busting...
-	req.onerror = ef;
-	req.onload = df;
-	var data = "nonce=" + (t * 1000);
+function mtGoxApiPost(path, params, ef, df) {
+	var request = new XMLHttpRequest();
+	var nowStamp = (new Date()).getTime();
+	request.open("POST", (useAPIv2 ? MtGoxAPI2BaseURL : "https://mtgox.com/api/0/") + path + "?t=" + nowStamp, true); // Extra cache-busting...
+	request.onerror = ef;
+	request.onload = df;
+	var data = "nonce=" + (nowStamp * 1000);
 	for (var i in params) {
 		data += "&" + params[i];
 	}
 	data = encodeURI(data);
-	var hmac = hmac_512((useAPIv2 ? (path + "\0" + data) : data), ApiSec);
-	req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-	req.setRequestHeader("Rest-Key", ApiKey);
-	req.setRequestHeader("Rest-Sign", hmac);
-	req.send(data);
+	var hmac = mtGoxApiComputeHmac512((useAPIv2 ? (path + "\0" + data) : data), mtGoxApiSecret);
+	request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+	request.setRequestHeader("Rest-Key", mtGoxApiKey);
+	request.setRequestHeader("Rest-Sign", hmac);
+	request.send(data);
 }
 
-function one(e) {
+function logOnErrorCallback(e) {
 	console.log("ajax post error", e);
 }
 
-function onl(d) {
+function logOnLoadCallback(d) {
 	console.log("ajax post ok", d);
 	schedUpdateInfo(2500);
 }
@@ -179,10 +179,11 @@ function dat2day(ms) {
 	return y + "-" + m + "-" + d;
 }
 
-function get_url(req, url) {
+function mtGoxApiGetByUrl(request, url) {
+	// *FIXME*: function name changed to mtGoxApiGetByUrl()
 	// console.log("get_url(): " + url);
-	req.open("GET", url);
-	req.send();
+	request.open("GET", url);
+	request.send();
 }
 
 
@@ -308,22 +309,22 @@ function trade() {
 			if ((fiat > 0) || ((inverseEMA == 1) && (sellAmount > 0))) {
 			// if (fiat > (Math.max(0, keepFiat))) {
 				// var s = fiat - keepFiat;
-				if ((tradingEnabled == 1) && (ApiKey != "")) {
+				if ((tradingEnabled == 1) && (mtGoxApiKey != "")) {
 					if (inverseEMA != 1) {
 						// Normal EMA-strategy
 						console.log("BUY! (EMA(" + EmaShortPar + ")/EMA(" + EmaLongPar + ")>" + MinBuyThreshold + "% for " + tickCountBuy + " or more ticks)");
 						if (useAPIv2) {
-							mtgoxpost("BTC" + currency + "/money/order/add", ["type=bid", "amount_int=" + (1000 * 100000000).toString()], one, onl);
+							mtGoxApiPost("BTC" + currency + "/money/order/add", ["type=bid", "amount_int=" + (1000 * 100000000).toString()], logOnErrorCallback, logOnLoadCallback);
 						} else {
-							mtgoxpost("buyBTC.php", ["Currency=" + currency, "amount=1000"], one, onl);
+							mtGoxApiPost("buyBTC.php", ["Currency=" + currency, "amount=1000"], logOnErrorCallback, logOnLoadCallback);
 						}
 					} else {
 						// Crazy Ivan!
 						console.log("Crazy Ivan SELL " + sellAmount + " BTC!" + ((keepBTC > 0) ? (" (keep " + (keepBTC.toString() + ((keepBTCUnitIsPercentage == 1) ? " %" : " BTC")) + ")") : "") + " EMA(" + EmaShortPar + ")/EMA(" + EmaLongPar + ")>" + MinBuyThreshold + "% for " + tickCountBuy + " or more ticks");
 						if (useAPIv2) {
-							mtgoxpost("BTC" + currency + "/money/order/add", ["type=ask", "amount_int=" + Math.round(sellAmount * 100000000).toString()], one, onl);
+							mtGoxApiPost("BTC" + currency + "/money/order/add", ["type=ask", "amount_int=" + Math.round(sellAmount * 100000000).toString()], logOnErrorCallback, logOnLoadCallback);
 						} else {
-							mtgoxpost("sellBTC.php", ["Currency=" + currency, "amount=" + sellAmount.toString()], one, onl);
+							mtGoxApiPost("sellBTC.php", ["Currency=" + currency, "amount=" + sellAmount.toString()], logOnErrorCallback, logOnLoadCallback);
 						}
 					}
 				} else {
@@ -355,22 +356,22 @@ function trade() {
 			latestSolidTrend = -3;
 
 			if ((sellAmount > 0) || ((inverseEMA == 1) && (fiat > 0))) {
-				if ((tradingEnabled == 1) && (ApiKey != "")) {
+				if ((tradingEnabled == 1) && (mtGoxApiKey != "")) {
 					if (inverseEMA != 1) {
 						// Normal EMA-strategy
 						console.log("SELL " + sellAmount + " BTC! (keep " + (keepBTC.toString() + ((keepBTCUnitIsPercentage == 1) ? " %" : " BTC")) + ") EMA(" + EmaShortPar + ")/EMA(" + EmaLongPar + ")<-" + MinSellThreshold + "% for " + tickCountSell + " or more ticks");
 						if (useAPIv2) {
-							mtgoxpost("BTC" + currency + "/money/order/add", ["type=ask", "amount_int=" + Math.round(sellAmount * 100000000).toString()], one, onl);
+							mtGoxApiPost("BTC" + currency + "/money/order/add", ["type=ask", "amount_int=" + Math.round(sellAmount * 100000000).toString()], logOnErrorCallback, logOnLoadCallback);
 						} else {
-							mtgoxpost("sellBTC.php", ["Currency=" + currency, "amount=" + sellAmount.toString()], one, onl);
+							mtGoxApiPost("sellBTC.php", ["Currency=" + currency, "amount=" + sellAmount.toString()], logOnErrorCallback, logOnLoadCallback);
 						}
 					} else {
 						// Crazy Ivan!
 						console.log("Crazy Ivan BUY! (EMA(" + EmaShortPar + ")/EMA(" + EmaLongPar + ")<-" + MinSellThreshold + "% for " + tickCountSell + " or more ticks)");
 						if (useAPIv2) {
-							mtgoxpost("BTC" + currency + "/money/order/add", ["type=bid", "amount_int=" + (1000 * 100000000).toString()], one, onl);
+							mtGoxApiPost("BTC" + currency + "/money/order/add", ["type=bid", "amount_int=" + (1000 * 100000000).toString()], logOnErrorCallback, logOnLoadCallback);
 						} else {
-							mtgoxpost("buyBTC.php", ["Currency=" + currency, "amount=1000"], one, onl);
+							mtGoxApiPost("buyBTC.php", ["Currency=" + currency, "amount=1000"], logOnErrorCallback, logOnLoadCallback);
 						}
 					}
 				} else {
@@ -448,7 +449,7 @@ var log = console.log = function () {
 		line = stack.split("\n")[2].split("/")[3].split(":")[1];
 	} catch (e) {}
 	var args = [];
-	args.push(dat2day(t.getTime()) + " " + padit(t.getHours()) + ":" + padit(t.getMinutes()) + ":" + padit(t.getSeconds()));
+	args.push(dat2day(t.getTime()) + " " + zeroPadTwoDigits(t.getHours()) + ":" + zeroPadTwoDigits(t.getMinutes()) + ":" + zeroPadTwoDigits(t.getSeconds()));
 	args.push("[" + file + ":" + line + "]");
 	// now add all the other arguments that were passed in:
 	for (var _i = 0, _len = arguments.length; _i < _len; _i++) {
@@ -469,26 +470,26 @@ Object.size = function (obj) {
 	return size;
 }
 
-function tidBinarySearch(trs, tid) {
+function tidBinarySearch(tradeHistoryResponse, tid) {
 	if (
-		(trs.length <= 1) ||
-		(tid < trs[1].tid) ||
-		(tid > trs[trs.length - 1].tid)
+		(tradeHistoryResponse.length <= 1) ||
+		(tid < tradeHistoryResponse[1].tid) ||
+		(tid > tradeHistoryResponse[tradeHistoryResponse.length - 1].tid)
 	) {
 		return -1;
 	}
-	var l = 1, u = trs.length, m;
+	var l = 1, u = tradeHistoryResponse.length, m;
 	while (l <= u) {
-		if (tid > parseInt(trs[(m = Math.floor((l + u) / 2))].tid)) {
+		if (tid > parseInt(tradeHistoryResponse[(m = Math.floor((l + u) / 2))].tid)) {
 			l = m + 1;
 		} else {
-			u = (tid == parseInt(trs[m].tid)) ? -2 : (m - 1);
+			u = (tid == parseInt(tradeHistoryResponse[m].tid)) ? -2 : (m - 1);
 		}
 	}
 	return (u == -2) ? m : l;
 }
 
-function cacheOtherUsefulSamples(trs) {
+function cacheOtherUsefulSamples(tradeHistoryResponse) {
 	// log("generating usefulSamplePoints");
 	// May not really be needed to generate this on every call, but to get the very latest sample points for long date durations, do it anyway (not very intensive)...
 	var time_now = (new Date()).getTime();
@@ -508,11 +509,11 @@ function cacheOtherUsefulSamples(trs) {
 		for (var key in usefulSamplePoints) {
 			var sample = localStorage.getItem("sample." + key);
 			if ((!sample) || (sample == "null")) {
-				var i = tidBinarySearch(trs, parseInt(key) * 60 * 1000000);
+				var i = tidBinarySearch(tradeHistoryResponse, parseInt(key) * 60 * 1000000);
 				if (i != -1) {
 					// found++;
-					// log("Sample should be cached. key=" + key + " tid=" + parseInt(trs[i].tid / 60 / 1000000) + " lastTid=" + parseInt(trs[i - 1].tid / 60 / 1000000) + " price=" + trs[i].price);
-					localStorage.setItem("sample." + key, trs[i].price);
+					// log("Sample should be cached. key=" + key + " tid=" + parseInt(tradeHistoryResponse[i].tid / 60 / 1000000) + " lastTid=" + parseInt(tradeHistoryResponse[i - 1].tid / 60 / 1000000) + " price=" + tradeHistoryResponse[i].price);
+					localStorage.setItem("sample." + key, tradeHistoryResponse[i].price);
 				}
 			}
 		}
@@ -577,12 +578,12 @@ function addSample(minuteFetch, price, nocache) {
 	}
 }
 
-function getSampleFromMtGox(req, minute_fetch) {
+function mtGoxApiGetSample(request, minute_fetch) {
 	var since = (minute_fetch * 60 * 1000000).toString();
 	if (useAPIv2) {
-		get_url(req, MtGoxAPI2BaseURL + "BTC" + currency + "/money/trades/fetch?since=" + since + "&nonce=" + ((new Date()).getTime() * 1000));
+		mtGoxApiGetByUrl(request, MtGoxAPI2BaseURL + "BTC" + currency + "/money/trades/fetch?since=" + since + "&nonce=" + ((new Date()).getTime() * 1000));
 	} else {
-		get_url(req, "https://data.mtgox.com/api/0/data/getTrades.php?Currency=" + currency + "&since=" + since + "&nonce=" + ((new Date()).getTime() * 1000));
+		mtGoxApiGetByUrl(request, "https://data.mtgox.com/api/0/data/getTrades.php?Currency=" + currency + "&since=" + since + "&nonce=" + ((new Date()).getTime() * 1000));
 	}
 }
 
@@ -677,7 +678,7 @@ function updateH1(reset) { // Added "reset" parameter to clear the H1 data - sho
 		cleanSampleCache();
 
 		req = new XMLHttpRequest();
-		var url, since;
+		var FIXME_neverInilializedUrl, since;
 
 		req.onerror = function (e) {
 			if (abortUpdateAndRedo) {
@@ -688,7 +689,7 @@ function updateH1(reset) { // Added "reset" parameter to clear the H1 data - sho
 			}
 			console.log("getTrades error", e, "-repeat");
 			// lastUpdateStartTime = (new Date()).getTime();
-			get_url(req, url);
+			mtGoxApiGetByUrl(req, FIXME_neverInilializedUrl);
 		}
 
 		req.onload = function () {
@@ -703,27 +704,27 @@ function updateH1(reset) { // Added "reset" parameter to clear the H1 data - sho
 			var done = true;
 			try {
 				// log(req.responseText)
-				var trs = JSON.parse(req.responseText);
+				var tradeHistoryResponse = JSON.parse(req.responseText);
 				if (useAPIv2) {
-					trs = trs.data;
+					tradeHistoryResponse = tradeHistoryResponse.data;
 				}
 
-				if (trs.length > 0) {
-					// log("Adding sample from MtGox: sample." + minute_fetch + " = " + trs[0].price);
-					addSample(minute_fetch, trs[0].price);
+				if (tradeHistoryResponse.length > 0) {
+					// log("Adding sample from MtGox: sample." + minute_fetch + " = " + tradeHistoryResponse[0].price);
+					addSample(minute_fetch, tradeHistoryResponse[0].price);
 
-					// Check if the chunk contains more any useful data
+					// Check if the chunk contains any more useful data
 					minute_fetch = getNextMinuteFetch();
 					var i = 1;
-					while ((i < trs.length) && (minute_fetch <= minute_now)) {
-						if (parseInt(trs[i].tid) > minute_fetch * 60 * 1000000) {
-							// log("Adding bonus sample from MtGox :) sample." + minute_fetch + " = " + trs[i].price);
-							addSample(minute_fetch, trs[i].price);
+					while ((i < tradeHistoryResponse.length) && (minute_fetch <= minute_now)) {
+						if (parseInt(tradeHistoryResponse[i].tid) > minute_fetch * 60 * 1000000) {
+							// log("Adding bonus sample from MtGox :) sample." + minute_fetch + " = " + tradeHistoryResponse[i].price);
+							addSample(minute_fetch, tradeHistoryResponse[i].price);
 							minute_fetch = getNextMinuteFetch();
 						}
 						i++;
 					}
-					cacheOtherUsefulSamples(trs);
+					cacheOtherUsefulSamples(tradeHistoryResponse);
 				} else {
 					log("Empty sample chunk from MtGox - no trades since minute_fetch=" + minute_fetch);
 					if (parseInt((new Date()).getTime() / (60 * 1000)) - minute_fetch < 5) {
@@ -747,7 +748,7 @@ function updateH1(reset) { // Added "reset" parameter to clear the H1 data - sho
 				if (minute_fetch <= minute_now) {
 					// We are not done, but a sample did not exist in local storage: We need to fetch more samples from MtGox...
 					lastUpdateStartTime = (new Date()).getTime();
-					getSampleFromMtGox(req, minute_fetch);
+					mtGoxApiGetSample(req, minute_fetch);
 					done = false;
 					if (bootstrap) {
 						chrome.browserAction.setBadgeText({text: ("       |        ").substr((bootstrap++) % 9, 6)});
@@ -779,7 +780,7 @@ function updateH1(reset) { // Added "reset" parameter to clear the H1 data - sho
 
 		// log("Fetching sample from MtGox: minute_fetch=" + minute_fetch);
 		lastUpdateStartTime = (new Date()).getTime();
-		getSampleFromMtGox(req, minute_fetch);
+		mtGoxApiGetSample(req, minute_fetch);
 	} else {
 		// Done, and all samples where loaded from local storage...
 		log("Got new samples (all loaded from cache) " + H1.length + " " + MaxSamplesToKeep);
@@ -805,7 +806,7 @@ function onLod(d) {
 	log("getTrades post ok", d.currentTarget.responseText);
 }
 setTimeout(function () {
-	mtgoxpost("money/wallet/history", ["currency=USD"], onErr, onLod);
-	mtgoxpost("BTCUSD/money/info", [], onErr, onLod);
+	mtGoxApiPost("money/wallet/history", ["currency=USD"], onErr, onLod);
+	mtGoxApiPost("BTCUSD/money/info", [], onErr, onLod);
 }, 1000);
 */
