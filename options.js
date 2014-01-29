@@ -350,7 +350,7 @@ document.addEventListener("DOMContentLoaded", function () {
 	spyes.addEventListener("change", function () { sp.readOnly = !spyes.checked; });
 	butres.addEventListener("click", function () { reset(); });
 	butsav.addEventListener("click", function () { save(); });
-	allcur.addEventListener("click", function () { cf.value = ''; });
-	swtchlog.addEventListener("click", function () { chlog.style.display = ((chlog.style.display == 'none') ? 'block' : 'none'); });
+	allcur.addEventListener("click", function () { cf.value = ""; });
+	swtchlog.addEventListener("click", function () { chlog.style.display = ((chlog.style.display == "none") ? "block" : "none"); });
 */
 });
