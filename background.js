@@ -451,7 +451,11 @@ Object.size = function (obj) {
 }
 
 function tidBinarySearch(trs, tid) {
-	if ((trs.length <= 1) || (tid < trs[1].tid) || (tid > trs[trs.length - 1].tid))
+	if (
+		(trs.length <= 1) ||
+		(tid < trs[1].tid) ||
+		(tid > trs[trs.length - 1].tid)
+	)
 		return -1;
 	var l = 1, u = trs.length, m;
 	while (l <= u) {
