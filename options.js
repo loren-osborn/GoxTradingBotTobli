@@ -310,7 +310,7 @@ function intervalChanged() {
 		if (slaVal > maxHours) {
 			sla.options[i].disabled = true;
 			sla.options[i].style.color = "#B0B0B0";
-		} else if (slaVal!=0) {
+		} else if (slaVal != 0) {
 			sla.options[i].disabled = false;
 			sla.options[i].style.color = "#000000";
 			if (currentSlaValue > maxHours) {
