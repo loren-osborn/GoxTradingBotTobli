@@ -9,8 +9,8 @@ function zeroPadTwoDigits(d) {
 
 function refreshtable() {
 	const wds = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-	const bcols = ["#f2f2ff", "#fffff0"];
-	var lastBgCol = 0;
+	const backgroundColors = ["#f2f2ff", "#fffff0"];
+	var lastBackgroundColorIndex = 0;
 	var lastDate = "";
 	var tab = document.getElementById("tab");
 	document.getElementById("emal").innerHTML = bkgdPg.EmaLongPar;
@@ -86,13 +86,13 @@ function refreshtable() {
 			r.title = wds[d.getDay()];
 			var dateStr = d.getFullYear() + "-" + zeroPadTwoDigits(d.getMonth() + 1) + "-" + zeroPadTwoDigits(d.getDate());
 			var date = d.getDate() + "/" + (d.getMonth() + 1) + " ";
-			// r.style.backgroundColor = bcols[((bkgdPg.tim[i] + 1) / 24) & 1];
+			// r.style.backgroundColor = backgroundColors[((bkgdPg.tim[i] + 1) / 24) & 1];
 			if (lastDate != date) {
-				lastBgCol = 1 - lastBgCol;
+				lastBackgroundColorIndex = 1 - lastBackgroundColorIndex;
 				lastDate = date;
 			}
 
-			r.style.backgroundColor = bcols[lastBgCol];
+			r.style.backgroundColor = backgroundColors[lastBackgroundColorIndex];
 
 			// r.insertCell(-1).innerHTML = (new Date(bkgdPg.tim[i] * 3600 * 1000)).getHours() + ":00";
 			// r.insertCell(-1).innerHTML = d.getFullYear() + "-" + zeroPadTwoDigits(d.getMonth() + 1) + "-" + zeroPadTwoDigits(d.getDate()) + " " + zeroPadTwoDigits(d.getHours()) + ":" + zeroPadTwoDigits(d.getMinutes());
