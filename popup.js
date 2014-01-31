@@ -144,7 +144,7 @@ function refreshtable() {
 function popupUpdateCounter() {
 	var o = document.getElementById("loadCell");
 	if (o) {
-		o.innerHTML="&nbsp;<br>Fetching trading data - please wait...<br>(" + bp.H1.length + " of " + bp.MaxSamplesToKeep + " samples loaded)<br>&nbsp;";
+		o.innerHTML = "&nbsp;<br>Fetching trading data - please wait...<br>(" + bp.H1.length + " of " + bp.MaxSamplesToKeep + " samples loaded)<br>&nbsp;";
 	}
 	redrawChart();
 }
@@ -177,7 +177,7 @@ function redrawChart() {
 		var visibleMinutes = (visibleSamples * bp.tradingIntervalMinutes);
 		if (visibleMinutes > 59) {
 			visibleHours = Math.floor(visibleMinutes / 60);
-			visibleMinutes = visibleMinutes-visibleHours * 60;
+			visibleMinutes = visibleMinutes - visibleHours * 60;
 		}
 		if (visibleHours > 23) {
 			visibleDays = Math.floor(visibleHours / 24);
