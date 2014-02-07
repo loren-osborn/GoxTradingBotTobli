@@ -713,7 +713,7 @@ function updateH1(reset) { // Added "reset" parameter to clear the H1 data - sho
 					// log("Adding sample from MtGox: sample." + minute_fetch + " = " + tradeHistoryResponse[0].price);
 					addSample(minute_fetch, tradeHistoryResponse[0].price);
 
-					// Check if the chunk contains more any useful data
+					// Check if the chunk contains any more useful data
 					minute_fetch = getNextMinuteFetch();
 					var i = 1;
 					while ((i < tradeHistoryResponse.length) && (minute_fetch <= minute_now)) {
