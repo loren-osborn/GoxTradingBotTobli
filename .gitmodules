@@ -1,0 +1,3 @@
+[submodule "vendor/Caligatio/jsSHA"]
+	path = vendor/Caligatio/jsSHA
+	url = https://github.com/Caligatio/jsSHA.git
