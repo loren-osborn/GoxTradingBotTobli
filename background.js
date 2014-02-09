@@ -18,8 +18,8 @@ var tradingIntervalMinutes = parseInt(localStorage.tradingIntervalMinutes || 60)
 var LogLines = parseInt(localStorage.LogLines || 0);
 var currency = localStorage.currency || "USD"; // Fiat currency to trade with
 var keepBTC = parseFloat(localStorage.keepBTC || 0.0); // this amount in BTC will be untouched by trade - bot will play with the rest
-var keepBTCUnitIsPercentage = 0; // (localStorage.keepBTCUnitIsPercentage || 0);  // Does not work, so don't uncomment...
-// var keepFiat = parseFloat(localStorage.keepFiat || 0.0); 	// this amount in Fiat currency will be untouched by trade - bot will play with the rest - does not work, so don't uncomment...
+var keepBTCUnitIsPercentage = 0; // (localStorage.keepBTCUnitIsPercentage || 0); // Does not work, so don't uncomment...
+// var keepFiat = parseFloat(localStorage.keepFiat || 0.0); // this amount in Fiat currency will be untouched by trade - bot will play with the rest - does not work, so don't uncomment...
 
 // Parameteres for "EMA settings"
 var EmaShortPar = parseInt(localStorage.EmaShortPar || 10);
@@ -232,7 +232,7 @@ function findLatestSolidTrend() {
 			break;
 		}
 	}
-	tobliGoxBot.getTobliLogger().log("Latest solid trend: " + (latestSolidTrend == 3 ? "up" : (latestSolidTrend == -3 ? "down" : "none")));
+	tobliGoxBot.getTobliLogger().log("Latest solid trend: " + ((latestSolidTrend == 3) ? "up" : ((latestSolidTrend == -3) ? "down" : "none")));
 }
 
 function trade() {
@@ -270,7 +270,7 @@ function trade() {
 						tobliGoxBot.getMtGoxApi().addBuyOrder(currency, 1000, logOnErrorCallback, logOnLoadCallback);
 					} else {
 						// Crazy Ivan!
-						tobliGoxBot.getTobliLogger().logNative("Crazy Ivan SELL " + sellAmount + " BTC!" + (keepBTC > 0 ? " (keep " + (keepBTC.toString() + (keepBTCUnitIsPercentage == 1 ? " %" : " BTC")) + ")" : "") + " EMA(" + EmaShortPar + ")/EMA(" + EmaLongPar + ")>" + MinBuyThreshold + "% for " + tickCountBuy + " or more ticks");
+						tobliGoxBot.getTobliLogger().logNative("Crazy Ivan SELL " + sellAmount + " BTC!" + ((keepBTC > 0) ? (" (keep " + (keepBTC.toString() + ((keepBTCUnitIsPercentage == 1) ? " %" : " BTC")) + ")") : "") + " EMA(" + EmaShortPar + ")/EMA(" + EmaLongPar + ")>" + MinBuyThreshold + "% for " + tickCountBuy + " or more ticks");
 						tobliGoxBot.getMtGoxApi().addSellOrder(currency, sellAmount, logOnErrorCallback, logOnLoadCallback);
 					}
 				} else {
@@ -278,7 +278,7 @@ function trade() {
 					if (inverseEMA != 1)
 						tobliGoxBot.getTobliLogger().logNative("Simulted BUY! EMA(" + EmaShortPar + ")/EMA(" + EmaLongPar + ")>" + MinBuyThreshold + "% for " + tickCountBuy + " or more ticks (Simulation only: no trade was made)");
 					else
-						tobliGoxBot.getTobliLogger().logNative("Simulated Crazy Ivan SELL " + sellAmount + " BTC!" + (keepBTC > 0 ? " (keep " + (keepBTC.toString() + (keepBTCUnitIsPercentage == 1 ? " %" : " BTC")) + ")" : "") + " EMA(" + EmaShortPar + ")/EMA(" + EmaLongPar + ")>" + MinBuyThreshold + "% for " + tickCountBuy + " or more ticks (Simulation only: no trade was made)");
+						tobliGoxBot.getTobliLogger().logNative("Simulated Crazy Ivan SELL " + sellAmount + " BTC!" + ((keepBTC > 0) ? (" (keep " + (keepBTC.toString() + ((keepBTCUnitIsPercentage == 1) ? " %" : " BTC")) + ")") : "") + " EMA(" + EmaShortPar + ")/EMA(" + EmaLongPar + ")>" + MinBuyThreshold + "% for " + tickCountBuy + " or more ticks (Simulation only: no trade was made)");
 				}
 			} else {
 				tobliGoxBot.getTobliLogger().logNative("Trend is up, but no " + currency + " to spend...");
@@ -304,7 +304,7 @@ function trade() {
 				if ((tradingEnabled == 1) && (tobliGoxBot.getMtGoxApi().isKeySet())) {
 					if (inverseEMA != 1) {
 						// Normal EMA-strategy
-						tobliGoxBot.getTobliLogger().logNative("SELL " + sellAmount + " BTC! (keep " + (keepBTC.toString() + (keepBTCUnitIsPercentage == 1 ? " %" : " BTC")) + ") EMA(" + EmaShortPar + ")/EMA(" + EmaLongPar + ")<-" + MinSellThreshold + "% for " + tickCountSell + " or more ticks");
+						tobliGoxBot.getTobliLogger().logNative("SELL " + sellAmount + " BTC! (keep " + (keepBTC.toString() + ((keepBTCUnitIsPercentage == 1) ? " %" : " BTC")) + ") EMA(" + EmaShortPar + ")/EMA(" + EmaLongPar + ")<-" + MinSellThreshold + "% for " + tickCountSell + " or more ticks");
 						tobliGoxBot.getMtGoxApi().addSellOrder(currency, sellAmount, logOnErrorCallback, logOnLoadCallback);
 					} else {
 						// Crazy Ivan!
@@ -314,7 +314,7 @@ function trade() {
 				} else {
 					// Simulation only
 					if (inverseEMA != 1)
-						tobliGoxBot.getTobliLogger().logNative("Simulated SELL " + sellAmount + " BTC! (keep " + (keepBTC.toString() + (keepBTCUnitIsPercentage == 1 ? " %" : " BTC")) + ") EMA(" + EmaShortPar + ")/EMA(" + EmaLongPar + ")<-" + MinSellThreshold + "% for " + tickCountSell + " or more ticks (Simulation only: no trade was made)");
+						tobliGoxBot.getTobliLogger().logNative("Simulated SELL " + sellAmount + " BTC! (keep " + (keepBTC.toString() + ((keepBTCUnitIsPercentage == 1) ? " %" : " BTC")) + ") EMA(" + EmaShortPar + ")/EMA(" + EmaLongPar + ")<-" + MinSellThreshold + "% for " + tickCountSell + " or more ticks (Simulation only: no trade was made)");
 					else
 						tobliGoxBot.getTobliLogger().logNative("Simulted Crazy Ivan BUY! EMA(" + EmaShortPar + ")/EMA(" + EmaLongPar + ")<-" + MinSellThreshold + "% for " + tickCountSell + " or more ticks (Simulation only: no trade was made)");
 				}
@@ -536,7 +536,7 @@ function forceAbort() {
 
 function updateH1(reset) { // Added "reset" parameter to clear the H1 data - should be called after changing settings that affects tradingInterval...
 	var now = tobliGoxBot.createNewTobliDate();
-	if ((updateInProgress) && ((lastUpdateStartTime == 0) || (now.getTime() - lastUpdateStartTime < 30 * 1000))) {
+	if ((updateInProgress) && ((lastUpdateStartTime == 0) || ((now.getTime() - lastUpdateStartTime) < (30 * 1000)))) {
 		// Skip update if updateInProgress and no "long call" exists.
 		// Unless reset==true - in that case, abort and re-update
 		// Check abort status after 30 seconds and forst abort if still not
