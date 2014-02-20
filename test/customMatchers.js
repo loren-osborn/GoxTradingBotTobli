@@ -188,6 +188,57 @@
 			return parsedNameMatches ? parsedNameMatches[1] : null;
 		});
 
+		jasmine.iterateOverTestDataSets = (function iterateOverTestDataSets(dataSets, paramOverrides, testCallback) {
+			var assert = (function assert(condition, message) {
+				if (!condition) {
+					throw message;
+				}
+			});
+			var iterateData = [], definedDataSets = {};
+			assert(arguments.length <= 3, "Too many parameters.");
+			assert(arguments.length == 3, "Missing required parameters.");
+			assert(dataSets instanceof Array, "First parameter must be an array.");
+			assert((paramOverrides === null) || (paramOverrides === undefined) || (paramOverrides.constructor === Object), "Second parameter must be null or simple Object.");
+			assert(testCallback instanceof Function, "Third parameter must be a function.");
+			assert(dataSets.length >= 1, "Must have at least 1 data set.");
+			var i, j, totalIterations = 1;
+			var prameters, paramIndex, remainder;
+			for (i = 0; i < dataSets.length; i++) {
+				assert(
+						(dataSets[i].name !== null) &&
+						({}.toString.call(dataSets[i].name) == "[object String]") &&
+						(dataSets[i].name.length > 0),
+					"Dataset[" + i + "].name must be a non-empty string.");
+				for (j = 0; j < i; j++) {
+					assert(dataSets[i].name != dataSets[j].name, "Dataset[" + i + "].name must not match Dataset[" + j + "].name.");
+				}
+				definedDataSets[dataSets[i].name] = true;
+				assert(dataSets[i].data instanceof Array, "Dataset[" + i + "].data must be an Array.");
+				assert(dataSets[i].data.length > 0, "Dataset[" + i + "].data must be non-empty.");
+				if (paramOverrides && (paramOverrides[dataSets[i].name] !== undefined)) {
+					assert(paramOverrides[dataSets[i].name] instanceof Array, "paramOverrides." + dataSets[i].name + " must be an Array.");
+					assert(paramOverrides[dataSets[i].name].length > 0, "paramOverrides." + dataSets[i].name + " must be non-empty.");
+					iterateData[i] = paramOverrides[dataSets[i].name];
+				} else {
+					iterateData[i] = dataSets[i].data;
+				}
+				totalIterations *= iterateData[i].length;
+			}
+			for (i in paramOverrides) {
+				assert(!({}.hasOwnProperty.call(paramOverrides, i)) || (definedDataSets[i] !== undefined), "paramOverrides dataset \"" + i + "\" is not defined.");
+			}
+			for (i = 0; i < totalIterations; i++) {
+				prameters = [];
+				remainder = i;
+				for (j = (iterateData.length - 1); j >= 0; j--) {
+					paramIndex = (remainder % (iterateData[j].length));
+					remainder = (remainder - paramIndex) / (iterateData[j].length);
+					prameters.unshift(iterateData[j][paramIndex]);
+				}
+				testCallback.apply(window, prameters);
+			}
+		});
+
 		expect.messageWhenExpecting = (function messageWhenExpecting(actual) {
 			expect(arguments.length).toEqual(1);
 			var expectation = expect(actual);
