@@ -41,6 +41,10 @@ var simple_buy_below = (localStorage.simple_sell_above || 0);
 var simple_sell_above = (localStorage.simple_sell_above || 0);
 */
 
+var tobliGoxBot = new DependancyInjectionContainer({
+	JsSha: DependancyInjectionContainer.wrap(jsSHA)
+});
+
 var BTC = Number.NaN;
 var fiat = Number.NaN;
 
@@ -133,7 +137,7 @@ function updateInfo() {
 }
 
 function mtGoxApiComputeHmac512(message, secret) {
-	var shaObj = new jsSHA(message, "TEXT");
+	var shaObj = new (tobliGoxBot.getJsSha())(message, "TEXT");
 	var hmac = shaObj.getHMAC(secret, "B64", "SHA-512", "B64");
 	return hmac;
 }

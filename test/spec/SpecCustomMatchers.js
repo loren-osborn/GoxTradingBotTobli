@@ -94,5 +94,77 @@ describe("jasmine extensions", function () {
 		var tv = new Television();
 		expect(tv).toBeOfClass("Television");
 	});
+
+	it("add isAFunction() matcher", function () {
+		var anonymousFunc = (function () {});
+		var doSomethingCool = (function doSomethingCool() {});
+		var callMe = (function callMe() {});
+		expect.messageWhenExpecting(null).isAFunction().toEqual("Expected null to be a function.");
+		expect({}).not.isAFunction();
+		expect.messageWhenExpecting(anonymousFunc).not.isAFunction().toEqual("Expected function () {} not to be a function.");
+		expect(doSomethingCool).isAFunction();
+		expect(callMe).isAFunction();
+		expect.messageWhenExpecting({}).isAFunction({withName: "foo"}).toEqual("Expected {  } to be a function.");
+		expect.messageWhenExpecting(anonymousFunc).isAFunction({withName: "foo"}).toEqual("Function () {} isn't named foo.");
+		expect.messageWhenExpecting(doSomethingCool).not.isAFunction({withName: "doSomethingCool"}).toEqual("Function doSomethingCool() {} is named doSomethingCool.");
+		expect(callMe).isAFunction({withName: "callMe"});
+		expect(doSomethingCool).not.isAFunction({withName: "callMe"});
+		expect(callMe).not.isAFunction({withName: "doSomethingCool"});
+	});
+
+	it("add toBeAWellBehavedConstructor() matcher", function () {
+		var anonymousConstructor = (function () {});
+		var Apple = (function Apple() {});
+		var Banana = (function Banana() {});
+		expect.messageWhenExpecting(null).toBeAWellBehavedConstructor().toEqual("Expected null to be a function.");
+		expect({}).not.toBeAWellBehavedConstructor();
+		expect.messageWhenExpecting(anonymousConstructor).not.toBeAWellBehavedConstructor().toEqual(
+			"Expected anonymous function not to be a well behaved constructor with parent class Object, creating objects of class (anonymous) when called \"new (function () {})()\".");
+		expect.messageWhenExpecting(Apple).not.toBeAWellBehavedConstructor().toEqual(
+			"Expected Apple not to be a well behaved constructor with parent class Object, creating objects of class Apple when called \"new Apple()\".");
+		expect.messageWhenExpecting(Apple).not.toBeAWellBehavedConstructor({withArbitrary: "parentClass"}).toEqual(
+			"Expected Apple not to be a well behaved constructor, creating objects of class Apple when called \"new Apple()\".");
+		expect.messageWhenExpecting(Apple).not.toBeAWellBehavedConstructor({withName: "Apple"}).toEqual(
+			"Expected Apple not to be a well behaved constructor with name Apple and parent class Object, creating objects of class Apple when called \"new Apple()\".");
+		expect(Apple).toBeAWellBehavedConstructor();
+		expect(Banana).toBeAWellBehavedConstructor();
+		expect.messageWhenExpecting(anonymousConstructor).toBeAWellBehavedConstructor({withName: "Carrot"}).toEqual(
+			"Expected anonymous function to be a function with name Carrot.");
+		expect(Apple).toBeAWellBehavedConstructor({withName: "Apple"});
+		expect(Banana).toBeAWellBehavedConstructor({withName: "Banana"});
+		expect(Apple).not.toBeAWellBehavedConstructor({withName: "Banana"});
+		expect.messageWhenExpecting(Apple).toBeAWellBehavedConstructor({withName: "Banana"}).toEqual(
+			"Expected Apple to be a function with name Banana.");
+		expect(Banana).not.toBeAWellBehavedConstructor({withName: "Apple"});
+		var HasNullPrototype = (function () {});
+		HasNullPrototype.prototype = null;
+		var HasUndefPrototype = (function () {});
+		HasUndefPrototype.prototype = undefined;
+		expect.messageWhenExpecting(HasNullPrototype).toBeAWellBehavedConstructor().toEqual("Expected anonymous function to have a non-null prototype.");
+		expect(HasUndefPrototype).not.toBeAWellBehavedConstructor();
+		var HasNullConstructor = (function () {});
+		HasNullConstructor.prototype.constructor = null;
+		var HasUndefConstructor = (function () {});
+		HasUndefConstructor.prototype.constructor = undefined;
+		expect(HasNullConstructor).not.toBeAWellBehavedConstructor();
+		expect.messageWhenExpecting(HasUndefConstructor).toBeAWellBehavedConstructor().toEqual("Expected anonymous function's prototype to point to itself.");
+		var Vehicle = (function Vehicle() {});
+		var Car = (function Car() {});
+		Car.prototype = Object.create(Vehicle.prototype);
+		Car.prototype.constructor = Car;
+		expect.messageWhenExpecting(Car).toBeAWellBehavedConstructor().toEqual("Expected Car's parent class to be Object instead of Vehicle.");
+		expect.messageWhenExpecting(Car).not.toBeAWellBehavedConstructor({withParentClass: Vehicle}).toEqual(
+			"Expected Car not to be a well behaved constructor with parent class Vehicle, creating objects of class Car when called \"new Car()\".");
+		expect.messageWhenExpecting(Car).not.toBeAWellBehavedConstructor({withArbitrary: "parentClass"}).toEqual(
+			"Expected Car not to be a well behaved constructor, creating objects of class Car when called \"new Car()\".");
+		var Boat = (function Boat() {});
+		Boat.prototype = Object.create(Vehicle.prototype);
+		Boat.prototype.constructor = Boat;
+		var LostBoat = (function LostBoat() {});
+		LostBoat.prototype = Object.create(Boat.prototype);
+		expect.messageWhenExpecting(LostBoat).toBeAWellBehavedConstructor({withParentClass: Boat}).toEqual(
+			"Expected LostBoat's prototype to point to itself.");
+	});
+
 });
 

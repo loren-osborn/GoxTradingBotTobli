@@ -43,13 +43,139 @@
 	var toBeOfClassMatcher = function (className) {
 		return (this.actual) && toBeOfTypeMatcher.apply({actual: this.actual.constructor}, ["Function"]) && (jasmine.getNameOfFunction(this.actual.constructor) == className);
 	};
-
+	var isAFunctionMatcher = function (parameterObject) {
+		// This is a hack I pulled from here:
+		// http://stackoverflow.com/questions/5999998/how-can-i-check-if-a-javascript-variable-is-function-type
+		var retVal = (this.actual) && toBeOfTypeMatcher.apply(this, ["Function"]);
+		var fnName;
+		if (retVal && parameterObject && parameterObject.withName) {
+			fnName = jasmine.getNameOfFunction(this.actual);
+			retVal = (fnName == parameterObject.withName);
+			this.message = function () {
+				return [
+					this.actual.toString().replace(/^f/, "F") + " isn't named " + parameterObject.withName + ".",
+					this.actual.toString().replace(/^f/, "F") + " is named " + parameterObject.withName + "."
+				];
+			};
+		} else {
+			this.message = function () {
+				return [
+					"Expected " + jasmine.pp(this.actual) + " to be a function.",
+					"Expected " + (this.actual ? this.actual.toString() : "false") + " not to be a function."
+				];
+			};
+		}
+		return retVal;
+	};
+	var toBeAWellBehavedConstructorMatcher = function (parameterObject) {
+		var getNameOfFunction = (function getNameOfFunction(func) {
+			var result = jasmine.getNameOfFunction(func);
+			return ((result == null) ? "(anonymous)" : result);
+		});
+		parameterObject = parameterObject || {};
+		var cleanParamObj = {
+			withParentClass: (parameterObject.withParentClass || Object),
+			whenCalledWith: (parameterObject.whenCalledWith || []),
+			returningObjectOfClass: (parameterObject.returningObjectOfClass || this.actual),
+			isFunctionParams: (parameterObject.withName ? [{"withName": parameterObject.withName}] : [])
+		};
+		if (parameterObject.withArbitrary == "parentClass") {
+			cleanParamObj.withParentClass = null;
+		}
+		var messageEnding = "";
+		var actualStr = jasmine.pp(this.actual);
+		var actualSuffix = "";
+		var affirmation = " ";
+		var affirmationSuffix = ".";
+		var negation = " not ";
+		var negationSuffix = ".";
+		var printableArgsList = [];
+		var retVal = isAFunctionMatcher.apply(this, cleanParamObj.isFunctionParams);
+		var constructorWrapper = null;
+		var testObj = null;
+		var callableName;
+		var specParts = []
+		var i;
+		if (isAFunctionMatcher.call(this)) {
+			actualStr = jasmine.getNameOfFunction(this.actual);
+			if (actualStr == null) {
+				actualStr = "anonymous function";
+			}
+		}
+		if (!retVal) {
+			messageEnding = "to be a function";
+			if (cleanParamObj.isFunctionParams.length == 1) {
+				messageEnding += " with name " + cleanParamObj.isFunctionParams[0].withName;
+			}
+		} else {
+			retVal = (this.actual.prototype !== jasmine.undefined) && (this.actual.prototype !== null);
+			if (!retVal) {
+				messageEnding = "to have a non-null prototype";
+			} else {
+				retVal = (this.actual.prototype.constructor === this.actual);
+				if (!retVal) {
+					actualSuffix = "'s prototype";
+					messageEnding = "to point to itself";
+				} else {
+					retVal = (cleanParamObj.withParentClass === null) || (Object.getPrototypeOf(this.actual.prototype) === cleanParamObj.withParentClass.prototype);
+					if (!retVal) {
+						actualSuffix = "'s parent class";
+						messageEnding = "to be " + getNameOfFunction(cleanParamObj.withParentClass);
+						affirmationSuffix = " instead of " + getNameOfFunction(Object.getPrototypeOf(this.actual.prototype).constructor) + ".";
+					} else {
+						constructorWrapper = function (constructor) {
+							return constructor.apply(this, cleanParamObj.whenCalledWith);
+						};
+						constructorWrapper.prototype = this.actual.prototype;
+						testObj = new constructorWrapper(this.actual);
+						retVal =
+							testObj &&
+							(testObj instanceof cleanParamObj.returningObjectOfClass) &&
+							(testObj.constructor === cleanParamObj.returningObjectOfClass) &&
+							(Object.getPrototypeOf(testObj) === cleanParamObj.returningObjectOfClass.prototype);
+						if (!retVal) {
+							messageEnding = "to create objects of class " + getNameOfFunction(cleanParamObj.returningObjectOfClass);
+							affirmationSuffix = " instead of objects of class " + getNameOfFunction(testObj.constructor) + ".";
+						} else {
+							messageEnding = "to be a well behaved constructor";
+							if (cleanParamObj.isFunctionParams.length == 1) {
+								specParts.push("name " + cleanParamObj.isFunctionParams[0].withName);
+							}
+							if (cleanParamObj.withParentClass) {
+								specParts.push("parent class " + getNameOfFunction(cleanParamObj.withParentClass));
+							}
+							if (specParts.length > 0) {
+								messageEnding += " with " + specParts.join(" and ");
+							}
+							for (i in cleanParamObj.whenCalledWith) {
+								printableArgsList[i] = jasmine.pp(cleanParamObj.whenCalledWith[i]);
+							}
+							callableName = jasmine.getNameOfFunction(this.actual) || ("(" + this.actual.toString() + ")");
+							messageEnding += (
+								", creating objects of class " + getNameOfFunction(cleanParamObj.returningObjectOfClass) +
+								" when called \"new " + callableName + "(" + printableArgsList.join(", ") + ")\""
+							);
+						}
+					}
+				}
+			}
+		}
+		this.message = (function () {
+			return [
+				("Expected " + actualStr + actualSuffix + affirmation + messageEnding + affirmationSuffix),
+				("Expected " + actualStr + actualSuffix + negation + messageEnding + negationSuffix)
+			];
+		});
+		return retVal;
+	};
 	beforeEach(function () {
 		this.addMatchers({
 			toBeOneOf: toBeOneOfMatcher,
 			toEqualOneOf: toEqualOneOfMatcher,
 			toBeOfType: toBeOfTypeMatcher,
-			toBeOfClass: toBeOfClassMatcher
+			toBeOfClass: toBeOfClassMatcher,
+			isAFunction: isAFunctionMatcher,
+			toBeAWellBehavedConstructor: toBeAWellBehavedConstructorMatcher
 		});
 
 		jasmine.getNameOfFunction = (function (func) {
