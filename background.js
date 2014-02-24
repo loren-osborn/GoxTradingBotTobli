@@ -42,7 +42,9 @@ var simple_sell_above = (localStorage.simple_sell_above || 0);
 */
 
 var tobliGoxBot = new DependancyInjectionContainer({
-	JsSha: DependancyInjectionContainer.wrap(jsSHA)
+	NativeDate: DependancyInjectionContainer.wrap(Date),
+	JsSha: DependancyInjectionContainer.wrap(jsSHA),
+	TobliDate: getTobliDateConstructor
 });
 
 var BTC = Number.NaN;
@@ -63,9 +65,6 @@ var updateInProgress = false;
 var lastUpdateStartTime = 0;
 var abortUpdateAndRedo = false;
 
-function zeroPadTwoDigits(d) {
-	return (d < 10) ? ("0" + d.toString()) : d.toString();
-}
 
 function updateEMA(ema, N) {
 	var pr, k = 2 / (N + 1);
