@@ -1,17 +1,10 @@
 var bkgdPg = chrome.extension.getBackgroundPage();
-var nowDate;
-var nowDateStr;
 var visibleChartSamples = bkgdPg.LogLines;
 
-function zeroPadTwoDigits(d) {
-	return (d < 10) ? ("0" + d.toString()) : d.toString();
-}
-
 function refreshtable() {
-	const wds = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 	const backgroundColors = ["#f2f2ff", "#fffff0"];
 	var lastBackgroundColorIndex = 0;
-	var lastDate = "";
+	var lastDate = false;
 	var tab = document.getElementById("tab");
 	document.getElementById("emal").innerHTML = bkgdPg.EmaLongPar;
 	document.getElementById("emas").innerHTML = bkgdPg.EmaShortPar;
@@ -58,9 +51,6 @@ function refreshtable() {
 		tab.deleteRow(4);
 	}
 
-	nowDate = new Date();
-	nowDateStr = nowDate.getFullYear() + "-" + zeroPadTwoDigits(nowDate.getMonth() + 1) + "-" + zeroPadTwoDigits(nowDate.getDate());
-
 	var displayLines = Math.min(bkgdPg.H1.length, ((bkgdPg.LogLines == 0) ? (bkgdPg.MaxSamplesToKeep - bkgdPg.preSamples) : bkgdPg.LogLines));
 	if ((bkgdPg.updateInProgress) && (bkgdPg.H1.length < bkgdPg.MaxSamplesToKeep)) { // && bkgdPg.H1.length > bkgdPg.LogLines) {
 		var r = tab.insertRow(4);
@@ -82,12 +72,11 @@ function refreshtable() {
 			var perc = 100 * (es - el) / ((es + el) / 2);
 			var r = tab.insertRow(4);
 			// var ti = new Date(bkgdPg.tim[i] * 3600 * 1000);
-			var d = new Date(bkgdPg.tim[i] * 60 * 1000);
-			r.title = wds[d.getDay()];
-			var dateStr = d.getFullYear() + "-" + zeroPadTwoDigits(d.getMonth() + 1) + "-" + zeroPadTwoDigits(d.getDate());
-			var date = d.getDate() + "/" + (d.getMonth() + 1) + " ";
+			var date = bkgdPg.tobliGoxBot.createNewTobliDate();
+			date.setMinuteId(bkgdPg.tim[i]);
+			r.title = date.getWeekdayName();
 			// r.style.backgroundColor = backgroundColors[((bkgdPg.tim[i] + 1) / 24) & 1];
-			if (lastDate != date) {
+			if ((lastDate === false) || !(date.isSameDate(lastDate))) {
 				lastBackgroundColorIndex = 1 - lastBackgroundColorIndex;
 				lastDate = date;
 			}
@@ -95,9 +84,9 @@ function refreshtable() {
 			r.style.backgroundColor = backgroundColors[lastBackgroundColorIndex];
 
 			// r.insertCell(-1).innerHTML = (new Date(bkgdPg.tim[i] * 3600 * 1000)).getHours() + ":00";
-			// r.insertCell(-1).innerHTML = d.getFullYear() + "-" + zeroPadTwoDigits(d.getMonth() + 1) + "-" + zeroPadTwoDigits(d.getDate()) + " " + zeroPadTwoDigits(d.getHours()) + ":" + zeroPadTwoDigits(d.getMinutes());
+			// r.insertCell(-1).innerHTML = date.formatTimeAndDate();
 
-			r.insertCell(-1).innerHTML = ((dateStr != nowDateStr) ? date : "") + zeroPadTwoDigits(d.getHours()) + ":" + zeroPadTwoDigits(d.getMinutes());
+			r.insertCell(-1).innerHTML = date.FIXME_formatDayMonthAndTimeWithImplicitTodayDate();
 			r.insertCell(-1).innerHTML = bkgdPg.H1[i].toFixed(3);
 			r.insertCell(-1).innerHTML = es.toFixed(3);
 			r.insertCell(-1).innerHTML = el.toFixed(3);
@@ -153,9 +142,6 @@ function redrawChart() {
 	if (localStorage.chartVisible == 1) {
 		document.getElementById("chart").style.display = "block";
 		document.getElementById("EMAChartHead").style.display = "block";
-
-		nowDate = new Date();
-		nowDateStr = nowDate.getFullYear() + "-" + zeroPadTwoDigits(nowDate.getMonth() + 1) + "-" + zeroPadTwoDigits(nowDate.getDate());
 
 		var chartWidth = 285;
 		var chartHeight = 100;
@@ -379,9 +365,9 @@ function formatPriceTooltip(sp, options, fields) {
 }
 
 function assembleTooltip(tim) {
-	var d = new Date(tim * 60 * 1000);
-	var dateStr = d.getFullYear() + "-" + zeroPadTwoDigits(d.getMonth() + 1) + "-" + zeroPadTwoDigits(d.getDate());
-	var t = ((dateStr != nowDateStr) ? dateStr : "Today") + " " + zeroPadTwoDigits(d.getHours()) + ":" + zeroPadTwoDigits(d.getMinutes());
+	var d = bkgdPg.tobliGoxBot.createNewTobliDate();
+	d.setMinuteId(tim);
+	var t = d.formatDateAndTimeWithLabeledTodayDate();
 	var tooltip = "<div align=\"center\">" + t +
 		"<table width=\"100%\" border=\"0\"><tr><td align=\"center\" class=\"tooltipTableCell\">" +
 		lastPriceTooltipLine + "<br>" +

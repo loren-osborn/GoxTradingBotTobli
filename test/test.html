@@ -11,11 +11,13 @@
 		<script type="text/javascript" src="customMatchers.js" ></script>
 
 		<!-- include source files here... -->
+		<script type="text/javascript" src="../modules/TobliDate.js" ></script>
 		<script type="text/javascript" src="../modules/DependancyInjectionContainer.js" ></script>
 		<script type="text/javascript" src="../modules/TobliLogger.js" ></script>
 
 		<!-- include spec files here... -->
 		<script type="text/javascript" src="spec/SpecCustomMatchers.js" ></script>
+		<script type="text/javascript" src="spec/SpecTobliDate.js" ></script>
 		<script type="text/javascript" src="spec/SpecTobliLogger.js" ></script>
 		<script type="text/javascript" src="spec/SpecDependancyInjectionContainer.js" ></script>
 
@@ -29,8 +31,9 @@
 							for (i = 0; i < suites.length; i++) {
 								suiteNames.push(suites[i].description);
 							}
-							expect(suites.length).toEqual(4);
+							expect(suites.length).toEqual(5);
 							expect('jasmine extensions').toEqualOneOf(suiteNames);
+							expect('getTobliDateConstructor').toEqualOneOf(suiteNames);
 							expect('getTobliLogger').toEqualOneOf(suiteNames);
 							expect('DependancyInjectionContainer').toEqualOneOf(suiteNames);
 							expect('All specs included').toEqualOneOf(suiteNames);
