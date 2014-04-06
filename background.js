@@ -440,7 +440,7 @@ function refreshEMA(reset) {
 
 var origLog = console.log;
 var log = console.log = function () {
-	var t = new Date();
+	var now = new Date();
 	var file = "";
 	var line = "";
 	try {
@@ -449,7 +449,7 @@ var log = console.log = function () {
 		line = stack.split("\n")[2].split("/")[3].split(":")[1];
 	} catch (e) {}
 	var args = [];
-	args.push(dat2day(t.getTime()) + " " + zeroPadTwoDigits(t.getHours()) + ":" + zeroPadTwoDigits(t.getMinutes()) + ":" + zeroPadTwoDigits(t.getSeconds()));
+	args.push(dat2day(now.getTime()) + " " + zeroPadTwoDigits(now.getHours()) + ":" + zeroPadTwoDigits(now.getMinutes()) + ":" + zeroPadTwoDigits(now.getSeconds()));
 	args.push("[" + file + ":" + line + "]");
 	// now add all the other arguments that were passed in:
 	for (var _i = 0, _len = arguments.length; _i < _len; _i++) {
