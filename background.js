@@ -480,7 +480,6 @@ function tidBinarySearch(tradeHistoryResponse, tid) {
 function cacheOtherUsefulSamples(tradeHistoryResponse) {
 	// log("generating usefulSamplePoints");
 	// May not really be needed to generate this on every call, but to get the very latest sample points for long date durations, do it anyway (not very intensive)...
-	var time_now = (new Date()).getTime();
 	var usefulSamplePoints = {};
 	for (var j = 0; j < validSampleIntervalMinutes.length; j++) {
 		var minute_now = Math.floor(tobliGoxBot.createNewTobliDate().getMinuteId() / validSampleIntervalMinutes[j]) * validSampleIntervalMinutes[j]; // Fix trading samples to whole hours...
