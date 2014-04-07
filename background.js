@@ -635,7 +635,7 @@ function updateH1(reset) { // Added "reset" parameter to clear the H1 data - sho
 	}
 
 	updateInProgress = true;
-	lastUpdateStartTime = (new Date()).getTime();
+	lastUpdateStartTime = now.getTime();
 
 	if (reset) {
 		// console.log("updateH1(): reset H1 data (Interval has changed)");
