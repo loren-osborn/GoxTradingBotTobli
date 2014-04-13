@@ -110,7 +110,7 @@ function updateInfo() {
 			schedUpdateInfo(60 * 1000); // retry after 1 minute
 		},
 		function (d) {
-			tobliGoxBot.getTobliLogger().logLevel("DEBUG").logNative("info.php", d.currentTarget.responseText)
+			tobliGoxBot.getTobliLogger().logLevel("DEBUG").logNative("info.php", d.currentTarget.responseText);
 			try {
 				var rr = tobliGoxBot.getMtGoxApi().getResponseData(d.currentTarget.responseText);
 				if (typeof(rr.Wallets) == "undefined") {
@@ -275,10 +275,11 @@ function trade() {
 					}
 				} else {
 					// Simulation only
-					if (inverseEMA != 1)
+					if (inverseEMA != 1) {
 						tobliGoxBot.getTobliLogger().logNative("Simulted BUY! EMA(" + EmaShortPar + ")/EMA(" + EmaLongPar + ")>" + MinBuyThreshold + "% for " + tickCountBuy + " or more ticks (Simulation only: no trade was made)");
-					else
+					} else {
 						tobliGoxBot.getTobliLogger().logNative("Simulated Crazy Ivan SELL " + sellAmount + " BTC!" + ((keepBTC > 0) ? (" (keep " + (keepBTC.toString() + ((keepBTCUnitIsPercentage == 1) ? " %" : " BTC")) + ")") : "") + " EMA(" + EmaShortPar + ")/EMA(" + EmaLongPar + ")>" + MinBuyThreshold + "% for " + tickCountBuy + " or more ticks (Simulation only: no trade was made)");
+					}
 				}
 			} else {
 				tobliGoxBot.getTobliLogger().logNative("Trend is up, but no " + currency + " to spend...");
@@ -313,10 +314,11 @@ function trade() {
 					}
 				} else {
 					// Simulation only
-					if (inverseEMA != 1)
+					if (inverseEMA != 1) {
 						tobliGoxBot.getTobliLogger().logNative("Simulated SELL " + sellAmount + " BTC! (keep " + (keepBTC.toString() + ((keepBTCUnitIsPercentage == 1) ? " %" : " BTC")) + ") EMA(" + EmaShortPar + ")/EMA(" + EmaLongPar + ")<-" + MinSellThreshold + "% for " + tickCountSell + " or more ticks (Simulation only: no trade was made)");
-					else
+					} else {
 						tobliGoxBot.getTobliLogger().logNative("Simulted Crazy Ivan BUY! EMA(" + EmaShortPar + ")/EMA(" + EmaLongPar + ")<-" + MinSellThreshold + "% for " + tickCountSell + " or more ticks (Simulation only: no trade was made)");
+					}
 				}
 			} else {
 				tobliGoxBot.getTobliLogger().logNative("Trend is down, but no BTC to sell...");
@@ -607,7 +609,7 @@ function updateH1(reset) { // Added "reset" parameter to clear the H1 data - sho
 			var refr = false;
 			var done = true;
 			try {
-				tobliGoxBot.getTobliLogger().logLevel("DEBUG").log(req.responseText)
+				tobliGoxBot.getTobliLogger().logLevel("DEBUG").log(req.responseText);
 				var tradeHistoryResponse = tobliGoxBot.getMtGoxApi().getResponseData(req.responseText);
 
 				if (tradeHistoryResponse.length > 0) {

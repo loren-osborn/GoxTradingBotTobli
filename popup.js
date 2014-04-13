@@ -75,9 +75,9 @@ function refreshtable() {
 			var date = bkgdPg.tobliGoxBot.createNewTobliDate();
 			date.setMinuteId(bkgdPg.tim[i]);
 			r.title = date.getWeekdayName();
-			// r.style.backgroundColor = backgroundColors[((bkgdPg.tim[i] + 1) / 24)&1]
+			// r.style.backgroundColor = backgroundColors[((bkgdPg.tim[i] + 1) / 24) & 1];
 			if ((lastDate === false) || !(date.isSameDate(lastDate))) {
-				lastBackgroundColorIndex = 1-lastBackgroundColorIndex;
+				lastBackgroundColorIndex = 1 - lastBackgroundColorIndex;
 				lastDate = date;
 			}
 
