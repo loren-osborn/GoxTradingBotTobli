@@ -6,7 +6,6 @@ Gox Trading Bot Chrome Extension
 This project is modified/enhanced version of the original Gox Trading Bot (https://chrome.google.com/webstore/detail/gox-trading-bot/iejmifigokhpcgpmoacllcdiceicmejb)
 
 
-
 Disclaimer
 ----------
 The authors of this project is NOT responsible for any damage or loss caused by this software.
